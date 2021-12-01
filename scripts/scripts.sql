@@ -9,6 +9,7 @@ limit 20
 /* recalage UTC -> temps local*/
 
 /* filtrer sur l'emprise du track  < 625 m2*/
+/* Recréer la géométrie du track à partir des points*/
 /* ST_MinimumBoundingCircle() // geom
  * ST_MinimumBoundingRadius() // geom
  * ST_Area(noisecapture_track_frame::geom)
@@ -26,7 +27,8 @@ select count(pk_point) from noisecapture_point np2 where accuracy = 0; /*10 783 
 /*Précision moyenne du track*/
 select count(pk_track) from noisecapture_track nt ; /*260422 tracks*/
 select count(*) from (select pk_track from noisecapture_point np2 group by pk_track) as pk_track_tabl ; /*260419 tracks*/
-/*142 547 track avec une précision moyenne > 0 et < 20 */
+
+/*142 547 tracks (54%) avec une précision moyenne > 0 et < 20 */
 select count(*) from 
 (select pk_track, avg(accuracy) as mean_acc from noisecapture_point np group by pk_track order by mean_acc) as mean_acc 
 where mean_acc  > 0 and mean_acc <20 ;
@@ -34,3 +36,5 @@ where mean_acc  > 0 and mean_acc <20 ;
 
 
 select (select count(pk_point) from noisecapture_point np2 where accuracy = 0)/(select count(pk_point) from noisecapture_point);
+
+SELECT * FROM noisecapture_track;

@@ -1,0 +1,50 @@
+---
+title: "Database operations"
+author: "Nicolas Roelandt"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Database connection
+library(RPostgreSQL)
+library(DBI)
+drv <- DBI::dbDriver("PostgreSQL")
+#library(sys)
+
+# Data handling
+library(sf)
+library(dplyr)
+```
+
+```{r con-parameters}
+con <- DBI::dbConnect(
+drv,
+dbname ="noisecapture",
+host = "lassopg.ifsttar.fr", #server IP or hostname
+port = 5432, #Port on which we ran the proxy
+user="noisecapture",
+password=Sys.getenv('noisecapture_password') # password stored in .Renviron. Use this to edit it : usethis::edit_r_environ()
+)
+```
+
+
+```{r test-query, eval=FALSE, echo=FALSE}
+# Check database connection and software versions
+RPostgreSQL::dbGetQuery(con,statement = paste("SELECT version();")) # should return PostgreSQL 10.15 or higher
+RPostgreSQL::dbGetQuery(con,statement = paste("SELECT postgis_full_version();")) # should return PostGIS 2.5 or higher
+
+# Check that the database is a PostGIS database
+RPostgreSQL::dbGetQuery(con,statement = paste("SELECT count(*) FROM spatial_ref_sys;")) # should return 5757 or more
+```
+
+
+
+
+```{r close-connection}
+RPostgreSQL::dbDisconnect(con)
+```
+
+
