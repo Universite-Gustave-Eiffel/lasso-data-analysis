@@ -1,5 +1,5 @@
 ---
-title: "Database operations"
+title: "Temporal analysis"
 author: "Nicolas Roelandt"
 date: "`r Sys.Date()`"
 output: html_document
@@ -7,6 +7,21 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+
+# parameters
+# keep records with "animal" tag (then add water and vegetation)
+tag <- "'animals', 'water'"
+# remove records with indoor and test tags
+excluded_tags <- "'indoor', 'test'"
+# remove points with GPS accuracy < 20m
+# remove tracks too long < 15 minutes, 1 hour ?
+duration <- 900 # in seconds
+# study temporal inconstancies between GPS and phone
+# study France and compare to Deutschland
+
+
+
 
 # Database connection
 library(RPostgreSQL)
@@ -17,6 +32,11 @@ drv <- DBI::dbDriver("PostgreSQL")
 # Data handling
 library(sf)
 library(dplyr)
+library(ggplot2)
+
+# time / date handling
+library(lubridate)
+library(hydroTSM)
 ```
 
 ```{r con-parameters}
@@ -31,19 +51,213 @@ password=Sys.getenv('noisecapture_password') # password stored in .Renviron. Use
 ```
 
 
-```{r test-query, eval=FALSE, echo=FALSE}
-# Check database connection and software versions
-RPostgreSQL::dbGetQuery(con,statement = paste("SELECT version();")) # should return PostgreSQL 10.15 or higher
-RPostgreSQL::dbGetQuery(con,statement = paste("SELECT postgis_full_version();")) # should return PostGIS 2.5 or higher
 
-# Check that the database is a PostGIS database
-RPostgreSQL::dbGetQuery(con,statement = paste("SELECT count(*) FROM spatial_ref_sys;")) # should return 5757 or more
+
+# Data cleaning
+
+The data stored in the database is not useable as is.
+Most of the data is not taggued, the accuraccy of the GPS position can vary, the track is too long.
+So the data needs to be filtered.
+
+```{r tag-list, include=FALSE}
+# Tag list
+query <- "SELECT distinct  * FROM noisecapture_tag;"
+RPostgreSQL::dbGetQuery(con,statement = query) 
+```
+
+```{r create-view, include=FALSE}
+# Query that create a view of interesting tracks 
+# keep records with "animal" tag
+# remove tracks taggued indoor and test
+# remove tracks too long < 15 minutes, 1 hour 
+query <- "CREATE OR REPLACE VIEW tracks_of_interest AS
+    SELECT nt.pk_track, record_utc, time_length ,     noise_level,tag_name from noisecapture_track AS nt 
+    INNER JOIN noisecapture_track_tag ntt ON nt.pk_track = ntt.pk_track /* Add track tags*/
+    INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
+    WHERE 
+       tag_name in ('animals') --only animal sounds
+       AND time_length < 900  -- duration < 15 minutes (900 s)
+       AND nt.pk_track not in (
+           SELECT DISTINCT nt.pk_track from noisecapture_track AS nt 
+           INNER JOIN noisecapture_track_tag ntt ON nt.pk_track = ntt.pk_track /* Add track tags*/
+           INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
+           WHERE ntag.tag_name IN ('indoor','test')    /*track recorded indoor or tests*/
+  );"
+
+
+
+RPostgreSQL::dbGetQuery(con,statement = query) 
+```
+
+## Retrieve data
+### Track information
+
+```{r join-track-info}
+query <- "SELECT  ft.pk_track, record_utc, time_length, pleasantness, noise_level, track_uuid, geog
+FROM france_tracks AS ft
+JOIN noisecapture_track AS nt ON ft.pk_track = nt.pk_track;"
+
+track_info <- sf::st_read(con,query = query)
+track_info %>% head()
+```
+
+Some records are not in the France metropolitan area so they need to be discarded.
+
+```{r france-metro-filtering}
+france_metro <- sf::st_read(dsn=here::here("raw_data/2020_France_metro_WGS84.geojson"))
+
+filtered_track_info <- track_info %>%
+  dplyr::filter(sf::st_intersects(., france_metro, sparse = FALSE)) 
+```
+
+`r nrow(filtered_track_info)` tracks meets the study criteria (duration, envelop area, etc.).
+`r nrow(track_info) - nrow(filtered_track_info)` tracks where not in France's metropolitan area.
+
+### Tag information 
+
+```{r tag-info}
+query <- "SELECT ft.pk_track, tag_name FROM france_tracks as ft
+INNER JOIN noisecapture_track_tag ntt ON ft.pk_track = ntt.pk_track /* Add track tags*/
+INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/;"
+
+tag_info <- RPostgreSQL::dbGetQuery(con,statement = query)
+head(tag_info)
+```
+
+
+```{r tag-histo, echo=FALSE}
+ggplot(tag_info) +
+  aes(x = tag_name) +
+  geom_bar(fill = "#112446") +
+  coord_flip()+ 
+  labs(
+    x = "Tag",
+    title = "Tag repartition in the subset",
+    caption = "Count of each tag"
+  ) +
+  theme_minimal()
 ```
 
 
 
+# Time repartition
+## All year
+```{r merge-informations}
+all_info <- tag_info %>% 
+  dplyr::inner_join(
+    filtered_track_info %>% sf::st_drop_geometry()) %>%
+  # add local hour
+  dplyr::mutate(local_time = lubridate::hour( # extract hour
+    lubridate::with_tz( # convert to local time
+      lubridate::ymd_hms(record_utc, tz = "UTC"), # convert text to date
+      "Europe/Paris")), # target timezone
+    season = hydroTSM::time2season(lubridate::date(record_utc), out.fmt = "seasons", type="default")) # compute season
 
-```{r close-connection}
+all_info %>% head() %>% knitr::kable()
+```
+
+
+```{r compute-tags-occurrences}
+occurences <- all_info %>% dplyr::group_by(tag_name, local_time) %>% dplyr::count(name = "occurences")
+
+occurences %>% head() %>% knitr::kable()
+```
+
+
+```{r compute-tags-hourly-repartition}
+tags_hourly_repartition <- occurences %>% 
+  left_join(
+    occurences %>% dplyr::group_by(local_time) %>% dplyr::summarise(total = sum(occurences)),
+    by = "local_time") %>% 
+  mutate(percentage = occurences * 100 / total)
+
+tags_hourly_repartition %>% head() %>% knitr::kable()
+```
+
+
+```{r tags-hourly-repartition-graph}
+ggplot(tags_hourly_repartition) +
+  aes(x = local_time, y = percentage) +
+  geom_point(shape = "circle", size = 1.5, colour = "#112446") +
+  labs(
+    x = "Time of the day",
+    y = "Percentage",
+    title = "Hourly repartition of tags",
+    subtitle = "Noicecaptures tags in metropolitan France,
+    2017 - 2020"
+  ) +
+  theme_minimal() +
+  facet_wrap(vars(tag_name))
+```
+
+## Seasonal
+### Animals
+
+```{r compute-animals-hourly-repartition-season}
+seasonal_occurences <- all_info %>% 
+  dplyr::group_by(tag_name, local_time, season) %>% 
+  dplyr::count(name = "occurences")
+
+animals_seasonal_repartition <- seasonal_occurences %>% 
+  dplyr::filter(tag_name == "animals") %>% 
+  mutate(seasonal_time = paste0(season,'_',local_time)) %>%
+  left_join(
+    seasonal_occurences %>%
+      dplyr::group_by(local_time, season) %>% 
+      dplyr::summarise(total = sum(occurences))%>% 
+      dplyr::mutate(seasonal_time = paste0(season,'_',local_time)) %>% select(-season),
+    by = "seasonal_time") %>% 
+  mutate(percentage = occurences * 100 / total)
+  
+
+animals_seasonal_repartition %>% dplyr::select(-local_time.y, -seasonal_time) %>% head() %>% knitr::kable()
+```
+
+
+```{r compute-animals-hourly-repartition-season-graph}
+
+```
+
+# Packages citations
+
+```{r}
+citation("tidyverse")
+```
+```{r}
+citation("sf")
+```
+
+```{r}
+citation("hydroTSM")
+```
+
+# Reproductibility
+## Data sources
+Most of the treatment has been made within the PostGIS database.
+The scripts folder contains several scripts to execute to prepare the dataset.
+
+## Session informations
+
+```{r session-info, echo=FALSE}
+extract_loaded_package <- function(packages_info) {
+  return(packages_info$Package) 
+}
+
+xfun::session_info(sapply(sessionInfo()$otherPkgs, extract_loaded_package), dependencies = FALSE)
+```
+
+## Database information
+
+```{r pg-version, eval=FALSE, echo=FALSE}
+# Check database connection and software versions
+RPostgreSQL::dbGetQuery(con,statement = paste("SELECT version();")) # should return PostgreSQL 10.15 or higher
+```
+
+```{r postgis-version, eval=FALSE, echo=FALSE}
+RPostgreSQL::dbGetQuery(con,statement = paste("SELECT postgis_full_version();")) # should return PostGIS 2.5 or higher
+```
+
+```{r close-connection, echo=FALSE}
 RPostgreSQL::dbDisconnect(con)
 ```
 
