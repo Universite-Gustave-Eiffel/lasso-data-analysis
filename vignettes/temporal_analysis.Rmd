@@ -213,7 +213,64 @@ animals_seasonal_repartition <- seasonal_occurences %>%
 animals_seasonal_repartition %>% dplyr::select(-local_time.y, -seasonal_time) %>% head() %>% knitr::kable()
 ```
 
+```{r animals-hourly-repartition-season-graph}
+ggplot(animals_seasonal_repartition) +
+  aes(x = local_time.x, y = percentage) +
+  geom_point(shape = "circle", size = 1.5, colour = "#112446") +
+  labs(
+    x = "Local time",
+    y = "Percentage",
+    title = "Seasonal occurences of animals sounds"
+  ) +
+  theme_minimal() +
+  facet_wrap(vars(season))
+```
 
+
+```{r seasonal-graphs}
+season_graphs <- function(tag) {
+  seasonal_occurences %>% 
+  dplyr::filter(tag_name == tag) %>% 
+  mutate(seasonal_time = paste0(season,'_',local_time)) %>%
+  left_join(
+    seasonal_occurences %>%
+      dplyr::group_by(local_time, season) %>% 
+      dplyr::summarise(total = sum(occurences))%>% 
+      dplyr::mutate(seasonal_time = paste0(season,'_',local_time)) %>% select(-season),
+    by = "seasonal_time") %>% 
+  mutate(percentage = occurences * 100 / total) %>%
+    ggplot() +
+  aes(x = local_time.x, y = percentage) +
+  geom_point(shape = "circle", size = 1.5, colour = "#112446") +
+  labs(
+    x = "Local time",
+    y = "Percentage",
+    title = paste("Seasonal occurences of",tag,"sounds")
+  ) +
+  theme_minimal() +
+  facet_wrap(vars(season))
+}
+
+
+graphs <- purrr::map(unique(seasonal_occurences$tag_name), season_graphs)
+graphs
+```
+
+
+# TODO
+- regarder la répartition par mois également
+- GADM28 : remplacer countries ?
+- timezones : https://github.com/Ifsttar/NoiseCapture/tree/master/onomap-geoserver/geoserver/src/test/resources/org/noise_planet/noisecapturegs
+- SunCalc : heure du levé du soleil   
+  - heure du levé de soleil : localisation + date
+  - nouvelle colonne : heure locale - heure de levé du soleil
+- 5s < duration <900s
+- ajouter url de téléchargement dans table track_info => depuis postgis
+```{sql, eval=FALSE}
+select record_utc, concat('https://data.noise-planet.org/raw/', substring(user_uuid, 1, 2),'/', substring(user_uuid, 3, 2),'/', substring(user_uuid, 5, 2),'/',user_uuid,'/','track_',track_uuid,'.zip') download  from noisecapture_track nt, noisecapture_user nu where nt.pk_user = nu.pk_user and nt.record_utc > NOW()::date - 1 order by record_utc DESC LIMIT 30;
+
+```
+ 
 ```{r compute-animals-hourly-repartition-season-graph}
 
 ```
@@ -248,12 +305,12 @@ xfun::session_info(sapply(sessionInfo()$otherPkgs, extract_loaded_package), depe
 
 ## Database information
 
-```{r pg-version, eval=FALSE, echo=FALSE}
+```{r pg-version}
 # Check database connection and software versions
 RPostgreSQL::dbGetQuery(con,statement = paste("SELECT version();")) # should return PostgreSQL 10.15 or higher
 ```
 
-```{r postgis-version, eval=FALSE, echo=FALSE}
+```{r postgis-version}
 RPostgreSQL::dbGetQuery(con,statement = paste("SELECT postgis_full_version();")) # should return PostGIS 2.5 or higher
 ```
 

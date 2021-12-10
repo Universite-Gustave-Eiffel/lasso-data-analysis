@@ -19,7 +19,7 @@ where ntag.tag_name = 'indoor' or ntag.tag_name =  'test'    /*track recorded in
 
 
 /* Spatial filtering 
- * Returns 9293 records
+ * Returns 5319 records (9293 if not area filter)
  * 44s execution time
  * store result in a MATERIALIZED view
  * */ 
@@ -39,7 +39,7 @@ where ntag.tag_name = 'indoor' or ntag.tag_name =  'test'    /*track recorded in
            ) group by pk_track ) as subquery
       ) as subquery2
  -- filter tracks recorded in a large area ( larger than 25 x 25 m)
---where sqm_area < 625 -- filtering by area
+where sqm_area < 625 -- filtering by area
  ) as spatial_query 
 where ST_Intersects(geog, (select geog from countries c where c."admin"  = 'France'))
 );
