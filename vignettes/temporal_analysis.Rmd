@@ -37,6 +37,10 @@ library(ggplot2)
 # time / date handling
 library(lubridate)
 library(hydroTSM)
+
+# Get sun rise time
+## install.packages("suncalc")
+library(suncalc)
 ```
 
 ```{r con-parameters}
@@ -93,9 +97,8 @@ RPostgreSQL::dbGetQuery(con,statement = query)
 ### Track information
 
 ```{r join-track-info}
-query <- "SELECT  ft.pk_track, record_utc, time_length, pleasantness, noise_level, track_uuid, geog
-FROM france_tracks AS ft
-JOIN noisecapture_track AS nt ON ft.pk_track = nt.pk_track;"
+query <- "SELECT  pk_track, record_utc, time_length, pleasantness, noise_level, track_uuid, geog
+FROM france_tracks;"
 
 track_info <- sf::st_read(con,query = query)
 track_info %>% head()
@@ -256,22 +259,42 @@ graphs <- purrr::map(unique(seasonal_occurences$tag_name), season_graphs)
 graphs
 ```
 
+# Sound dynamics: sunrise study
 
-# TODO
-- regarder la répartition par mois également
-- GADM28 : remplacer countries ?
-- timezones : https://github.com/Ifsttar/NoiseCapture/tree/master/onomap-geoserver/geoserver/src/test/resources/org/noise_planet/noisecapturegs
 - SunCalc : heure du levé du soleil   
   - heure du levé de soleil : localisation + date
   - nouvelle colonne : heure locale - heure de levé du soleil
+
+```{r sunrise}
+filtered_track_info %>% dplyr::bind_cols(
+  filtered_track_info %>% st_centroid() %>% st_coordinates() %>% as_tibble() %>% select(lat = Y, long = X)
+) %>% dplyr::mutate(
+  sunrise_time = suncalc::getSunlightTimes(
+    date = record_utc,
+    lat =lat,
+    long =long,
+    keep = "sunrise",
+    tz = "UTC"
+  )
+)
+
+```
+
+
+# TODO
+- regarder la répartition par mois également
+
+- timezones : https://github.com/Ifsttar/NoiseCapture/tree/master/onomap-geoserver/geoserver/src/test/resources/org/noise_planet/noisecapturegs
+
+
+
+
+## DONE
 - 5s < duration <900s
+- GADM28 : remplacer countries ? => NON GADM28 contient des données au niveau communal, il faudrait fusionner 36 000 entités avant d'avoir un résultat acceptable, c'est plus rapide de télécharger le fichier à partir de Natural Earth.
 - ajouter url de téléchargement dans table track_info => depuis postgis
 ```{sql, eval=FALSE}
 select record_utc, concat('https://data.noise-planet.org/raw/', substring(user_uuid, 1, 2),'/', substring(user_uuid, 3, 2),'/', substring(user_uuid, 5, 2),'/',user_uuid,'/','track_',track_uuid,'.zip') download  from noisecapture_track nt, noisecapture_user nu where nt.pk_user = nu.pk_user and nt.record_utc > NOW()::date - 1 order by record_utc DESC LIMIT 30;
-
-```
- 
-```{r compute-animals-hourly-repartition-season-graph}
 
 ```
 
