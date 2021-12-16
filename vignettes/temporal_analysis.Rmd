@@ -33,6 +33,7 @@ drv <- DBI::dbDriver("PostgreSQL")
 library(sf)
 library(dplyr)
 library(ggplot2)
+library(purrr)
 
 # time / date handling
 library(lubridate)
@@ -191,6 +192,8 @@ ggplot(tags_hourly_repartition) +
   ) +
   theme_minimal() +
   facet_wrap(vars(tag_name))
+
+# ggsave("plots/tags_hourly_dynamics.png") 
 ```
 
 ## Seasonal
@@ -227,6 +230,8 @@ ggplot(animals_seasonal_repartition) +
   ) +
   theme_minimal() +
   facet_wrap(vars(season))
+
+# ggsave("plots/animals_seasonal_dynamic.png") 
 ```
 
 
@@ -254,26 +259,24 @@ season_graphs <- function(tag) {
   facet_wrap(vars(season))
 }
 
-
 graphs <- purrr::map(unique(seasonal_occurences$tag_name), season_graphs)
+```
+
+```{r display-graphs, echo=FALSE, message=FALSE}
 graphs
 ```
 
 # Sound dynamics: sunrise study
 
-- SunCalc : heure du levé du soleil   
-  - heure du levé de soleil : localisation + date
-  - nouvelle colonne : heure locale - heure de levé du soleil
-
-
-```{r}
-
+```{r compute-sunrise}
 get_sunrise <- function(pk_track, date, lat, lon, tz ="UTC") {
-  # compute sunrise time from localisation and UTC time  
+  # compute sunrise time from localisation and UTC time
+  #return NA if error
   in_pk_track = pk_track
   in_lat = round(lat,5)
   in_lon = round(lon,5)
   in_tz = tz
+  
   
   sunrise = tryCatch(suncalc::getSunlightTimes(
     date = lubridate::date(date),
@@ -282,17 +285,23 @@ get_sunrise <- function(pk_track, date, lat, lon, tz ="UTC") {
     tz   = in_tz
   )$sunrise, error=function(e) NA)
 
-  return(tribble(
+  return(dplyr::tribble(
  ~pk_track, ~sunrise,
  in_pk_track, sunrise)
 )
 }
 
-sunrises <- purrr::pmap_dfr(suncalc_prep %>% select(pk_track,date = record_utc, lat, lon) %>% st_drop_geometry,get_sunrise )
+suncalc_prep <- filtered_track_info %>% dplyr::bind_cols(
+  filtered_track_info %>% st_centroid() %>% st_coordinates() %>% as_tibble() %>% select(lat = Y, lon = X)
+) 
 
+
+sunrises <- purrr::pmap_dfr(suncalc_prep %>% select(pk_track,date = record_utc, lat, lon) %>% st_drop_geometry, get_sunrise )
+```
+```{r time-after-sunrise}
 # join sunrises to study data
 # removes records where sunrise time cannot be compute
-suncalc_prep %>% 
+time_after_sunrise <- suncalc_prep %>% 
   dplyr::inner_join(sunrises %>% filter(!is.na(sunrise))) %>%
   dplyr::mutate(local_time = lubridate::hour( # extract hour
     lubridate::with_tz( # convert to local time
@@ -303,8 +312,39 @@ suncalc_prep %>%
       lubridate::ymd_hms(sunrise, tz = "UTC"), # convert text to date
       "Europe/Paris")),
     time_after_sunrise = local_time -local_sunrise
-    ) 
+    ) %>% left_join( all_info %>% select(pk_track,tag_name))
 
+time_after_sunrise %>% head() %>% knitr::kable()
+```
+
+
+```{r time-after-sunrise-percentage}
+occurences <- time_after_sunrise %>% sf::st_drop_geometry() %>% dplyr::group_by(tag_name, time_after_sunrise) %>% dplyr::count(name = "occurences")
+
+time_after_sunrise_repartition <- occurences %>% 
+  left_join(
+    occurences %>% dplyr::group_by(time_after_sunrise) %>% dplyr::summarise(total = sum(occurences)),
+    by = "time_after_sunrise") %>% 
+  mutate(percentage = occurences * 100 / total)
+
+time_after_sunrise_repartition %>% head() %>% knitr::kable()
+```
+
+
+```{r time-after-sunrise-graph}
+ggplot(time_after_sunrise_repartition) +
+   aes(x = time_after_sunrise, y = percentage) +
+   geom_point(shape = "circle", size = 1.5, colour = "#112446") +
+   labs(
+     x = "Time before or after sunrise",
+     y = "Percentage",
+     title = "Hourly repartition of tags",
+     subtitle = "Noicecaptures tags in metropolitan France,
+     2017 - 2020"
+   ) +
+   theme_minimal() +
+   facet_wrap(vars(tag_name))
+# ggsave("plots/tag_dynamics_around_sunrise.png") 
 ```
 
 
