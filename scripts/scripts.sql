@@ -111,3 +111,22 @@ SELECT ft.pk_track, tag_name FROM france_tracks as ft
 INNER JOIN noisecapture_track_tag ntt ON ft.pk_track = ntt.pk_track /* Add track tags*/
 INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 
+-- List of available drivers provided by OGR_fdw
+SELECT driver
+FROM unnest(ogr_fdw_drivers()) AS driver
+ORDER BY driver;
+
+
+/* Quick look into GADM28 data */
+select *  from gadm28 g where name_0 = 'France'
+
+select distinct type_5 from gadm28 g  where name_0 = 'France'
+
+/*Generates download link for sound sample*/
+select record_utc, concat('https://data.noise-planet.org/raw/', substring(user_uuid, 1, 2),'/', substring(user_uuid, 3, 2),'/', substring(user_uuid, 5, 2),'/',user_uuid,'/','track_',track_uuid,'.zip') download  
+from noisecapture_track nt, noisecapture_user nu 
+where nt.pk_user = nu.pk_user 
+--and nt.record_utc > NOW()::date - 1 
+order by record_utc DESC LIMIT 30;
+
+select  concat('https://data.noise-planet.org/raw/', substring(user_uuid, 1, 2),'/', substring(user_uuid, 3, 2),'/', substring(user_uuid, 5, 2),'/',user_uuid,'/','track_',track_uuid,'.zip') download from france_tracks ft, noisecapture_track nt, noisecapture_user nu where nt.pk_track = ft.pk_track and nt.pk_user = nu.pk_user 
