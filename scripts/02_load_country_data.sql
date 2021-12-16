@@ -42,3 +42,26 @@ alter table countries rename geom to geog
 
 -- create spatial index on geog column
 create index ix_countries_geog_gist on countries using gist(geog);
+
+
+/* Load Timezone data from topopjson file
+ * source : https://gist.github.com/tschaub/cc70281ce4df5358eac38b34409b9ef9
+ * based on NaturalEarth timezone data
+ */
+drop server if exists fds_tz cascade;
+create server fds_tz
+    foreign data wrapper ogr_fdw
+    options(datasource
+'/vsicurl/https://gist.githubusercontent.com/tschaub/cc70281ce4df5358eac38b34409b9ef9/raw/d152ba9e83d7733d9fb5f37f52202c0fcead834a/timezones.json',
+ format 'TopoJSON')
+ 
+  -- Import 
+import foreign schema ogr_all from server fds_tz into staging;
+
+-- Copy data from fds_tz to a table
+create table timezones as
+select * from staging.ne_10m_time_zones tz ;
+
+-- rename table
+ALTER TABLE IF EXISTS ne_10m_time_zones
+RENAME TO countries;
