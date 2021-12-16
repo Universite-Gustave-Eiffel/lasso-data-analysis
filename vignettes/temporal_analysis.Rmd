@@ -265,18 +265,45 @@ graphs
   - heure du levé de soleil : localisation + date
   - nouvelle colonne : heure locale - heure de levé du soleil
 
-```{r sunrise}
-filtered_track_info %>% dplyr::bind_cols(
-  filtered_track_info %>% st_centroid() %>% st_coordinates() %>% as_tibble() %>% select(lat = Y, long = X)
-) %>% dplyr::mutate(
-  sunrise_time = suncalc::getSunlightTimes(
-    date = record_utc,
-    lat =lat,
-    long =long,
-    keep = "sunrise",
-    tz = "UTC"
-  )
+
+```{r}
+
+get_sunrise <- function(pk_track, date, lat, lon, tz ="UTC") {
+  # compute sunrise time from localisation and UTC time  
+  in_pk_track = pk_track
+  in_lat = round(lat,5)
+  in_lon = round(lon,5)
+  in_tz = tz
+  
+  sunrise = tryCatch(suncalc::getSunlightTimes(
+    date = lubridate::date(date),
+    lat = in_lat,
+    lon = in_lon,
+    tz   = in_tz
+  )$sunrise, error=function(e) NA)
+
+  return(tribble(
+ ~pk_track, ~sunrise,
+ in_pk_track, sunrise)
 )
+}
+
+sunrises <- purrr::pmap_dfr(suncalc_prep %>% select(pk_track,date = record_utc, lat, lon) %>% st_drop_geometry,get_sunrise )
+
+# join sunrises to study data
+# removes records where sunrise time cannot be compute
+suncalc_prep %>% 
+  dplyr::inner_join(sunrises %>% filter(!is.na(sunrise))) %>%
+  dplyr::mutate(local_time = lubridate::hour( # extract hour
+    lubridate::with_tz( # convert to local time
+      lubridate::ymd_hms(record_utc, tz = "UTC"), # convert text to date
+      "Europe/Paris")),
+    local_sunrise = lubridate::hour( # extract hour
+    lubridate::with_tz( # convert to local time
+      lubridate::ymd_hms(sunrise, tz = "UTC"), # convert text to date
+      "Europe/Paris")),
+    time_after_sunrise = local_time -local_sunrise
+    ) 
 
 ```
 
@@ -309,6 +336,11 @@ citation("sf")
 
 ```{r}
 citation("hydroTSM")
+```
+
+
+```{r}
+citation("suncalc")
 ```
 
 # Reproductibility
