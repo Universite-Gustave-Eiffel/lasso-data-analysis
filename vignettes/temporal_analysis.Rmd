@@ -8,21 +8,6 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-
-# parameters
-# keep records with "animal" tag (then add water and vegetation)
-tag <- "'animals', 'water'"
-# remove records with indoor and test tags
-excluded_tags <- "'indoor', 'test'"
-# remove points with GPS accuracy < 20m
-# remove tracks too long < 15 minutes, 1 hour ?
-duration <- 900 # in seconds
-# study temporal inconstancies between GPS and phone
-# study France and compare to Deutschland
-
-
-
-
 # Database connection
 library(RPostgreSQL)
 library(DBI)
@@ -70,29 +55,15 @@ query <- "SELECT distinct  * FROM noisecapture_tag;"
 RPostgreSQL::dbGetQuery(con,statement = query) 
 ```
 
-```{r create-view, include=FALSE}
-# Query that create a view of interesting tracks 
-# keep records with "animal" tag
-# remove tracks taggued indoor and test
-# remove tracks too long < 15 minutes, 1 hour 
-query <- "CREATE OR REPLACE VIEW tracks_of_interest AS
-    SELECT nt.pk_track, record_utc, time_length ,     noise_level,tag_name from noisecapture_track AS nt 
-    INNER JOIN noisecapture_track_tag ntt ON nt.pk_track = ntt.pk_track /* Add track tags*/
-    INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
-    WHERE 
-       tag_name in ('animals') --only animal sounds
-       AND time_length < 900  -- duration < 15 minutes (900 s)
-       AND nt.pk_track not in (
-           SELECT DISTINCT nt.pk_track from noisecapture_track AS nt 
-           INNER JOIN noisecapture_track_tag ntt ON nt.pk_track = ntt.pk_track /* Add track tags*/
-           INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
-           WHERE ntag.tag_name IN ('indoor','test')    /*track recorded indoor or tests*/
-  );"
+This has be done within the database using views.
+Please see the [03_create_views.sql](https://github.com/nicolas-roelandt/lasso-data-analysis/blob/main/scripts/03_create_views.sql) script for more details.
 
+In summary, it removes test and indoor records, filter tracks that have a duration between 5 to 900 seconds.
+It also remove the tracks where the GPS accuracy was below a 20 meter threshold and that are larger than a 25 square meter area.
 
+This study is focused on France so there is a spatial filtering on its boundaries.
 
-RPostgreSQL::dbGetQuery(con,statement = query) 
-```
+The final data is stored in a view called `france_tracks` that can be called at will.
 
 ## Retrieve data
 ### Track information
@@ -124,7 +95,7 @@ query <- "SELECT ft.pk_track, tag_name FROM france_tracks as ft
 INNER JOIN noisecapture_track_tag ntt ON ft.pk_track = ntt.pk_track /* Add track tags*/
 INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/;"
 
-tag_info <- RPostgreSQL::dbGetQuery(con,statement = query)
+tag_info <- RPostgreSQL::dbGetQuery(con,statement = query) %>% dplyr::filter(pk_track %in% filtered_track_info$pk_track)
 head(tag_info)
 ```
 
@@ -291,18 +262,19 @@ get_sunrise <- function(pk_track, date, lat, lon, tz ="UTC") {
 )
 }
 
+# Compute track centroid coordinates
 suncalc_prep <- filtered_track_info %>% dplyr::bind_cols(
   filtered_track_info %>% st_centroid() %>% st_coordinates() %>% as_tibble() %>% select(lat = Y, lon = X)
 ) 
 
-
-sunrises <- purrr::pmap_dfr(suncalc_prep %>% select(pk_track,date = record_utc, lat, lon) %>% st_drop_geometry, get_sunrise )
+# Compute sunrise hours for each track in a new dataframe
+sunrises <- purrr::pmap_dfr(suncalc_prep %>% select(pk_track, date = record_utc, lat, lon) %>% st_drop_geometry, get_sunrise )
 ```
 ```{r time-after-sunrise}
 # join sunrises to study data
-# removes records where sunrise time cannot be compute
+# removes records where sunrise time cannot be compute (track 265404)
 time_after_sunrise <- suncalc_prep %>% 
-  dplyr::inner_join(sunrises %>% filter(!is.na(sunrise))) %>%
+  dplyr::inner_join(sunrises %>% filter(!is.na(sunrise))) %>% #remove NAs to avoid errors later on
   dplyr::mutate(local_time = lubridate::hour( # extract hour
     lubridate::with_tz( # convert to local time
       lubridate::ymd_hms(record_utc, tz = "UTC"), # convert text to date
@@ -348,10 +320,31 @@ ggplot(time_after_sunrise_repartition) +
 ```
 
 
+
+```{r time-after-sunrise-animals-graph}
+ggplot(time_after_sunrise_repartition %>% dplyr::filter(tag_name == "animals")) +
+   aes(x = time_after_sunrise, y = percentage) +
+   geom_point(shape = "circle", size = 1.5, colour = "#112446") +
+   labs(
+     x = "Time before or after sunrise",
+     y = "Percentage",
+     title = "Hourly repartition of tags",
+     subtitle = "Noicecaptures tags in metropolitan France,
+     2017 - 2020"
+   ) +
+   geom_smooth(method = "loess", se = FALSE, aes(colour="loess")) +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 3), se = FALSE, aes(colour="Polynomial")) +
+  scale_colour_manual(values=c("blue", "red"))+
+   theme_minimal()
+# ggsave("plots/tag_dynamics_around_sunrise.png") 
+```
+
 # TODO
 - regarder la répartition par mois également
 
 - timezones : https://github.com/Ifsttar/NoiseCapture/tree/master/onomap-geoserver/geoserver/src/test/resources/org/noise_planet/noisecapturegs
+  - loaded in database
+  - not used car metropolitan France study only
 
 
 
