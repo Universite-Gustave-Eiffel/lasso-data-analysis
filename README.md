@@ -27,7 +27,7 @@ https://research-data.ifsttar.fr/dataset.xhtml?persistentId=doi:10.25578/J5DG3W
 - Create an empty database named `noisecapture` with the Postgis extension
 - Copy in your home folder the SQL script `01_drop_foreign_keys.sql` if your available storage is less than 200 Gb
 - Execute the script `00_prepare_database.sh`, comment the second line if you want to keep foreign keys
-- Execute the SQL script `02_load_country_data.sql` to load additional data used by the analysis
+- Execute the SQL script `02_load_country_data.sql` to load additional data from [NaturalEarth](https://www.naturalearthdata.com/downloads/10m-cultural-vectors/) used by the analysis
 - Execute the SQL script `03_create_views.sql` to compute the views that prepare the data used in the analysis.
 
 ### Render `temporal_analysis.Rmd` vignette
@@ -36,10 +36,12 @@ The final analysis is made within R.
 Please be sure to adapt the connexion parameters to your setup.
 
 ```r
+drv <- DBI::dbDriver("PostgreSQL")
+
 con <- DBI::dbConnect(
 drv,
 dbname ="noisecapture",
-host = "lassopg.ifsttar.fr", #server IP or hostname
+host = "noisecaptureDB", #server IP or hostname
 port = 5432, #Port on which we ran the proxy
 user="noisecapture",
 password=Sys.getenv('noisecapture_password') # password stored in .Renviron. Use this to edit it : usethis::edit_r_environ()
