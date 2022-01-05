@@ -17,8 +17,11 @@ drv <- DBI::dbDriver("PostgreSQL")
 # Data handling
 library(sf)
 library(dplyr)
-library(ggplot2)
 library(purrr)
+
+# Graphes
+library(ggplot2)
+library(scales)
 
 # time / date handling
 library(lubridate)
@@ -99,6 +102,8 @@ tag_info <- RPostgreSQL::dbGetQuery(con,statement = query) %>% dplyr::filter(pk_
 head(tag_info)
 ```
 
+Those `r nrow(filtered_track_info)` tracks correspond to `r nrow(tag_info)` tags as a track can have multiple tags.
+
 
 ```{r tag-histo, echo=FALSE}
 ggplot(tag_info) +
@@ -112,8 +117,6 @@ ggplot(tag_info) +
   ) +
   theme_minimal()
 ```
-
-
 
 # Time repartition
 ## All year
@@ -167,7 +170,7 @@ ggplot(tags_hourly_repartition) +
 # ggsave("plots/tags_hourly_dynamics.png") 
 ```
 
-## Seasonal
+## Seasonal repartition
 ### Animals
 
 ```{r compute-animals-hourly-repartition-season}
@@ -339,12 +342,68 @@ ggplot(time_after_sunrise_repartition %>% dplyr::filter(tag_name == "animals")) 
 # ggsave("plots/tag_dynamics_around_sunrise.png") 
 ```
 
+# Monthly repartition
+
+```{r monthly-repartition}
+monthly_occurences <- all_info %>% dplyr::mutate(local_month = lubridate::month( # extract hour
+    lubridate::with_tz( # convert to local time
+      lubridate::ymd_hms(record_utc, tz = "UTC"), # convert text to date
+      "Europe/Paris"))) %>%
+  dplyr::group_by(tag_name, local_month, season) %>% 
+  dplyr::count(name = "occurences")
+
+tags_monthly_repartition <- monthly_occurences %>%  left_join(
+    monthly_occurences %>% dplyr::group_by(local_month) %>% dplyr::summarise(total = sum(occurences)),
+    by = "local_month") %>% 
+  mutate(percentage = occurences * 100 / total)
+```
+
+```{r tags-monthly-repartition-graph}
+
+data_breaks <- data.frame(start = c(0, 3, 6, 9),  # Create data with breaks
+                          end = c(3, 6, 9, 12),
+                          Seasons = factor(c("Winter", "Spring", "Summer", "Autumn"), 
+                                          levels = c("Winter", "Spring", "Summer", "Autumn"),
+                          labels = c("Winter", "Spring", "Summer", "Autumn")))
+data_breaks                                       # Print data with breaks
+
+ggplot() +
+  # Add background colors to plot
+  geom_rect(data = data_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Seasons),
+            alpha = 0.25) +
+  scale_fill_manual(values = c("Winter" = "white",
+                               "Spring" = "green",
+                               "Summer" = "yellow",
+                               "Autumn" = "brown"
+                               ))+
+  geom_point(data = tags_monthly_repartition, aes(x = local_month, y = percentage),
+             shape = "circle", size = 1.5, colour = "#112446") +
+  labs(
+    x = "Month",
+    y = "Percentage",
+    title = "Monthly repartition of tags",
+    subtitle = "Noicecaptures tags in metropolitan France,
+    2017 - 2020"
+  ) +
+  theme_minimal() +
+  scale_x_continuous(breaks = scales::pretty_breaks(), labels=c("Jan","Feb","Apr","Jun", "Aug", "Oct", "Dec", "null"), limits = c(1,12))+
+  facet_wrap(vars(tag_name))
+
+# ggsave("plots/tags_monthly_dynamics.png") 
+```
+
+
 # TODO
-- regarder la répartition par mois également
+
 
 - timezones : https://github.com/Ifsttar/NoiseCapture/tree/master/onomap-geoserver/geoserver/src/test/resources/org/noise_planet/noisecapturegs
   - loaded in database
-  - not used car metropolitan France study only
+  - not used because metropolitan France study only
 
 
 
@@ -357,6 +416,7 @@ ggplot(time_after_sunrise_repartition %>% dplyr::filter(tag_name == "animals")) 
 select record_utc, concat('https://data.noise-planet.org/raw/', substring(user_uuid, 1, 2),'/', substring(user_uuid, 3, 2),'/', substring(user_uuid, 5, 2),'/',user_uuid,'/','track_',track_uuid,'.zip') download  from noisecapture_track nt, noisecapture_user nu where nt.pk_user = nu.pk_user and nt.record_utc > NOW()::date - 1 order by record_utc DESC LIMIT 30;
 
 ```
+- regarder la répartition par mois également
 
 # Packages citations
 
