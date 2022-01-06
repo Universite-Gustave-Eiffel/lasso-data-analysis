@@ -331,15 +331,15 @@ ggplot(time_after_sunrise_repartition %>% dplyr::filter(tag_name == "animals")) 
    labs(
      x = "Time before or after sunrise",
      y = "Percentage",
-     title = "Hourly repartition of tags",
+     title = "Hourly repartition of animal tags",
      subtitle = "Noicecaptures tags in metropolitan France,
      2017 - 2020"
    ) +
-   geom_smooth(method = "loess", se = FALSE, aes(colour="loess")) +
-  geom_smooth(method = "lm", formula = y ~ poly(x, 3), se = FALSE, aes(colour="Polynomial")) +
+   geom_smooth(method = "loess", se = FALSE, aes(colour="loess")) + # smooth curve test (see span parameter to fit more to the peak before sunrise)
+  # geom_smooth(method = "lm", formula = y ~ poly(x, 3), se = FALSE, aes(colour="Polynomial")) +
   scale_colour_manual(values=c("blue", "red"))+
    theme_minimal()
-# ggsave("plots/tag_dynamics_around_sunrise.png") 
+# ggsave("plots/animal_dynamics_around_sunrise.png") 
 ```
 
 # Monthly repartition
@@ -380,7 +380,7 @@ ggplot() +
                                "Spring" = "green",
                                "Summer" = "yellow",
                                "Autumn" = "brown"
-                               ))+
+                               )) +
   geom_point(data = tags_monthly_repartition, aes(x = local_month, y = percentage),
              shape = "circle", size = 1.5, colour = "#112446") +
   labs(
@@ -404,19 +404,9 @@ ggplot() +
 - timezones : https://github.com/Ifsttar/NoiseCapture/tree/master/onomap-geoserver/geoserver/src/test/resources/org/noise_planet/noisecapturegs
   - loaded in database
   - not used because metropolitan France study only
+  - intersect track geom with timezones and use timezone variable in computations ("Europe/Paris" -> tz)
+- investiguate with there is doubles in tags_monthly_dynamic graph in Road March and industrial June (data related ? Agregation ?)
 
-
-
-
-## DONE
-- 5s < duration <900s
-- GADM28 : remplacer countries ? => NON GADM28 contient des données au niveau communal, il faudrait fusionner 36 000 entités avant d'avoir un résultat acceptable, c'est plus rapide de télécharger le fichier à partir de Natural Earth.
-- ajouter url de téléchargement dans table track_info => depuis postgis
-```{sql, eval=FALSE}
-select record_utc, concat('https://data.noise-planet.org/raw/', substring(user_uuid, 1, 2),'/', substring(user_uuid, 3, 2),'/', substring(user_uuid, 5, 2),'/',user_uuid,'/','track_',track_uuid,'.zip') download  from noisecapture_track nt, noisecapture_user nu where nt.pk_user = nu.pk_user and nt.record_utc > NOW()::date - 1 order by record_utc DESC LIMIT 30;
-
-```
-- regarder la répartition par mois également
 
 # Packages citations
 
