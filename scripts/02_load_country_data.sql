@@ -64,4 +64,4 @@ select * from staging.ne_10m_time_zones tz ;
 
 -- rename table
 ALTER TABLE IF EXISTS ne_10m_time_zones
-RENAME TO countries;
+RENAME TO timezones;
