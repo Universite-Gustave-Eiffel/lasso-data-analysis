@@ -5,3 +5,4 @@
 .DS_Store
 documentation/ #local documentation
 documentation
+inst/doc
