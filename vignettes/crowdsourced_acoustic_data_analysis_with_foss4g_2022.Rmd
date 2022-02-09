@@ -9,11 +9,13 @@ author:
 - name: Nicolas Roelandt
   affiliation: Univ. Gustave Eiffel/AME
 - name: Pierre Aumond
-  affiliation: Univ. Gustave Eiffel/UMRAE
+  affiliation: UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France
+- name: Ludovic Moisan (? au delà de l'intérêt pour son CV, je pense que d'ici l'oral, tu pourras te servir de certains de ses résultats)
+  affiliation: UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France
 - name: Grégoire Le Campion
   affiliation: Univ. Gustave Eiffel/UMRAE
 - name: Judicaël Picaut (?)
-  affiliation: Univ. Gustave Eiffel/UMRAE
+  affiliation: UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France
 - name: Paul Chapron (?)
   affiliation: IGN/LASTIG
 ---
@@ -37,31 +39,24 @@ Environmental acoustics, crowdsourced open data, Open Science, FOSS4G, literate 
 
 # Abstract (fr) {-}
 
-Le laboratoire UMRAE (Université Gustave Eiffel) a développé
-l'application NoiseCapture avec l'objectif de collecter des données
-collaboratives sur le bruit afin d’affiner les modèles de pollution sonore.
-Démarrée en 2017, la collecte est toujours en cours et un premier
-export des trois premières années a été réalisé et libéré. L'objectif
-de cette analyse était de voir si les données présentaient des
-dynamiques acoustiques connues au sein de la région d'étude et ainsi
-déterminer la pertinence de l'aspect collecte collaborative de données
-acoustiques. 
+NoiseCapture est une application pour smartphone développée par l'Université Gustave Eiffel et le CNRS 
+dans le cadre d'une démarche participative de cartographie du bruit dans l'environnement.
+L'application est open-source, et l'ensemble de ses données sont libres.
 
-Les premiers résultats sont encourageants car les
+Cette étude présente une première analyse de 3 années de collecte à travers le prisme 
+des sources sonores. Les premiers résultats sont encourageants car les
 dynamiques routières liées aux trajets domicile-travail ou liées au chant
 des oiseaux ont pu être observées. L'analyse ne portait que
 sur les étiquettes renseignées par les utilisateurs et non sur le spectre sonore de la
 mesure, celui-ci sera étudié ultérieurement. 
 
-Ces travaux préparatoires
-devant être consolidés et étendus par la suite, et avec la volonté
+Ces travaux préparatoiresn devant être consolidés et étendus par la suite, et avec la volonté
 d'inclure cette étude dans le cadre de la Science Ouverte, une attention a été
-portée sur l'aspect reproductibilité de l'analyse. 
-L'analyse a été conçue et réalisée avec des techniques de programmation lettrée.
-La reprise des travaux par un stagiaire a permis d'évaluer la pertinence de la méthode,
-celui-ci ayant pu compléter les points inachevés et adapté les scripts
-à ses besoins.
+portée sur l'aspect reproductibilité de l'analyse. Celle-ci a été entièrement réalisée 
+avec des techniques de programmation lettrée. La reprise des travaux par un stagiaire 
+a permis d'évaluer la pertinence de la méthode, celui-ci ayant pu compléter des analyses 
+inachevées et adapté les scripts à ses besoins.
 
-Nous souhaitons présenter dans ce papier le contexte de l'étude, les
-outils et techniques mis en oeuvre, les premiers résultats obtenus ainsi que
-les bénéfices tirés de l'utilisation de la programmation lettrées dans ces travaux préparatoires.
+Le contexte de l'étude, les outils et techniques mis en oeuvre et les premiers résultats 
+obtenus seront présentés ainsi que les bénéfices tirés de l'utilisation de la 
+programmation lettrées dans ce type de travaux préparatoires.
