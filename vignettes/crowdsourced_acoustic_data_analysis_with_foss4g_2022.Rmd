@@ -5,6 +5,17 @@ vignette: >
   %\VignetteIndexEntry{Crowdsourced acoustic open data analysis with FOSS4G tools}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+author:
+- name: Nicolas Roelandt
+  affiliation: Univ. Gustave Eiffel/AME
+- name: Pierre Aumond
+  affiliation: Univ. Gustave Eiffel/UMRAE
+- name: Grégoire Le Campion
+  affiliation: Univ. Gustave Eiffel/UMRAE
+- name: Judicaël Picaut (?)
+  affiliation: Univ. Gustave Eiffel/UMRAE
+- name: Paul Chapron (?)
+  affiliation: IGN/LASTIG
 ---
 
 ```{r, include = FALSE}
@@ -14,6 +25,43 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
-library(LASSO)
+```{r comments, include=FALSE}
+#' Call for paper : https://2022.foss4g.org/cfp-academic_track.php
+#' Submission of academic abstracts 	from 06/12/2021 	to 28/02/2022
+#' Announcement of accepted abstracts 		01/04/2022
+#' Submission of full academic papers 		01/06/2022
 ```
+
+# Keywords {-}
+Environmental acoustics, crowdsourced open data, Open Science, FOSS4G, literate programming
+
+# Abstract (fr) {-}
+
+Le laboratoire UMRAE (Université Gustave Eiffel) a développé
+l'application NoiseCapture avec l'objectif de collecter des données
+collaboratives sur le bruit afin d’affiner les modèles de pollution sonore.
+Démarrée en 2017, la collecte est toujours en cours et un premier
+export des trois premières années a été réalisé et libéré. L'objectif
+de cette analyse était de voir si les données présentaient des
+dynamiques acoustiques connues au sein de la région d'étude et ainsi
+déterminer la pertinence de l'aspect collecte collaborative de données
+acoustiques. 
+
+Les premiers résultats sont encourageants car les
+dynamiques routières liées aux trajets domicile-travail ou liées au chant
+des oiseaux ont pu être observées. L'analyse ne portait que
+sur les étiquettes renseignées par les utilisateurs et non sur le spectre sonore de la
+mesure, celui-ci sera étudié ultérieurement. 
+
+Ces travaux préparatoires
+devant être consolidés et étendus par la suite, et avec la volonté
+d'inclure cette étude dans le cadre de la Science Ouverte, une attention a été
+portée sur l'aspect reproductibilité de l'analyse. 
+L'analyse a été conçue et réalisée avec des techniques de programmation lettrée.
+La reprise des travaux par un stagiaire a permis d'évaluer la pertinence de la méthode,
+celui-ci ayant pu compléter les points inachevés et adapté les scripts
+à ses besoins.
+
+Nous souhaitons présenter dans ce papier le contexte de l'étude, les
+outils et techniques mis en oeuvre, les premiers résultats obtenus ainsi que
+les bénéfices tirés de l'utilisation de la programmation lettrées dans ces travaux préparatoires.
