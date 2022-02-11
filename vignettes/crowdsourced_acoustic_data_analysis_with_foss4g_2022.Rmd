@@ -33,7 +33,9 @@ knitr::opts_chunk$set(
 ```
 
 # Keywords {-}
-Environmental acoustics, crowdsourced open data, Open Science, FOSS4G, literate programming
+Environmental acoustics, crowdsourced open data, FOSS4G, reproducibility,
+literate programming, Open Science, 
+Open Geospatial Software, Open GIScience, Open Geospatial Data 
 
 # Abstract (fr) {-}
 
@@ -60,4 +62,30 @@ Le contexte de l'étude, les outils et techniques mis en oeuvre et les premiers 
 obtenus seront présentés ainsi que les bénéfices tirés de l'utilisation de la 
 programmation lettrée dans ce type de travaux préparatoires.
 
+# Abstract (en) {-}
+
+[NoiseCapture](https://noise-planet.org/noisecapture.html) is a smartphone application 
+developed by the [Gustave Eiffel University](https://www.univ-gustave-eiffel.fr/)
+and the [French National Centre for Scientific Research](https://www.cnrs.fr/en/cnrs) 
+as part of a participatory approach to environmental noise mapping.
+The application is open-source, and all its data are free.
+
+This study presents a first analysis of 
+[3 years of data collection](https://research-data.ifsttar.fr/dataset.xhtml?persistentId=doi:10.25578/J5DG3W) 
+through the prism of sound sources. 
+Sound dynamics of roads related to commuting or of bird songs have been observed,
+so the first results are encouraging. 
+This analysis was only based on the tags given by the users and not on the sound 
+spectrum of the measurement, which will be studied at a later stage. 
+
+As this preparatory work should be consolidated and extended later, and with the will
+to include this study in the framework of the Open Science, we paid attention to reproducibility. 
+It was entirely realized with literate programming techniques. 
+The resumption of the work by a trainee made it possible to evaluate 
+the relevance of the method, as unfinished analyses has been completed and 
+provided scripts adapted to fit new needs.
+
+The context of the study, the tools and techniques used and the first results 
+obtained will be presented as well as the benefits of using the literate programming 
+in this type of preparatory work.
 
