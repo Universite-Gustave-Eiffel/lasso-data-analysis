@@ -12,8 +12,6 @@ author:
   affiliation: UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France
 - name: Ludovic Moisan  <!-- (? au delà de l'intérêt pour son CV, je pense que d'ici l'oral, tu pourras te servir de certains de ses résultats-->
   affiliation: UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France
-- name: Judicaël Picaut <!--(?)-->
-  affiliation: UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France
 - name: Paul Chapron <!--(?)-->
   affiliation: IGN/LASTIG
 bibliography: bibliography.bib
