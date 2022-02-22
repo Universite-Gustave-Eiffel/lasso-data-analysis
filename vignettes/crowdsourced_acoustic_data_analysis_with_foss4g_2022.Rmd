@@ -10,9 +10,9 @@ author:
   affiliation: AME, Univ. Gustave Eiffel, IFSTTAR, F-69675 Bron, France
 - name: Pierre Aumond
   affiliation: UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France
-- name: Ludovic Moisan  <!-- (? au delà de l'intérêt pour son CV, je pense que d'ici l'oral, tu pourras te servir de certains de ses résultats-->
+- name: Ludovic Moisan
   affiliation: UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France
-- name: Paul Chapron <!--(?)-->
+- name: Paul Chapron
   affiliation: IGN/LASTIG
 bibliography: bibliography.bib
 biblio-style: "apalike"
@@ -40,7 +40,7 @@ Open Geospatial Software, Open GIScience, Open Geospatial Data
 
 # Abstract (fr) {-}
 
-NoiseCapture est une application pour smartphone développée par 
+NoiseCapture est une application Android développée par 
 l'Université Gustave Eiffel et le CNRS 
 dans le cadre d'une démarche participative de cartographie du bruit dans l'environnement.
 L'application est open-source, et l'ensemble de ses données sont libres.
@@ -48,7 +48,7 @@ L'application est open-source, et l'ensemble de ses données sont libres.
 Cette étude présente une première analyse de 3 années de collecte à travers 
 le prisme  des sources sonores. 
 Les premiers résultats sont encourageants car les dynamiques routières liées aux 
-trajets domicile-travail ou liées au chant des oiseaux ont pu être observées. 
+trajets domicile-travail ou au chant des oiseaux ont pu être observées. 
 L'analyse ne portait que sur les étiquettes renseignées par les utilisateurs et 
 non sur le spectre sonore de la mesure, celui-ci sera étudié ultérieurement. 
 
@@ -56,8 +56,6 @@ Ces travaux préparatoires devant être consolidés et étendus par la suite, et
 d'inclure cette étude dans le cadre de la Science Ouverte, une attention a été
 portée sur l'aspect reproductibilité de l'analyse. 
 Celle-ci a été entièrement réalisée avec des techniques de programmation lettrée. 
-La reprise des travaux par un stagiaire a permis d'évaluer la pertinence de la méthode, 
-celui-ci ayant pu compléter des analyses inachevées et adapté les scripts à ses besoins.
 
 Le contexte de l'étude, les outils et techniques mis en oeuvre et les premiers résultats 
 obtenus seront présentés ainsi que les bénéfices tirés de l'utilisation de la 
@@ -65,42 +63,41 @@ programmation lettrée dans ce type de travaux préparatoires.
 
 # Abstract (en) {-}
 
-[NoiseCapture](https://noise-planet.org/noisecapture.html) is a smartphone application 
+[NoiseCapture](https://noise-planet.org/noisecapture.html) is a Android application 
 developed by the [Gustave Eiffel University](https://www.univ-gustave-eiffel.fr/)
 and the [French National Centre for Scientific Research](https://www.cnrs.fr/en/cnrs) 
 as part of a participatory approach to environmental noise mapping.
-The application is open-source, and all its data are free.
+The application is open-source, and all its data are open.
 
 This study presents a first analysis of 
 [3 years of data collection](https://research-data.ifsttar.fr/dataset.xhtml?persistentId=doi:10.25578/J5DG3W) 
-through the prism of sound sources. 
-Sound dynamics of roads related to commuting or of bird songs have been observed,
-so the first results are encouraging. 
-This analysis was only based on the tags given by the users and not on the sound 
+through the lens of sound sources. 
+Sound dynamics of roads related to commuting or bird songs have been observed. 
+The first results are therefore encouraging. 
+This analysis is based only on the tags given by the users and not on the sound 
 spectrum of the measurement, which will be studied at a later stage. 
 
-As this preparatory work should be consolidated and extended later, and with the will
-to include this study in the framework of the Open Science, we paid attention to reproducibility. 
+
+This preparatory work will be consolidated and extended later, and with the will
+to register this study in the framework of the Open Science, we paid attention to the reproducibility. 
 It was entirely realized with literate programming techniques. 
 The resumption of the work by a trainee made it possible to evaluate 
-the relevance of the method, as unfinished analyses has been completed and 
-provided scripts adapted to fit new needs.
 
 The context of the study, the tools and techniques used and the first results 
-obtained will be presented as well as the benefits of using the literate programming 
+obtained will be presented as well as the benefits of using literate programming 
 in this type of preparatory work.
 
 # Abstract étendu (fr) {-}
 
 <!-- Seul l'abstract sera évalué il doit faire impérativement 800 à 1000 mots -->
 ## Introduction {-}
-NoiseCapture est une application pour smartphone Android développée par 
+NoiseCapture est une application Android développée par 
 l'Université Gustave Eiffel et le CNRS 
 dans le cadre d'une démarche participative de cartographie du bruit dans l'environnement.
 L'application est open-source et l'ensemble de ses données sont libres.
 
 L'étude présentée ici est une première analyse des trois premières années de collecte 
-à travers le prisme  des sources sonores. 
+à travers le prisme des sources sonores. 
 L'analyse ne portait que sur les étiquettes renseignées par les utilisateurs et 
 non sur le spectre sonore de la mesure, celui-ci sera étudié ultérieurement.
 
@@ -121,18 +118,19 @@ programmation lettrée dans ce type de travaux préparatoires.
 <!-- Définir les données : track, tag, etc-->
 Un article présentant ce jeu de données a été publiée en 2021 [@picautSmartphoneBasedCrowdSourcedDatabase2021].
 Il détaille la structure de la base et des données, le profil des contributeurs
-et des contributions mais ne creuse pas à l'aspect acoustique environnemental. 
+et des contributions mais n'analyse pas le contenu des données. 
 C'est ce que le présent article propose d'entamer.
 
 Les données exploitées dans la présente étude correspondent aux contributions 
 réalisées entre le 29 août 2017 et le 28 août 2020. 
 Durant cette période, près de 70 000 contributeurs uniques ont permis la collecte
-de plus 260 000 tracks. 
-Un track est un enregistrement collecté, il contient le spectre sonore enregistré
-par le téléphone ainsi que le positionnement GPS de celui-ci.
-Ces informations brutes peuvent être enrichies par des étiquettes apposées par
-le contributeur.
-C'est sur ces étiquettes que portent les travaux préliminaires présentés ici.
+de plus 260 000 traçes pour un total d'environ 60 millions de secondes de mesure. 
+Une trace est un enregistrement collecté, il contient le spectre sonore (1s, tiers d'octave) enregistré
+par le téléphone couplé à son positionnement GPS (1s).
+Ces informations peuvent être librement enrichies par des étiquettes par
+le contributeur. Elles sont au nombre de X : ...,...,...,...,...,...,...,... 
+et l'utilisateur peut séléctionner une ou plusieurs d'entre elle pour chacune des traçes effectuées.
+C'est sur l'analyse de ces étiquettes que portent les travaux préliminaires présentés ici.
 
 <!--
 date de collecte: 29 August 2017 to 28 August 2020
@@ -198,7 +196,7 @@ le choix de cet outil s'est imposé naturellement.
 
 ### Mise en place
 
-Comme dit précédemment, les données sont fournies sous forme d'un dump PostGreSQL/PostGIS.
+Les données sont fournies sous forme d'un dump PostGreSQL/PostGIS.
 Un serveur a été mis en place et les données chargées.
 Une vue matérialisée a été créée afin de fournir un accès stable aux données correspondant
 aux critères définis.
@@ -210,27 +208,27 @@ permettant d'analyser les données.
 ## Résultats
 L'étude porte sur les tracks portant un tag, enregistrés en France métropolitaine.
 Sur cet échantillon, il est possible de noter une prévalence des tags *roads*,
-*chatting*, *animals* et *wind*.
-Les tags *air_traffic* et *works* sont aussi bien représentés, ce qui est intéressant
-d'un point de vue acoustique environnementale.
+*chatting*, *animals* et *wind*. Les tags *air_traffic* et *works* sont aussi bien représentés.
+
+<!-- Il faut expliquer kkpart que l'on travaille sur la proportion des tags.-->
 
 Un premier axe d'analyse porte sur la répartition horaire des tags.
-Ainsi les bruits d'animaux (tag *animals*) sont plus fréquents le matin et il est 
-possible de voir les pics d'activités humaines notamment les trajets domicile-travail.
+Les bruits d'animaux (tag *animals*) sont plus fréquents le matin et notamment une heure avant le 
+lever du soleil. Il s'agit d'une dynamique courante pour 
+le chant des oiseaux [citation oiseaux ici !].
+Il est également possible d'observer les pics d'activités humaines 
+notamment les trajets domicile-travail [citation].
 
 L'axe temporel suivant a été la saisonnalité, notamment ceux des bruits d'animaux,
-car les oiseaux sont plus actifs au printemps et à l'été.
+avec une activité plus intense au printemps et à l'été.
 Ce phénomène a également pu être observé dans les observations.
 
-Une autre dynamique liée au chant des oiseaux au levé du soleil a été étudiée dans
-les données collectées.
-Celle-ci a pu être observée mais avec un horaire plus tardif qu'attendu.
-La raison de ce décalage n'a pas encore été investiguée.
+<!--Puet-être rajouter la musique ?-->
 
 ## Conclusion
 
 Les premiers résultats sont encourageants car les dynamiques routières liées aux 
-trajets domicile-travail ou au chant des oiseaux ont pu être observées.
+trajets domicile-travail ou à l'activité animale ont pu être observées.
 La question principale était de déterminer si ces dynamiques connues en acoustique
 environnementale pouvaient être retrouvées dans un jeu de données collecté collaborativement.
 
