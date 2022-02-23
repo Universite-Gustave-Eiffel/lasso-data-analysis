@@ -12,8 +12,6 @@ author:
   affiliation: UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France
 - name: Ludovic Moisan
   affiliation: UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France
-- name: Paul Chapron
-  affiliation: IGN/LASTIG
 bibliography: bibliography.bib
 biblio-style: "apalike"
 link-citations: true
