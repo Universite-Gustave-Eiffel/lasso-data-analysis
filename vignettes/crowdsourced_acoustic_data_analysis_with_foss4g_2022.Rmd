@@ -216,9 +216,9 @@ Les tags *air_traffic* et *works* sont aussi bien représentés.
 Un premier axe d'analyse porte sur la répartition horaire des tags.
 Les bruits d'animaux (tag *animals*) sont plus fréquents le matin et notamment 
 une heure avant le lever du soleil. 
-Il s'agit d'une dynamique courante pour le chant des oiseaux <!--[citation oiseaux ici !]-->.
+Il s'agit d'une dynamique courante pour le chant des oiseaux <!--[Morgan et al. - 1981 - Effect of time of day on bird activity]-->.
 Il est également possible d'observer les pics d'activités humaines 
-notamment les trajets domicile-travail <!--[citation]-->.
+notamment les trajets domicile-travail <!--[Ma et al. - 2017 - Understanding commuting patterns using transit smart card data]-->.
 
 L'axe temporel suivant a été la saisonnalité, notamment ceux des bruits d'animaux,
 avec une activité plus intense au printemps et à l'été.
