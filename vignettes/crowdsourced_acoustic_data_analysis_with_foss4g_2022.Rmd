@@ -216,7 +216,7 @@ Les tags *air_traffic* et *works* sont aussi bien représentés.
 
 Un premier axe d'analyse porte sur la répartition horaire des tags.
 Les bruits d'animaux (tag *animals*) sont plus fréquents le matin et notamment 
-une heure avant le lever du soleil. 
+une heure après le lever du soleil. 
 Il s'agit d'une dynamique courante pour le chant des oiseaux [@robbins1981effect].
 Il est également possible d'observer les pics d'activités humaines 
 notamment les trajets domicile-travail [@MA2017135].
@@ -340,7 +340,7 @@ In the sample studied, it is possible to note a prevalence of the tags *roads*,
 
 A first axis of analysis concerns the time distribution of the tags. 
 Animal noises (tag *animals*) are more frequent in the morning and especially 
-one hour before sunrise. 
+one hour after sunrise. 
 This is a common dynamic for bird song [@robbins1981effect]. 
 We also observed peaks in human activity, especially commuting [@MA2017135].
 
