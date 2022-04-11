@@ -15,6 +15,7 @@ author:
 bibliography: bibliography.bib
 biblio-style: "apalike"
 link-citations: true
+date: "`r Sys.Date()`"
 ---
 
 ```{r, include = FALSE}
@@ -216,9 +217,9 @@ Les tags *air_traffic* et *works* sont aussi bien représentés.
 Un premier axe d'analyse porte sur la répartition horaire des tags.
 Les bruits d'animaux (tag *animals*) sont plus fréquents le matin et notamment 
 une heure avant le lever du soleil. 
-Il s'agit d'une dynamique courante pour le chant des oiseaux [@MA2017135].
+Il s'agit d'une dynamique courante pour le chant des oiseaux [@robbins1981effect].
 Il est également possible d'observer les pics d'activités humaines 
-notamment les trajets domicile-travail [@robbins1981effect].
+notamment les trajets domicile-travail [@MA2017135].
 
 L'axe temporel suivant a été la saisonnalité, notamment ceux des bruits d'animaux,
 avec une activité plus intense au printemps et à l'été.
@@ -340,8 +341,8 @@ In the sample studied, it is possible to note a prevalence of the tags *roads*,
 A first axis of analysis concerns the time distribution of the tags. 
 Animal noises (tag *animals*) are more frequent in the morning and especially 
 one hour before sunrise. 
-This is a common dynamic for bird song. 
-We also observed peaks in human activity, especially commuting.
+This is a common dynamic for bird song [@robbins1981effect]. 
+We also observed peaks in human activity, especially commuting [@MA2017135].
 
 The next temporal axis was the seasonality, especially those of animal noises, 
 with a more intense activity in European spring and summer. 
