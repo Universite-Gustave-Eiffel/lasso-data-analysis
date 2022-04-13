@@ -319,9 +319,12 @@ ggplot(time_after_sunrise_repartition) +
    ) +
    theme_minimal() +
    facet_wrap(vars(tag_name))
-# ggsave("plots/tag_dynamics_around_sunrise.png") 
+
 ```
 
+```{r time-after-sunrise-graph-save}
+ggsave("plots/tag_dynamics_around_sunrise.png")
+```
 
 
 ```{r time-after-sunrise-animals-graph}
@@ -339,7 +342,12 @@ ggplot(time_after_sunrise_repartition %>% dplyr::filter(tag_name == "animals")) 
   # geom_smooth(method = "lm", formula = y ~ poly(x, 3), se = FALSE, aes(colour="Polynomial")) +
   scale_colour_manual(values=c("blue", "red"))+
    theme_minimal()
-# ggsave("plots/animal_dynamics_around_sunrise.png") 
+ggsave("plots/animal_dynamics_around_sunrise.png")
+```
+
+
+```{r time-after-sunrise-animals-graph-save}
+ggsave("plots/animal_dynamics_around_sunrise.png")
 ```
 
 # Monthly repartition
@@ -394,9 +402,12 @@ ggplot() +
   scale_x_continuous(breaks = scales::pretty_breaks(), labels=c("Jan","Feb","Apr","Jun", "Aug", "Oct", "Dec", "null"), limits = c(1,12))+
   facet_wrap(vars(tag_name))
 
-# ggsave("plots/tags_monthly_dynamics.png") 
+ggsave("plots/tags_monthly_dynamics.png")
 ```
 
+```{r tags-monthly-repartition-graph-save}
+ggsave("plots/tags_monthly_dynamics.png")
+```
 
 # TODO
 
