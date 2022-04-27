@@ -16,6 +16,7 @@ bibliography: bibliography.bib
 biblio-style: "apalike"
 link-citations: true
 date: "`r Sys.Date()`"
+
 ---
 
 ```{r, include = FALSE}
@@ -37,30 +38,7 @@ Environmental acoustics, crowdsourced open data, FOSS4G, reproducibility,
 literate programming, Open Science, 
 Open Geospatial Software, Open GIScience, Open Geospatial Data 
 
-# Abstract (fr) {-}
-
-NoiseCapture est une application Android développée par 
-l'Université Gustave Eiffel et le CNRS 
-dans le cadre d'une démarche participative de cartographie du bruit dans l'environnement.
-L'application est open-source, et l'ensemble de ses données sont libres.
-
-Cette étude présente une première analyse de 3 années de collecte à travers 
-le prisme  des sources sonores. 
-Les premiers résultats sont encourageants car les dynamiques routières liées aux 
-trajets domicile-travail ou au chant des oiseaux ont pu être observées. 
-L'analyse ne portait que sur les étiquettes renseignées par les utilisateurs et 
-non sur le spectre sonore de la mesure, celui-ci sera étudié ultérieurement. 
-
-Ces travaux préparatoires devant être consolidés et étendus par la suite, et avec la volonté
-d'inclure cette étude dans le cadre de la Science Ouverte, une attention a été
-portée sur l'aspect reproductibilité de l'analyse. 
-Celle-ci a été entièrement réalisée avec des techniques de programmation lettrée. 
-
-Le contexte de l'étude, les outils et techniques mis en oeuvre et les premiers résultats 
-obtenus seront présentés ainsi que les bénéfices tirés de l'utilisation de la 
-programmation lettrée dans ce type de travaux préparatoires.
-
-# Abstract (en) {-}
+# Abstract {-}
 
 [NoiseCapture](https://noise-planet.org/noisecapture.html) is a Android application 
 developed by the [Gustave Eiffel University](https://www.univ-gustave-eiffel.fr/)
@@ -77,176 +55,17 @@ This analysis is based only on the tags given by the users and not on the sound
 spectrum of the measurement, which will be studied at a later stage. 
 
 
-This preparatory work will be consolidated and extended later, and with the will
-to register this study in the framework of the Open Science, we paid attention to the reproducibility. 
-It was entirely realized with literate programming techniques. 
-The resumption of the work by a trainee made it possible to evaluate 
+As this preparatory work will be consolidated and extended later, and with the will
+to register this study in the framework of the Open Science, we paid attention 
+to its reproducibility. 
 
 The context of the study, the tools and techniques used and the first results 
 obtained will be presented as well as the benefits of using literate programming 
 in this type of preparatory work.
 
-# Abstract étendu (fr) {-}
 
-<!-- Seul l'abstract sera évalué il doit faire impérativement 800 à 1000 mots -->
-## Introduction {-}
-NoiseCapture est une application Android développée par 
-l'Université Gustave Eiffel et le CNRS 
-dans le cadre d'une démarche participative de cartographie du bruit dans l'environnement.
-L'application est open-source et l'ensemble de ses données sont libres.
+# Introduction {-}
 
-L'étude présentée ici est une première analyse des trois premières années de collecte 
-à travers le prisme des sources sonores. 
-L'analyse ne portait que sur les étiquettes renseignées par les utilisateurs et 
-non sur le spectre sonore de la mesure, celui-ci sera étudié ultérieurement.
-
-Il s'agissait de déterminer si des dynamiques connues en acoustique environnementale
-pouvaient être retrouvées à l'aide de données collaboratives.
-
-Ces travaux préparatoires devant être consolidés et étendus par la suite, et avec la volonté
-d'inclure cette étude dans le cadre de la Science Ouverte, une attention a été
-portée sur l'aspect reproductibilité de l'analyse. 
-Celle-ci a été entièrement réalisée avec des logiciels libres et des techniques 
-de programmation lettrée. 
-
-Le contexte de l'étude, les outils et techniques mis en oeuvre et les premiers résultats 
-obtenus seront présentés ainsi que les bénéfices tirés de l'utilisation de la 
-programmation lettrée dans ce type de travaux préparatoires.
-
-## Les données
-<!-- Définir les données : track, tag, etc-->
-Un article présentant ce jeu de données a été publiée en 2021 [@picautSmartphoneBasedCrowdSourcedDatabase2021].
-Il détaille la structure de la base et des données, le profil des contributeurs
-et des contributions mais n'analyse pas le contenu des données. 
-C'est ce que le présent article propose d'entamer.
-
-Les données exploitées dans la présente étude correspondent aux contributions 
-apportées entre le 29 août 2017 et le 28 août 2020. 
-Durant cette période, près de 70 000 contributeurs uniques ont permis la collecte
-de plus 260 000 traces pour un total d'environ 60 millions de secondes de mesure. 
-Une trace est un enregistrement collecté, il contient le spectre sonore (1 seconde, tiers d'octave)
-enregistré par le téléphone couplé à son positionnement GPS (1 seconde).
-Ces informations peuvent être enrichies par le contributeur à l'aide d'étiquettes. 
-Ces étiquettes sont au nombre de 18 et l'utilisateur peut sélectionner une ou plusieurs d'entre elle pour chacune des traces effectuées. Elles sont détaillées
-dans [@picautSmartphoneBasedCrowdSourcedDatabase2021].
-C'est sur l'analyse de la proportion de certaines étiquettes dans l'échantillon 
-global à certaines temporalités que portent les travaux préliminaires présentés ici.
-
-<!--
-date de collecte: 29 August 2017 to 28 August 2020
-69,898 contributors have contributed within this period. 
-260,422 tracks (59,685,328 points) have been collected. 
--->
-
-En plus de données issues de la collecte collaborative, quelques données complémentaires 
-ont été utilisées pour limiter la zone d'étude.
-Nous avons choisi de limiter l'emprise géographique de cette étude préliminaire
-à la France métropolitaine car cette zone contient le plus grand nombre d'enregistrements.
-Le climat et les dynamiques sonores sont y connues et documentées.
-
-<!--
-En effet, la France est un pays possédant des territoires dans plusieurs régions du globe,
-avec des fuseaux horaires , climats et saisons différents.
-Les conserver au sein de l'échantillon aurait perturbé les analyses temporelles.
-
-
-### Données complémentaires
-
-Pour faciliter la reproductibilité de l'étude, il a été décidé de recourir à un 
-jeu de données mondial reconnu: les données vectorielles fournies par le collectif
-Natural Earth [@pattersonNaturalEarth2021].
-
-Le contour de la France métropolitaine a été généré à partir de 
-base Admin Express fournie par l'Institut Géographique National français 
-[@institutgeographiquenationalAdminExpress].
-
---> 
-Pour faciliter la reproductibilité des filtrages spatiaux, il a été décidé d'utiliser des 
-jeux de données en open data de source reconnues : la base Natural Earth [@pattersonNaturalEarth2021]
-et la base Admin Express de l'Institut Géographique National français 
-[@institutgeographiquenationalAdminExpress].
-
-## L'étude
-### Outils
-#### PostGIS
-Les données  sont fournies sous la forme d'un dump d'une base PostGreSQL/PostGIS
-[@paulramseyPostGIS2001].
-Plusieurs scripts réalisent une grande partie des filtrages attributaires et spatiaux.
-Ces filtrages sont sauvegardés dans une vue matérialisée dont les données seront
-analysées avec le langage R.
-
-#### R
-
-Le language R [@rcoreteamRLanguageStatistical2021] est un langage de programmation
-orienté traitement de données et statistiques.
-Il dispose également de nombreuses bibliothèques dédiées aux données spatialisées.
-Le Rmarkdown permet de mêler code et texte en balisé markdown pour la production
-dynamique de graphes, tables et documents.
-C'est un des moyens recommandés en programmation lettrée.
-
-#### Git
-
-Git est un logiciel de versionnement de code source distribué 
-(Distributed Version Control System (DVCS) [@chacon2014pro]).
-Il permet le travail collaboratif et décentralisé. 
-Les différents collaborateurs sont présents sur plusieurs sites différents
-(Nantes, Lyon, Paris) et l'outil Git est déjà utilisé au sein du laboratoire UMRAE,
-le choix de cet outil s'est imposé naturellement.
-
-### Mise en place
-
-Les données sont fournies sous forme d'un dump PostGreSQL/PostGIS.
-Un serveur a été mis en place et les données chargées.
-Une vue matérialisée a été créée afin de fournir un accès stable aux données correspondant
-aux critères définis.
-Ceux-ci sont à la fois attributaires (filtrage de certains tags, durées minimales et maximales, etc.)
-et spatiaux (situé en France, emprise de la trace réduite, etc.).
-Un document Rmarkdown établit la connexion avec la vue puis effectue les opérations
-permettant d'analyser les données.
-
-## Résultats
-
-L'étude porte sur les tracks portant un tag, enregistrés en France métropolitaine.
-Elle porte sur proportion d'un certain tag par rapport à l'ensemble des tags pour
-une période donnée (heure de la journée, saison, etc.).
-Dans l'échantillon étudié, il est possible de noter une prévalence des tags *roads*,
-*chatting*, *animals* et *wind*. 
-Les tags *air_traffic* et *works* sont aussi bien représentés.
-
-
-Un premier axe d'analyse porte sur la répartition horaire des tags.
-Les bruits d'animaux (tag *animals*) sont plus fréquents le matin et notamment 
-une heure après le lever du soleil. 
-Il s'agit d'une dynamique courante pour le chant des oiseaux [@robbins1981effect].
-Il est également possible d'observer les pics d'activités humaines 
-notamment les trajets domicile-travail [@MA2017135].
-
-L'axe temporel suivant a été la saisonnalité, notamment ceux des bruits d'animaux,
-avec une activité plus intense au printemps et à l'été.
-Ce phénomène a également pu être observé dans les enregistrements.
-Nous avons également remarqué que la musique était moins présente en automne que 
-durant les autres saisons et qu'elle est surtout présente à des heures tardives.
-
-## Conclusion
-
-Les premiers résultats sont encourageants car les dynamiques routières liées aux 
-trajets domicile-travail ou à l'activité animale ont pu être observées.
-La question principale était de déterminer si ces dynamiques connues en acoustique
-environnementale pouvaient être retrouvées dans un jeu de données collecté collaborativement.
-Les premiers éléments semblent répondre positivement à cette question.
-
-Certaines questions doivent encore être creusées, notamment celles de la représentativité
-d'échantillons parfois faibles pour certains horaires.
-
-Le recours systématique a des logiciels libres, la fourniture des fichiers de code
-documentés et d'un document mêlant narratif, figures et code ont permis le reprise
-et la poursuite des analyses montrées ici.
-Ces travaux actuellement en cours viendront compléter l'article final.
-
-
-# Extended abstract (en) {-}
-
-## Introduction
 NoiseCapture is an Android application developed by the Gustave Eiffel University 
 and the CNRS as part of a participatory approach to environmental noise mapping. 
 The application is open-source and all its data are free.
@@ -268,20 +87,31 @@ The context of the study, the tools and techniques used and the first results
 obtained will be presented as well as the benefits of using literate programming 
 in this type of preparatory work.
 
-## Data
-An article presenting this dataset was published in 2021 [@picautSmartphoneBasedCrowdSourcedDatabase2021]. 
+## Methodology
+
+The beginining of this analysis was the release of a 3 years collection of environnemental
+acoustic samples. A first article presenting this dataset has been published in 2021 [@picautSmartphoneBasedCrowdSourcedDatabase2021]. 
 It details the structure of the database and the data, the profile of the 
 contributors and the contributions but does not analyze the content of the data. 
 This is what this article proposes to begin.
+
+As the NoiseCapture application is Open Source and the data collection infrastructure use Free 
+and Open Source Softwares (FOSS), we decided to pursue this by using open source software for data analysis.
+
+First, we will introduce the dataset then we will present the tools we used and why we choose them.
+
+### Data
 
 The data used in this study correspond to contributions made between August 29, 2017 
 and August 28, 2020. During this period, nearly 70,000 unique contributors allowed 
 the collection of more than 260,000 tracks for a total of about 60 million seconds 
 of measurement. A trace is a collected recording, it contains the sound spectrum 
 (1 second, third octave) recorded by the phone coupled with its GPS positioning 
-(1 second). This information can be enriched by the contributor with labels. 
+(1 second). Each trace is timestamped too.
+
+This information can be enriched by the contributor with labels. 
 There are 18 labels and the user can select one or more of them for each of the 
-traces made. They are detailed in [@picautSmartphoneBasedCrowdSourcedDatabase2021]. 
+traces made. The labels are detailed in [@picautSmartphoneBasedCrowdSourcedDatabase2021]. 
 The preliminary work presented here focuses on the analysis of the proportion of 
 certain labels in the global sample at certain temporalities.
 
@@ -289,58 +119,108 @@ In addition to data from the collaborative collection, some additional data were
 used to limit the study area. We chose to limit the geographical scope of this 
 preliminary study to metropolitan France because this area contains the largest 
 number of recordings. 
-The climate and sound dynamics are known and documented there.
+The climate and sound dynamics are also well known by the authors and are well documented.
 
 To facilitate the reproducibility of spatial filtering, it was decided to use 
 open data sets from recognized sources: the Natural Earth database 
 [@pattersonNaturalEarth2021] and the Admin Express database from the 
 National Institute of Geographic and Forest Information [@institutgeographiquenationalAdminExpress].
 
-## The study
+The raw data has been stored and pre-filtered in a geospatial databases and has been
+analysed using a statistical analysis language.
+
 ### Tools
+
+In order to be as open as possible and to work in the most collaborative way, we choose
+decided in a FOSS toolset: PostGreSQL/Postgis to store the data, the R language to analyse and produce knowlege from the data. We also used Git as it is a great tool to facilitate remote collaboration.
+
 #### PostGIS
+
 The data are provided as a dump from a PostGreSQL/PostGIS database [@paulramseyPostGIS2001].
 Several scripts perform much of the attribute and spatial filtering. 
-These filterings are saved in a materialized view whose data will be analyzed 
-with the R language.
+These filterings are saved in a materialized view.
+This view is the entry point for the R language.
 
 #### R
+
 The R language [@rcoreteamRLanguageStatistical2021]
 is a programming language for data processing and statistics with many libraries 
 dedicated to geospatial data. 
-Rmarkdown allows to mix code and text in markdown for the dynamic production of 
-graphs, tables and documents. 
-It is one of the recommended means for literate programming.
+ 
+The use of Rmarkdown is one of the recommended means for literate programming (along with Jupyter Notebooks and Emacs Org-Mode, [@desquilbet2019ReproducibleResearch])
+
+R allowed us to query the database to get data, refine it to our needs, then produce
+data analysis and graphs.
+Rmarkdown allows to mix code in several programming languages and text in markdown for the dynamic production of 
+graphs, tables and documents.
+So it is a great tool to either communicate inside our team and publish our results.
+
+
+Rmarkdown, as any markdown file, is a plain text file that can be easily versionned
+with any version control system.
+As our team is scaterred in several places in France, we needed a tool to 
+facilitate code sources communication, for this purpose, we used git.
 
 #### Git
+
 Git is a Distributed Version Control System (DVCS) [@chacon2014pro]. 
-It enables collaborative and decentralized work. 
+It enables collaborative and decentralized work.
 The choice of Git was natural as different collaborators are present on several
 sites (Nantes, Lyon, Paris) and Git is already used within the UMRAE laboratory.
 
 ### Implementation
 The data are provided in the form of a PostGreSQL/PostGIS dump. 
-A server has been set up and the data loaded. 
+A server has been set up accordingly to the documentation provided and the data loaded.  
 A materialized view was created in order to provide a stable access to the data 
 corresponding to the defined criteria. 
-These criteria are both attributive (filtering of certain tags, minimum and maximum 
-durations, etc.) and spatial (located in France, reduced trace area, etc.). 
+
+These criteria are both attributive and spatial. We removed from the analysis the tracks taggued *test* or *indoor* as we wanted outdoor recording. 
+We also filtered too short tracks (less than 5 seconds) and too long tracks (more than 15 minutes). We kept the tracks where the GPS median accuracy was higher than 20 meters. We also decided to keep tracks that are comprised in a rather small area (les than 625 square meters which correspond to a 25 by 25 meters square).
+We also pre-filtered the data using the NaturalEarth dataset to keep record within the France country. 
+NaturalEarth is a great dataset and is well known worlwide however it does not
+distinguish France metropolitan area from overseas areas. This could have introduce
+complications with timezone handling and the seasons are not the same everywhere.
+So we had to separate overseas records from metropolitan ones. 
+We did that operation using R.
+
 A Rmarkdown document establishes the connection with the view and then performs 
-the operations allowing to analyze the data.
+the operations allowing to finalyze data preparation and analyze the data.
+It is a document mixing narrative, figures and code (in R but also several programming languages).
 
-A document mixing narrative, figures and code allowed the resumption and 
-continuation of the analyses shown here. 
+In this document, we refine the spatial filtering to France's metropilotan area 
+using an authoritative dataset [@institutgeographiquenationalAdminExpress].
+We also transform the track timestamp to local time and season using the R packages 
+`lubridate` from the `tidyverse` metapackage [@wickhamWelcomeTidyverse2019] and 
+`hydroTSM` [@mauriciozambrano-bigiariniHydroTSMTimeSeries2020].
 
-## Results
+We also used the suncalc package (@thieurmelSuncalcComputeSun2019) to compute the sunrise time of the day of the track at its location.
+
+# Results
+## Environmental acoustics results 
+
+The main goal of this premliminary study was to verify the scientific value of 
+crowdsourced acoustic data and if tags are sufficients to describe user environment.
+
+
 The study concerns tracks bearing a tag, registered in metropolitan France. 
 It focuses on the proportion of a certain tag in relation to all the tags for a 
 given period (time of day, season, etc.). 
-In the sample studied, it is possible to note a prevalence of the tags *roads*, 
-*chatting*, *animals* and *wind*. The tags *air_traffic* and *works* are also well represented.
+In the sample studied, it is possible to note a prevalence of the tags *road*, 
+*chatting*, *animals* and *wind*. 
+The tags *air_traffic* and *works* are also well represented.
+
+```{r, fig.cap="Tags repartition", include=FALSE}
+knitr::include_graphics("plots/tags_repartition.png", dpi = 72)
+```
 
 A first axis of analysis concerns the time distribution of the tags. 
 Animal noises (tag *animals*) are more frequent in the morning and especially 
 one hour after sunrise. 
+
+```{r, fig.cap="Animals dynamics around sunrise", include=FALSE}
+knitr::include_graphics("plots/animal_dynamics_around_sunrise.png", dpi = 72)
+```
+
 This is a common dynamic for bird song [@robbins1981effect]. 
 We also observed peaks in human activity, especially commuting [@MA2017135].
 
@@ -350,7 +230,13 @@ This phenomenon could also be observed in the recordings.
 We also noticed that music was less present in autumn than in other seasons and 
 that it is mostly present at late hours.
 
-## Conclusion
+## Benefits of OpenScience and literate programming
+
+allowed the resumption and 
+continuation of the analyses shown here. 
+
+
+# Conclusion
 The first results are encouraging because road dynamics related to commuting or 
 animal activity can be observed.
 The main question was to determine if these known dynamics in environmental acoustics 

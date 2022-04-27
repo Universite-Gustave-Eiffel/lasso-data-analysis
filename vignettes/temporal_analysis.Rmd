@@ -3,6 +3,8 @@ title: "Temporal analysis"
 author: "Nicolas Roelandt"
 date: "`r Sys.Date()`"
 output: html_document
+fig_width: 6 
+fig_height: 4
 ---
 
 ```{r setup, include=FALSE}
@@ -30,6 +32,9 @@ library(hydroTSM)
 # Get sun rise time
 ## install.packages("suncalc")
 library(suncalc)
+
+# data cache handling
+library(xfun)
 ```
 
 ```{r con-parameters}
@@ -39,12 +44,9 @@ dbname ="noisecapture",
 host = "lassopg.ifsttar.fr", #server IP or hostname
 port = 5432, #Port on which we ran the proxy
 user="noisecapture",
-password=Sys.getenv('noisecapture_password') # password stored in .Renviron. Use this to edit it : usethis::edit_r_environ()
+password=Sys.getenv('noisecapture_password') # password stored in .Renviron. To edit : usethis::edit_r_environ()
 )
 ```
-
-
-
 
 # Data cleaning
 
@@ -54,15 +56,19 @@ So the data needs to be filtered.
 
 ```{r tag-list, include=FALSE}
 # Tag list
-query <- "SELECT distinct  * FROM noisecapture_tag;"
-RPostgreSQL::dbGetQuery(con,statement = query) 
+tag_list <- xfun::cache_rds({
+  query <- "SELECT distinct  * FROM noisecapture_tag;"
+  RPostgreSQL::dbGetQuery(con,statement = query) 
+})
+
+tag_list
 ```
 
-This has be done within the database using views.
+This has been done within the database using views.
 Please see the [03_create_views.sql](https://github.com/nicolas-roelandt/lasso-data-analysis/blob/main/scripts/03_create_views.sql) script for more details.
 
 In summary, it removes test and indoor records, filter tracks that have a duration between 5 to 900 seconds.
-It also remove the tracks where the GPS accuracy was below a 20 meter threshold and that are larger than a 25 square meter area.
+It also remove the tracks where the GPS accuracy was below a 20 meters threshold and that are larger than a 25 square meters area.
 
 This study is focused on France so there is a spatial filtering on its boundaries.
 
@@ -72,10 +78,13 @@ The final data is stored in a view called `france_tracks` that can be called at 
 ### Track information
 
 ```{r join-track-info}
-query <- "SELECT  pk_track, record_utc, time_length, pleasantness, noise_level, track_uuid, geog
+track_info <- xfun::cache_rds({
+  query <- "SELECT  pk_track, record_utc, time_length, pleasantness, noise_level, track_uuid, geog
 FROM france_tracks;"
 
-track_info <- sf::st_read(con,query = query)
+ sf::st_read(con,query = query)
+})
+
 track_info %>% head()
 ```
 
@@ -94,11 +103,14 @@ filtered_track_info <- track_info %>%
 ### Tag information 
 
 ```{r tag-info}
-query <- "SELECT ft.pk_track, tag_name FROM france_tracks as ft
+tag_info <- xfun::cache_rds({
+  query <- "SELECT ft.pk_track, tag_name FROM france_tracks as ft
 INNER JOIN noisecapture_track_tag ntt ON ft.pk_track = ntt.pk_track /* Add track tags*/
 INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/;"
 
-tag_info <- RPostgreSQL::dbGetQuery(con,statement = query) %>% dplyr::filter(pk_track %in% filtered_track_info$pk_track)
+ RPostgreSQL::dbGetQuery(con,statement = query) %>% dplyr::filter(pk_track %in% filtered_track_info$pk_track)
+})
+
 head(tag_info)
 ```
 
@@ -106,7 +118,9 @@ Those `r nrow(filtered_track_info)` tracks correspond to `r nrow(tag_info)` tags
 
 
 ```{r tag-histo, echo=FALSE}
-ggplot(tag_info) +
+tag_info %>%
+  mutate(tag_name = factor(tag_name, levels = unique(tag_info$tag_name))) %>%
+  ggplot() +
   aes(x = tag_name) +
   geom_bar(fill = "#112446") +
   coord_flip()+ 
@@ -116,6 +130,10 @@ ggplot(tag_info) +
     caption = "Count of each tag"
   ) +
   theme_minimal()
+```
+
+```{r tag-histo-save, echo=FALSE, message=FALSE}
+ggsave("plots/tags_repartition.png")
 ```
 
 # Time repartition
@@ -166,8 +184,9 @@ ggplot(tags_hourly_repartition) +
   ) +
   theme_minimal() +
   facet_wrap(vars(tag_name))
-
-# ggsave("plots/tags_hourly_dynamics.png") 
+```
+```{r tags-hourly-repartition-graph-save, echo=FALSE, message=FALSE}
+ggsave("plots/tags_hourly_dynamics.png") 
 ```
 
 ## Seasonal repartition
@@ -204,13 +223,16 @@ ggplot(animals_seasonal_repartition) +
   ) +
   theme_minimal() +
   facet_wrap(vars(season))
-
-# ggsave("plots/animals_seasonal_dynamic.png") 
+```
+```{r animals-hourly-repartition-season-graph-save, echo=FALSE, message=FALSE}
+ggsave("plots/animals_seasonal_dynamic.png") 
 ```
 
 
-```{r seasonal-graphs}
+```{r seasonal-graphs, message=FALSE}
 season_graphs <- function(tag) {
+  
+  title <- paste("Seasonal occurences of",tag,"sounds")
   seasonal_occurences %>% 
   dplyr::filter(tag_name == tag) %>% 
   mutate(seasonal_time = paste0(season,'_',local_time)) %>%
@@ -227,17 +249,24 @@ season_graphs <- function(tag) {
   labs(
     x = "Local time",
     y = "Percentage",
-    title = paste("Seasonal occurences of",tag,"sounds")
+    title = title
   ) +
   theme_minimal() +
   facet_wrap(vars(season))
+  
+  # save graphs
+  ggsave(paste0("plots/",gsub(" ", "_",title),".png")) 
 }
 
+# Render graphs
 graphs <- purrr::map(unique(seasonal_occurences$tag_name), season_graphs)
 ```
 
 ```{r display-graphs, echo=FALSE, message=FALSE}
-graphs
+# Display graphs in the document
+# as include_graphics needs a character vector and not a list, it has to be transformed
+# see https://stackoverflow.com/a/51269116
+knitr::include_graphics(as.character(graphs))
 ```
 
 # Sound dynamics: sunrise study
@@ -322,7 +351,7 @@ ggplot(time_after_sunrise_repartition) +
 
 ```
 
-```{r time-after-sunrise-graph-save}
+```{r time-after-sunrise-graph-save, echo=FALSE, message=FALSE}
 ggsave("plots/tag_dynamics_around_sunrise.png")
 ```
 
@@ -342,11 +371,10 @@ ggplot(time_after_sunrise_repartition %>% dplyr::filter(tag_name == "animals")) 
   # geom_smooth(method = "lm", formula = y ~ poly(x, 3), se = FALSE, aes(colour="Polynomial")) +
   scale_colour_manual(values=c("blue", "red"))+
    theme_minimal()
-ggsave("plots/animal_dynamics_around_sunrise.png")
 ```
 
 
-```{r time-after-sunrise-animals-graph-save}
+```{r time-after-sunrise-animals-graph-save, echo=FALSE, message=FALSE}
 ggsave("plots/animal_dynamics_around_sunrise.png")
 ```
 
@@ -402,10 +430,9 @@ ggplot() +
   scale_x_continuous(breaks = scales::pretty_breaks(), labels=c("Jan","Feb","Apr","Jun", "Aug", "Oct", "Dec", "null"), limits = c(1,12))+
   facet_wrap(vars(tag_name))
 
-ggsave("plots/tags_monthly_dynamics.png")
 ```
 
-```{r tags-monthly-repartition-graph-save}
+```{r tags-monthly-repartition-graph-save, echo=FALSE, message=FALSE}
 ggsave("plots/tags_monthly_dynamics.png")
 ```
 
@@ -463,7 +490,7 @@ RPostgreSQL::dbGetQuery(con,statement = paste("SELECT version();")) # should ret
 RPostgreSQL::dbGetQuery(con,statement = paste("SELECT postgis_full_version();")) # should return PostGIS 2.5 or higher
 ```
 
-```{r close-connection, echo=FALSE}
+```{r close-connection, echo=FALSE, message=FALSE}
 RPostgreSQL::dbDisconnect(con)
 ```
 
