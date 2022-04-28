@@ -20,3 +20,6 @@ usethis::use_description(
   ))
 
 usethis::use_vignette("crowdsourced_acoustic_data_analysis_with_foss4g_2022","Crowdsourced acoustic open data analysis with FOSS4G tools")
+
+# disable jekyll
+file.create(".nojekyll")
