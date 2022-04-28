@@ -73,7 +73,7 @@ The application is open-source and all collected data are available under an Ope
 [^1]: https://noise-planet.org/noisecapture.html
 [^2]: https://www.univ-gustave-eiffel.fr/en/
 [^3]: https://www.cnrs.fr/en
-[^4]: https://research-data.ifsttar.fr/dataset.xhtml?persistentId=doi:10.25578/J5DG3W
+
 
 
 The study presented here is the first exploratory analysis of the first three years of data 
@@ -121,6 +121,12 @@ the collection of more than 260,000 tracks for a total of about 60 million secon
 of measurement. A track (or *trace*) is a collected recording, it contains the 
 record of the sound spectrum (1 second, third octave) recorded by the phone microphone 
 coupled with its GPS positioning (1 second). Each track is timestamped too.
+
+The 3 years collection dataset is available with an Open Database License through
+the Gustave Eiffel university Dataverse[^4].
+
+[^4]: https://research-data.ifsttar.fr/dataset.xhtml?persistentId=doi:10.25578/J5DG3W
+
 
 This information can be enriched by the contributor with labels. 
 There are 18 predefined labels and the user can select one or more of them for each of the 
@@ -202,21 +208,24 @@ To extract data regarding France area, we pre-filtered the data
 using the NaturalEarth dataset to keep tracks that are within the France country.
 This spatial filtering was implemented by creating a materialized view within the 
 PostGIS database.
-The materialized view is a good compromise because it allowed us to recompute a view 
-easily if the threshold values changed while having better response times than with a normal view.
+The materialized view is a good compromise between a table and a view because it
+has similar response time to a table and also allows us to recompute 
+values easily if the threshold values changed.
 
 NaturalEarth is a great dataset and is well known worldwide however it does not
 distinguish France metropolitan area from overseas areas.
 This could have introduce complications with timezone handling.
+
 Plus we wanted to be able see if seasons have distinct dynamics.
-
-Metropolitan France has a temperate climate[@ClimatFranceMetropolitaine] 
+Metropolitan France has a temperate climate [@ClimatFranceMetropolitaine] 
 where the climate in the West Indies, Reunion, New Caledonia and Polynesia is of
-the tropical maritime type[@ClimatsOutremerMeteoFrance].
-So we separated overseas records from metropolitan ones using R.
+the tropical maritime type [@ClimatsOutremerMeteoFrance].
+That motivated our need to separate overseas records from metropolitan ones
 
-A Rmarkdown document establishes the connection with the materialized view and then performs 
-the operations allowing to finalize data preparation and analyze the data.
+In order to facilitate the replication of the study on areas without this kind of issues this as not been done within the database but at the begining of the Rmarkdown document where analysis is conducted.
+
+The Rmarkdown document establishes the connection with the materialized view and then 
+performs the operations allowing to finalize data preparation and analyze the data.
 It is a document mixing narrative, figures and code (in R but also several programming languages).
 
 In this document, we refine the spatial filtering to France's metropolitan area 
@@ -256,11 +265,19 @@ knitr::include_graphics("plots/animal_dynamics_around_sunrise.png", dpi = 72)
 This is a common dynamic for bird song [@robbins1981effect]. 
 We also observed peaks in human activity, especially commuting [@MA2017135].
 
-The next temporal axis was the seasonality, especially those of animal noises, 
-with a more intense activity in European spring and summer. 
-This phenomenon could also be observed in the recordings.
-We also noticed that music was less present in autumn than in other seasons and 
-that it is mostly present at late hours.
+```{r, fig.cap="Animals dynamics around sunrise", include=FALSE}
+knitr::include_graphics("plots/animal_dynamics_around_sunrise.png", dpi = 72)
+```
+
+Seeing those dynamics was a good sign regarding the validity of crowdsourced 
+environmental acoustic data. 
+However, we wanted more precise quality indicators so we looked if we were able 
+to correlate the mention of physical events in the dataset and records of thoses
+events in an authoritative database.
+
+### Correlation between tags and physical events in the user environment
+
+
 
 ## Benefits of OpenScience and literate programming
 

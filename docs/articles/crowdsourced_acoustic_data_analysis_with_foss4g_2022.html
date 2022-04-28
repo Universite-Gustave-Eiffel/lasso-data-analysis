@@ -53,7 +53,7 @@
       <a href="../articles/crowdsourced_acoustic_data_analysis_with_foss4g_2022.html">Crowdsourced acoustic open data analysis with FOSS4G tools</a>
     </li>
     <li>
-      <a href="../articles/temporal_analysis.html">Temporal analysis</a>
+      <a href="../articles/temporal_exploratory_analysis.html">Temporal exploratory analysis</a>
     </li>
   </ul>
 </li>
@@ -129,6 +129,7 @@
 <h4 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a>
 </h4>
 <p>The data used in this study are contributions made by the user of the application between August 29, 2017 and August 28, 2020. During this period, nearly 70,000 unique contributors allowed the collection of more than 260,000 tracks for a total of about 60 million seconds of measurement. A track (or <em>trace</em>) is a collected recording, it contains the record of the sound spectrum (1 second, third octave) recorded by the phone microphone coupled with its GPS positioning (1 second). Each track is timestamped too.</p>
+<p>The 3 years collection dataset is available with an Open Database License through the Gustave Eiffel university Dataverse<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a>.</p>
 <p>This information can be enriched by the contributor with labels. There are 18 predefined labels and the user can select one or more of them for each of the traces made. The labels are detailed in <span class="citation">(<a href="#ref-picautSmartphoneBasedCrowdSourcedDatabase2021" role="doc-biblioref">Picaut et al. 2021</a>)</span>. The preliminary work presented here focuses on the analysis of the proportion of certain labels in the global sample at certain temporalities.</p>
 <p>In addition to data from the collaborative collection, some additional data were used to limit the study area. First we chose to limit the geographical scope of this preliminary study to metropolitan France because this area contains the largest number of recordings and it avoided us to face the problems of time zones. Then we extended some analysis worldwide.</p>
 <p>To facilitate the reproducibility of spatial filtering, it was decided to use open data sets from recognized sources: the Natural Earth database <span class="citation">(<a href="#ref-pattersonNaturalEarth2021" role="doc-biblioref">Patterson and Kelso 2021</a>)</span> and the Admin Express database from the French National Institute of Geographic and Forest Information <span class="citation">(<a href="#ref-institutgeographiquenationalAdminExpress" role="doc-biblioref">Institut Géographique National 2021</a>)</span>.</p>
@@ -163,10 +164,11 @@
 <p>The data are provided in the form of a PostGreSQL/PostGIS dump. A server has been set up accordingly to the documentation provided and the data loaded.<br>
 A materialized view was created in order to provide a stable access to the data corresponding to the defined criteria.</p>
 <p>These criteria are both attributive and spatial. We removed from the analysis the tracks taggued <em>test</em> or <em>indoor</em> as we wanted outdoor recording. Short tracks (duration less than 5 seconds) and long tracks (duration longer than 15 minutes) have been removed. We kept the tracks where the GPS median accuracy was less than 20 meters. We decided to keep tracks that are comprised in a rather small area, the bounding box area of the track should be less than 625 square meters which corresponds to a square of 25 by 25 meters.</p>
-<p>To extract data regarding France area, we pre-filtered the data using the NaturalEarth dataset to keep tracks that are within the France country. This spatial filtering was implemented by creating a materialized view within the PostGIS database. The materialized view is a good compromise because it allowed us to recompute a view easily if the threshold values changed while having better response times than with a normal view.</p>
-<p>NaturalEarth is a great dataset and is well known worldwide however it does not distinguish France metropolitan area from overseas areas. This could have introduce complications with timezone handling. Plus we wanted to be able see if seasons have distinct dynamics.</p>
-<p>Metropolitan France has a temperate climate <span class="citation">(<a href="#ref-ClimatFranceMetropolitaine" role="doc-biblioref"><span>“Le Climat En <span>France</span> métropolitaine | <span>Météo-France</span>”</span> n.d.</a>)</span> where the climate in the West Indies, Reunion, New Caledonia and Polynesia is of the tropical maritime type<span class="citation">(<a href="#ref-ClimatsOutremerMeteoFrance" role="doc-biblioref"><span>“Les Climats En Outre-Mer | <span>Météo-France</span>”</span> n.d.</a>)</span>. So we separated overseas records from metropolitan ones using R.</p>
-<p>A Rmarkdown document establishes the connection with the materialized view and then performs the operations allowing to finalize data preparation and analyze the data. It is a document mixing narrative, figures and code (in R but also several programming languages).</p>
+<p>To extract data regarding France area, we pre-filtered the data using the NaturalEarth dataset to keep tracks that are within the France country. This spatial filtering was implemented by creating a materialized view within the PostGIS database. The materialized view is a good compromise between a table and a view because it has similar response time to a table and also allows us to recompute values easily if the threshold values changed.</p>
+<p>NaturalEarth is a great dataset and is well known worldwide however it does not distinguish France metropolitan area from overseas areas. This could have introduce complications with timezone handling.</p>
+<p>Plus we wanted to be able see if seasons have distinct dynamics. Metropolitan France has a temperate climate <span class="citation">(<a href="#ref-ClimatFranceMetropolitaine" role="doc-biblioref">Météo-France 2020a</a>)</span> where the climate in the West Indies, Reunion, New Caledonia and Polynesia is of the tropical maritime type <span class="citation">(<a href="#ref-ClimatsOutremerMeteoFrance" role="doc-biblioref">Météo-France 2020b</a>)</span>. That motivated our need to separate overseas records from metropolitan ones</p>
+<p>In order to facilitate the replication of the study on areas without this kind of issues this as not been done within the database but at the begining of the Rmarkdown document where analysis is conducted.</p>
+<p>The Rmarkdown document establishes the connection with the materialized view and then performs the operations allowing to finalize data preparation and analyze the data. It is a document mixing narrative, figures and code (in R but also several programming languages).</p>
 <p>In this document, we refine the spatial filtering to France’s metropolitan area using an authoritative dataset <span class="citation">(<a href="#ref-institutgeographiquenationalAdminExpress" role="doc-biblioref">Institut Géographique National 2021</a>)</span>. We also transform the track timestamp to local time and compute seasons using the R packages <code>lubridate</code> from the <code>tidyverse</code> metapackage <span class="citation">(<a href="#ref-wickhamWelcomeTidyverse2019" role="doc-biblioref">Wickham et al. 2019</a>)</span> and <code>hydroTSM</code> <span class="citation">(<a href="#ref-mauriciozambrano-bigiariniHydroTSMTimeSeries2020" role="doc-biblioref">Mauricio Zambrano-Bigiarini 2020</a>)</span>.</p>
 <p>We also used the <code>suncalc</code> package (<span class="citation"><a href="#ref-thieurmelSuncalcComputeSun2019" role="doc-biblioref">Thieurmel and Elmarhraoui</a> (<a href="#ref-thieurmelSuncalcComputeSun2019" role="doc-biblioref">2019</a>)</span>) to compute the sunrise time of the day of the track at its location.</p>
 </div>
@@ -182,7 +184,11 @@ A materialized view was created in order to provide a stable access to the data 
 <p>The study concerns tracks bearing a tag, registered in metropolitan France. It focuses on the proportion of a certain tag in relation to all the tags for a given period (time of day, season, etc.). In the sample studied, it is possible to note a prevalence of the tags <em>road</em>, <em>chatting</em>, <em>animals</em> and <em>wind</em>. The tags <em>air_traffic</em> and <em>works</em> are also well represented.</p>
 <p>A first axis of analysis concerns the time distribution of the tags. Animal noises (tag <em>animals</em>) are more frequent in the morning and especially one hour after sunrise.</p>
 <p>This is a common dynamic for bird song <span class="citation">(<a href="#ref-robbins1981effect" role="doc-biblioref">Robbins 1981</a>)</span>. We also observed peaks in human activity, especially commuting <span class="citation">(<a href="#ref-MA2017135" role="doc-biblioref">Ma et al. 2017</a>)</span>.</p>
-<p>The next temporal axis was the seasonality, especially those of animal noises, with a more intense activity in European spring and summer. This phenomenon could also be observed in the recordings. We also noticed that music was less present in autumn than in other seasons and that it is mostly present at late hours.</p>
+<p>Seeing those dynamics was a good sign regarding the validity of crowdsourced environmental acoustic data. However, we wanted more precise quality indicators so we looked if we were able to correlate the mention of physical events in the dataset and records of thoses events in an authoritative database.</p>
+<div class="section level4">
+<h4 id="correlation-between-tags-and-physical-events-in-the-user-environment">Correlation between tags and physical events in the user environment<a class="anchor" aria-label="anchor" href="#correlation-between-tags-and-physical-events-in-the-user-environment"></a>
+</h4>
+</div>
 </div>
 <div class="section level3">
 <h3 id="benefits-of-openscience-and-literate-programming">Benefits of OpenScience and literate programming<a class="anchor" aria-label="anchor" href="#benefits-of-openscience-and-literate-programming"></a>
@@ -210,17 +216,17 @@ Desquilbet, Loic, Sabrina Granger, Boris Hejblum, Arnaud Legrand, Pascal Pernot,
 <div id="ref-institutgeographiquenationalAdminExpress" class="csl-entry">
 Institut Géographique National. 2021. <span>“Admin Express.”</span> <a href="https://geoservices.ign.fr/adminexpress" class="external-link">https://geoservices.ign.fr/adminexpress</a>.
 </div>
-<div id="ref-ClimatFranceMetropolitaine" class="csl-entry">
-<span>“Le Climat En <span>France</span> métropolitaine | <span>Météo-France</span>.”</span> n.d. Accessed April 28, 2022. <a href="https://meteofrance.com/comprendre-climat/france/le-climat-en-france-metropolitaine" class="external-link">https://meteofrance.com/comprendre-climat/france/le-climat-en-france-metropolitaine</a>.
-</div>
-<div id="ref-ClimatsOutremerMeteoFrance" class="csl-entry">
-<span>“Les Climats En Outre-Mer | <span>Météo-France</span>.”</span> n.d. Accessed April 28, 2022. <a href="https://meteofrance.com/comprendre-climat/france/les-climats-en-outre-mer" class="external-link">https://meteofrance.com/comprendre-climat/france/les-climats-en-outre-mer</a>.
-</div>
 <div id="ref-MA2017135" class="csl-entry">
 Ma, Xiaolei, Congcong Liu, Huimin Wen, Yunpeng Wang, and Yao-Jan Wu. 2017. <span>“Understanding Commuting Patterns Using Transit Smart Card Data.”</span> <em>Journal of Transport Geography</em> 58: 135–45. https://doi.org/<a href="https://doi.org/10.1016/j.jtrangeo.2016.12.001" class="external-link">https://doi.org/10.1016/j.jtrangeo.2016.12.001</a>.
 </div>
 <div id="ref-mauriciozambrano-bigiariniHydroTSMTimeSeries2020" class="csl-entry">
 Mauricio Zambrano-Bigiarini. 2020. <span>“<span class="nocase">hydroTSM</span>: Time Series Management, Analysis and Interpolation for Hydrological Modelling.”</span> Manual. <a href="https://github.com/hzambran/hydroTSM" class="external-link">https://github.com/hzambran/hydroTSM</a>.
+</div>
+<div id="ref-ClimatFranceMetropolitaine" class="csl-entry">
+Météo-France. 2020a. <span>“Le Climat En <span>France</span> métropolitaine.”</span> February 24, 2020. <a href="https://meteofrance.com/comprendre-climat/france/le-climat-en-france-metropolitaine" class="external-link">https://meteofrance.com/comprendre-climat/france/le-climat-en-france-metropolitaine</a>.
+</div>
+<div id="ref-ClimatsOutremerMeteoFrance" class="csl-entry">
+———. 2020b. <span>“Les Climats En Outre-Mer.”</span> February 24, 2020. <a href="https://meteofrance.com/comprendre-climat/france/les-climats-en-outre-mer" class="external-link">https://meteofrance.com/comprendre-climat/france/les-climats-en-outre-mer</a>.
 </div>
 <div id="ref-pattersonNaturalEarth2021" class="csl-entry">
 Patterson, Tom, and Nathaniel Vaughn Kelso. 2021. <span>“Natural Earth.”</span> <a href="https://www.naturalearthdata.com/" class="external-link">https://www.naturalearthdata.com/</a>.
@@ -251,6 +257,7 @@ Wickham, Hadley, Mara Averick, Jennifer Bryan, Winston Chang, Lucy D’Agostino 
 <li id="fn1"><p><a href="https://noise-planet.org/noisecapture.html" class="external-link uri">https://noise-planet.org/noisecapture.html</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
 <li id="fn2"><p><a href="https://www.univ-gustave-eiffel.fr/en/" class="external-link uri">https://www.univ-gustave-eiffel.fr/en/</a><a href="#fnref2" class="footnote-back">↩︎</a></p></li>
 <li id="fn3"><p><a href="https://www.cnrs.fr/en" class="external-link uri">https://www.cnrs.fr/en</a><a href="#fnref3" class="footnote-back">↩︎</a></p></li>
+<li id="fn4"><p><a href="https://research-data.ifsttar.fr/dataset.xhtml?persistentId=doi:10.25578/J5DG3W" class="external-link uri">https://research-data.ifsttar.fr/dataset.xhtml?persistentId=doi:10.25578/J5DG3W</a><a href="#fnref4" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
   </div>
