@@ -6,3 +6,6 @@
 documentation/ #local documentation
 documentation
 inst/doc
+
+# ignore generated plots in vignettes folder
+vignettes/plots/*

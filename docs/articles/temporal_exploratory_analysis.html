@@ -91,7 +91,7 @@
 </h3>
 <p>As the analysis part of project as been treated as R package, the easiest way to reproduce is to install the package on your computer with the following command.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># We suggest to use the remotes packages to install needed packages</span>
+<code class="sourceCode R"><span class="co"># We suggest to use the remotes packages to install required packages</span>
 <span class="co"># install.packages("remotes")</span>
 <span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"nicolas-roelandt/lasso-data-analysis"</span><span class="op">)</span></code></pre></div>
 <p>This analysis use several packages that you’ll need to install beforehand.</p>
@@ -496,6 +496,36 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
   <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">facet_wrap</span><span class="op">(</span><span class="fu">vars</span><span class="op">(</span><span class="va">tag_name</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="temporal_exploratory_analysis_files/figure-html/tags-hourly-repartition-graph-1.png" width="700"></p>
+<div class="section level4">
+<h4 id="hourly-dynmaics-details">Hourly dynmaics, details<a class="anchor" aria-label="anchor" href="#hourly-dynmaics-details"></a>
+</h4>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">dynamic_graphs</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">tag</span><span class="op">)</span> <span class="op">{</span>
+  
+  <span class="va">title</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Repartition of"</span>,<span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">"_"</span>, <span class="st">" "</span>,<span class="va">tag</span><span class="op">)</span>,<span class="st">"sounds in local time"</span><span class="op">)</span>
+  <span class="fu">ggplot</span><span class="op">(</span><span class="va">tags_hourly_repartition</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">local_time</span>, y <span class="op">=</span> <span class="va">percentage</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">geom_point</span><span class="op">(</span>shape <span class="op">=</span> <span class="st">"circle"</span>, size <span class="op">=</span> <span class="fl">1.5</span>, colour <span class="op">=</span> <span class="st">"#112446"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">labs</span><span class="op">(</span>
+    x <span class="op">=</span> <span class="st">"Time of the day"</span>,
+    y <span class="op">=</span> <span class="st">"Percentage"</span>,
+    title <span class="op">=</span> <span class="va">title</span>,
+    subtitle <span class="op">=</span> <span class="st">"Noicecaptures tags in metropolitan France,
+    2017 - 2020"</span>
+  <span class="op">)</span> <span class="op">+</span>
+   <span class="fu">geom_smooth</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"loess"</span>, se <span class="op">=</span> <span class="cn">FALSE</span>, <span class="fu">aes</span><span class="op">(</span>colour<span class="op">=</span><span class="st">"loess"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="co"># smooth curve test (see span parameter to fit more to the peak before sunrise)</span>
+  <span class="co"># geom_smooth(method = "lm", formula = y ~ poly(x, 3), se = FALSE, aes(colour="Polynomial")) +</span>
+  <span class="fu">scale_colour_manual</span><span class="op">(</span>values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"blue"</span>, <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">+</span>
+   <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span>
+  
+  <span class="co"># save graphs</span>
+  <span class="fu">ggsave</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"plots/"</span>,<span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">" "</span>, <span class="st">"_"</span>,<span class="va">title</span><span class="op">)</span>,<span class="st">".png"</span><span class="op">)</span><span class="op">)</span> 
+<span class="op">}</span>
+
+<span class="co"># Render graphs</span>
+<span class="va">graphs</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">tags_hourly_repartition</span><span class="op">$</span><span class="va">tag_name</span><span class="op">)</span>, <span class="va">dynamic_graphs</span><span class="op">)</span></code></pre></div>
+<p><img src="plots/Repartition_of_air_traffic_sounds_in_local_time.png" width="1094"><img src="plots/Repartition_of_alarms_sounds_in_local_time.png" width="1094"><img src="plots/Repartition_of_animals_sounds_in_local_time.png" width="1094"><img src="plots/Repartition_of_chatting_sounds_in_local_time.png" width="1094"><img src="plots/Repartition_of_children_sounds_in_local_time.png" width="1094"><img src="plots/Repartition_of_footsteps_sounds_in_local_time.png" width="1094"><img src="plots/Repartition_of_industrial_sounds_in_local_time.png" width="1094"><img src="plots/Repartition_of_marine_traffic_sounds_in_local_time.png" width="1094"><img src="plots/Repartition_of_music_sounds_in_local_time.png" width="1094"><img src="plots/Repartition_of_rail_sounds_in_local_time.png" width="1094"><img src="plots/Repartition_of_rain_sounds_in_local_time.png" width="1094"><img src="plots/Repartition_of_road_sounds_in_local_time.png" width="1094"><img src="plots/Repartition_of_vegetation_sounds_in_local_time.png" width="1094"><img src="plots/Repartition_of_water_sounds_in_local_time.png" width="1094"><img src="plots/Repartition_of_wind_sounds_in_local_time.png" width="1094"><img src="plots/Repartition_of_works_sounds_in_local_time.png" width="1094"></p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="seasonal-repartition">Seasonal repartition<a class="anchor" aria-label="anchor" href="#seasonal-repartition"></a>
@@ -503,7 +533,7 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 <div class="section level4">
 <h4 id="animals">Animals<a class="anchor" aria-label="anchor" href="#animals"></a>
 </h4>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">seasonal_occurences</span> <span class="op">&lt;-</span> <span class="va">all_info</span> <span class="op">%&gt;%</span> 
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">tag_name</span>, <span class="va">local_time</span>, <span class="va">season</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"occurences"</span><span class="op">)</span>
@@ -519,7 +549,7 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
     by <span class="op">=</span> <span class="st">"seasonal_time"</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">mutate</span><span class="op">(</span>percentage <span class="op">=</span> <span class="va">occurences</span> <span class="op">*</span> <span class="fl">100</span> <span class="op">/</span> <span class="va">total</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `summarise()` has grouped output by 'local_time'. You can override using the `.groups` argument.</span></code></pre>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">animals_seasonal_repartition</span> <span class="op">%&gt;%</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">local_time.y</span>, <span class="op">-</span><span class="va">seasonal_time</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -581,7 +611,7 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggplot</span><span class="op">(</span><span class="va">animals_seasonal_repartition</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">local_time.x</span>, y <span class="op">=</span> <span class="va">percentage</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_point</span><span class="op">(</span>shape <span class="op">=</span> <span class="st">"circle"</span>, size <span class="op">=</span> <span class="fl">1.5</span>, colour <span class="op">=</span> <span class="st">"#112446"</span><span class="op">)</span> <span class="op">+</span>
@@ -593,7 +623,7 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
   <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">facet_wrap</span><span class="op">(</span><span class="fu">vars</span><span class="op">(</span><span class="va">season</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="temporal_exploratory_analysis_files/figure-html/animals-hourly-repartition-season-graph-1.png" width="700"></p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">season_graphs</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">tag</span><span class="op">)</span> <span class="op">{</span>
   
   <span class="va">title</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Seasonal occurences of"</span>,<span class="va">tag</span>,<span class="st">"sounds"</span><span class="op">)</span>
@@ -631,7 +661,7 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 <div class="section level2">
 <h2 id="sound-dynamics-sunrise-study">Sound dynamics: sunrise study<a class="anchor" aria-label="anchor" href="#sound-dynamics-sunrise-study"></a>
 </h2>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">get_sunrise</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">pk_track</span>, <span class="va">date</span>, <span class="va">lat</span>, <span class="va">lon</span>, <span class="va">tz</span> <span class="op">=</span><span class="st">"UTC"</span><span class="op">)</span> <span class="op">{</span>
   <span class="co"># compute sunrise time from localisation and UTC time</span>
   <span class="co">#return NA if error</span>
@@ -660,10 +690,10 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 <span class="op">)</span> </code></pre></div>
 <pre><code><span class="co">## Warning in st_centroid.sf(.): st_centroid assumes attributes are constant over</span>
 <span class="co">## geometries of x</span></code></pre>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Compute sunrise hours for each track in a new dataframe</span>
 <span class="va">sunrises</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map2.html" class="external-link">pmap_dfr</a></span><span class="op">(</span><span class="va">suncalc_prep</span> <span class="op">%&gt;%</span> <span class="fu">select</span><span class="op">(</span><span class="va">pk_track</span>, date <span class="op">=</span> <span class="va">record_utc</span>, <span class="va">lat</span>, <span class="va">lon</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="va">st_drop_geometry</span>, <span class="va">get_sunrise</span> <span class="op">)</span></code></pre></div>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># join sunrises to study data</span>
 <span class="co"># removes records where sunrise time cannot be compute (track 265404)</span>
 <span class="va">time_after_sunrise</span> <span class="op">&lt;-</span> <span class="va">suncalc_prep</span> <span class="op">%&gt;%</span> 
@@ -680,7 +710,7 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
     <span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">left_join</span><span class="op">(</span> <span class="va">all_info</span> <span class="op">%&gt;%</span> <span class="fu">select</span><span class="op">(</span><span class="va">pk_track</span>,<span class="va">tag_name</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Joining, by = "pk_track"</span>
 <span class="co">## Joining, by = "pk_track"</span></code></pre>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">time_after_sunrise</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <table class="table">
 <colgroup>
@@ -814,7 +844,7 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">occurences</span> <span class="op">&lt;-</span> <span class="va">time_after_sunrise</span> <span class="op">%&gt;%</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_drop_geometry</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">tag_name</span>, <span class="va">time_after_sunrise</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"occurences"</span><span class="op">)</span>
 
 <span class="va">time_after_sunrise_repartition</span> <span class="op">&lt;-</span> <span class="va">occurences</span> <span class="op">%&gt;%</span> 
@@ -877,7 +907,7 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggplot</span><span class="op">(</span><span class="va">time_after_sunrise_repartition</span><span class="op">)</span> <span class="op">+</span>
    <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">time_after_sunrise</span>, y <span class="op">=</span> <span class="va">percentage</span><span class="op">)</span> <span class="op">+</span>
    <span class="fu">geom_point</span><span class="op">(</span>shape <span class="op">=</span> <span class="st">"circle"</span>, size <span class="op">=</span> <span class="fl">1.5</span>, colour <span class="op">=</span> <span class="st">"#112446"</span><span class="op">)</span> <span class="op">+</span>
@@ -891,23 +921,32 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
    <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
    <span class="fu">facet_wrap</span><span class="op">(</span><span class="fu">vars</span><span class="op">(</span><span class="va">tag_name</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="temporal_exploratory_analysis_files/figure-html/time-after-sunrise-graph-1.png" width="700"></p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">ggplot</span><span class="op">(</span><span class="va">time_after_sunrise_repartition</span> <span class="op">%&gt;%</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">tag_name</span> <span class="op">==</span> <span class="st">"animals"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">sunrise_graphs</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">tag</span><span class="op">)</span> <span class="op">{</span>
+  
+  <span class="va">title</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Repartition of"</span>,<span class="va">tag</span>,<span class="st">"sounds around sunrise time"</span><span class="op">)</span>
+  <span class="fu">ggplot</span><span class="op">(</span><span class="va">time_after_sunrise_repartition</span> <span class="op">%&gt;%</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">tag_name</span> <span class="op">==</span> <span class="va">tag</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
    <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">time_after_sunrise</span>, y <span class="op">=</span> <span class="va">percentage</span><span class="op">)</span> <span class="op">+</span>
    <span class="fu">geom_point</span><span class="op">(</span>shape <span class="op">=</span> <span class="st">"circle"</span>, size <span class="op">=</span> <span class="fl">1.5</span>, colour <span class="op">=</span> <span class="st">"#112446"</span><span class="op">)</span> <span class="op">+</span>
    <span class="fu">labs</span><span class="op">(</span>
      x <span class="op">=</span> <span class="st">"Time before or after sunrise"</span>,
      y <span class="op">=</span> <span class="st">"Percentage"</span>,
-     title <span class="op">=</span> <span class="st">"Hourly repartition of animal tags"</span>,
+     title <span class="op">=</span> <span class="va">title</span>,
      subtitle <span class="op">=</span> <span class="st">"Noicecaptures tags in metropolitan France,
      2017 - 2020"</span>
    <span class="op">)</span> <span class="op">+</span>
    <span class="fu">geom_smooth</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"loess"</span>, se <span class="op">=</span> <span class="cn">FALSE</span>, <span class="fu">aes</span><span class="op">(</span>colour<span class="op">=</span><span class="st">"loess"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="co"># smooth curve test (see span parameter to fit more to the peak before sunrise)</span>
   <span class="co"># geom_smooth(method = "lm", formula = y ~ poly(x, 3), se = FALSE, aes(colour="Polynomial")) +</span>
   <span class="fu">scale_colour_manual</span><span class="op">(</span>values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"blue"</span>, <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">+</span>
-   <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## `geom_smooth()` using formula 'y ~ x'</span></code></pre>
-<p><img src="temporal_exploratory_analysis_files/figure-html/time-after-sunrise-animals-graph-1.png" width="700"></p>
+   <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span>
+  
+  <span class="co"># save graphs</span>
+  <span class="fu">ggsave</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"plots/"</span>,<span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">" "</span>, <span class="st">"_"</span>,<span class="va">title</span><span class="op">)</span>,<span class="st">".png"</span><span class="op">)</span><span class="op">)</span> 
+<span class="op">}</span>
+
+<span class="co"># Render graphs</span>
+<span class="va">graphs</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">seasonal_occurences</span><span class="op">$</span><span class="va">tag_name</span><span class="op">)</span>, <span class="va">sunrise_graphs</span><span class="op">)</span></code></pre></div>
+<p><img src="plots/Repartition_of_air_traffic_sounds_around_sunrise_time.png" width="1094"><img src="plots/Repartition_of_alarms_sounds_around_sunrise_time.png" width="1094"><img src="plots/Repartition_of_animals_sounds_around_sunrise_time.png" width="1094"><img src="plots/Repartition_of_chatting_sounds_around_sunrise_time.png" width="1094"><img src="plots/Repartition_of_children_sounds_around_sunrise_time.png" width="1094"><img src="plots/Repartition_of_footsteps_sounds_around_sunrise_time.png" width="1094"><img src="plots/Repartition_of_industrial_sounds_around_sunrise_time.png" width="1094"><img src="plots/Repartition_of_marine_traffic_sounds_around_sunrise_time.png" width="1094"><img src="plots/Repartition_of_music_sounds_around_sunrise_time.png" width="1094"><img src="plots/Repartition_of_rail_sounds_around_sunrise_time.png" width="1094"><img src="plots/Repartition_of_rain_sounds_around_sunrise_time.png" width="1094"><img src="plots/Repartition_of_road_sounds_around_sunrise_time.png" width="1094"><img src="plots/Repartition_of_vegetation_sounds_around_sunrise_time.png" width="1094"><img src="plots/Repartition_of_water_sounds_around_sunrise_time.png" width="1094"><img src="plots/Repartition_of_wind_sounds_around_sunrise_time.png" width="1094"><img src="plots/Repartition_of_works_sounds_around_sunrise_time.png" width="1094"></p>
 </div>
 <div class="section level2">
 <h2 id="monthly-repartition">Monthly repartition<a class="anchor" aria-label="anchor" href="#monthly-repartition"></a>
@@ -966,20 +1005,16 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 <pre><code><span class="co">## Warning: Removed 16 rows containing missing values (geom_rect).</span></code></pre>
 <p><img src="temporal_exploratory_analysis_files/figure-html/tags-monthly-repartition-graph-1.png" width="700"></p>
 <pre><code><span class="co">## Warning: Removed 16 rows containing missing values (geom_rect).</span></code></pre>
-</div>
-<div class="section level2">
-<h2 id="todo">TODO<a class="anchor" aria-label="anchor" href="#todo"></a>
-</h2>
-<ul>
-<li>timezones : <a href="https://github.com/Ifsttar/NoiseCapture/tree/master/onomap-geoserver/geoserver/src/test/resources/org/noise_planet/noisecapturegs" class="external-link uri">https://github.com/Ifsttar/NoiseCapture/tree/master/onomap-geoserver/geoserver/src/test/resources/org/noise_planet/noisecapturegs</a>
-<ul>
-<li>loaded in database</li>
-<li>not used because metropolitan France study only</li>
-<li>intersect track geom with timezones and use timezone variable in computations (“Europe/Paris” -&gt; tz)</li>
-</ul>
-</li>
-<li>investiguate with there is doubles in tags_monthly_dynamic graph in Road March and industrial June (data related ? Agregation ?)</li>
-</ul>
+<!-- TODO
+
+
+- timezones : https://github.com/Ifsttar/NoiseCapture/tree/master/onomap-geoserver/geoserver/src/test/resources/org/noise_planet/noisecapturegs
+  - loaded in database
+  - not used because metropolitan France study only
+  - intersect track geom with timezones and use timezone variable in computations ("Europe/Paris" -> tz)
+- investiguate with there is doubles in tags_monthly_dynamic graph in Road March and industrial June (data related ? Agregation ?)
+
+-->
 </div>
 <div class="section level2">
 <h2 id="packages-citations">Packages citations<a class="anchor" aria-label="anchor" href="#packages-citations"></a>

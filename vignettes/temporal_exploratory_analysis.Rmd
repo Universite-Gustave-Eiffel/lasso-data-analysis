@@ -13,7 +13,7 @@ As the analysis part of project as been treated as R package, the easiest way to
 reproduce is to install the package on your computer with the following command.
 
 ```{r package-installation, eval=FALSE}
-# We suggest to use the remotes packages to install needed packages
+# We suggest to use the remotes packages to install required packages
 # install.packages("remotes")
 remotes::install_github("nicolas-roelandt/lasso-data-analysis")
 ```
@@ -243,6 +243,45 @@ ggplot(tags_hourly_repartition) +
 ggsave("plots/tags_hourly_dynamics.png") 
 ```
 
+### Hourly dynmaics, details
+
+```{r dynamic-graphs, message=FALSE}
+dynamic_graphs <- function(tag) {
+  
+  title <- paste("Repartition of",gsub("_", " ",tag),"sounds in local time")
+  ggplot(tags_hourly_repartition) +
+  aes(x = local_time, y = percentage) +
+  geom_point(shape = "circle", size = 1.5, colour = "#112446") +
+  labs(
+    x = "Time of the day",
+    y = "Percentage",
+    title = title,
+    subtitle = "Noicecaptures tags in metropolitan France,
+    2017 - 2020"
+  ) +
+   geom_smooth(method = "loess", se = FALSE, aes(colour="loess")) + # smooth curve test (see span parameter to fit more to the peak before sunrise)
+  # geom_smooth(method = "lm", formula = y ~ poly(x, 3), se = FALSE, aes(colour="Polynomial")) +
+  scale_colour_manual(values=c("blue", "red"))+
+   theme_minimal()
+  
+  # save graphs
+  ggsave(paste0("plots/",gsub(" ", "_",title),".png")) 
+}
+
+# Render graphs
+graphs <- purrr::map(unique(tags_hourly_repartition$tag_name), dynamic_graphs)
+```
+
+```{r display-dynamics-graphs, echo=FALSE, message=FALSE}
+# Display graphs in the document
+# as include_graphics needs a character vector and not a list, it has to be transformed
+# see https://stackoverflow.com/a/51269116
+knitr::include_graphics(as.character(graphs))
+```
+
+
+
+
 ## Seasonal repartition
 ### Animals
 
@@ -410,7 +449,7 @@ ggsave("plots/tag_dynamics_around_sunrise.png")
 ```
 
 
-```{r time-after-sunrise-animals-graph}
+```{r time-after-sunrise-animals-graph, include=FALSE}
 ggplot(time_after_sunrise_repartition %>% dplyr::filter(tag_name == "animals")) +
    aes(x = time_after_sunrise, y = percentage) +
    geom_point(shape = "circle", size = 1.5, colour = "#112446") +
@@ -426,11 +465,47 @@ ggplot(time_after_sunrise_repartition %>% dplyr::filter(tag_name == "animals")) 
   scale_colour_manual(values=c("blue", "red"))+
    theme_minimal()
 ```
-
-
-```{r time-after-sunrise-animals-graph-save, echo=FALSE, message=FALSE}
+```{r time-after-sunrise-animals-graph-save, include=FALSE, message=FALSE}
 ggsave("plots/animal_dynamics_around_sunrise.png")
 ```
+
+
+```{r sunrise-graphs, message=FALSE}
+sunrise_graphs <- function(tag) {
+  
+  title <- paste("Repartition of",tag,"sounds around sunrise time")
+  ggplot(time_after_sunrise_repartition %>% dplyr::filter(tag_name == tag)) +
+   aes(x = time_after_sunrise, y = percentage) +
+   geom_point(shape = "circle", size = 1.5, colour = "#112446") +
+   labs(
+     x = "Time before or after sunrise",
+     y = "Percentage",
+     title = title,
+     subtitle = "Noicecaptures tags in metropolitan France,
+     2017 - 2020"
+   ) +
+   geom_smooth(method = "loess", se = FALSE, aes(colour="loess")) + # smooth curve test (see span parameter to fit more to the peak before sunrise)
+  # geom_smooth(method = "lm", formula = y ~ poly(x, 3), se = FALSE, aes(colour="Polynomial")) +
+  scale_colour_manual(values=c("blue", "red"))+
+   theme_minimal()
+  
+  # save graphs
+  ggsave(paste0("plots/",gsub(" ", "_",title),".png")) 
+}
+
+# Render graphs
+graphs <- purrr::map(unique(seasonal_occurences$tag_name), sunrise_graphs)
+```
+
+```{r display-sunrise-graphs, echo=FALSE, message=FALSE}
+# Display graphs in the document
+# as include_graphics needs a character vector and not a list, it has to be transformed
+# see https://stackoverflow.com/a/51269116
+knitr::include_graphics(as.character(graphs))
+```
+
+
+
 
 # Monthly repartition
 

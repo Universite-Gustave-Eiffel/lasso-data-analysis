@@ -22,7 +22,8 @@ date: "`r Sys.Date()`"
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  echo = FALSE
 )
 ```
 
@@ -73,8 +74,6 @@ The application is open-source and all collected data are available under an Ope
 [^1]: https://noise-planet.org/noisecapture.html
 [^2]: https://www.univ-gustave-eiffel.fr/en/
 [^3]: https://www.cnrs.fr/en
-
-
 
 The study presented here is the first exploratory analysis of the first three years of data 
 collection, through the prism of noise sources. The analysis only focused on the 
@@ -258,16 +257,16 @@ Animal noises (tag *animals*) are more frequent in the morning and especially
 one hour after sunrise. 
 
 <!--TODO: Remplacer par le graphique de Ludovic -->
-```{r, fig.cap="Animals dynamics around sunrise", include=FALSE}
-knitr::include_graphics("https://nicolas-roelandt.github.io/lasso-data-analysis/articles/temporal_exploratory_analysis_files/figure-html/time-after-sunrise-animals-graph-1.png")
+```{r, fig.cap="Animals dynamics around sunrise"}
+knitr::include_graphics("plots/Repartition_of_animals_sounds_in_local_time.png")
 ```
 
 This is a common dynamic for bird song [@robbins1981effect]. 
 We also observed peaks in human activity, especially commuting [@MA2017135].
 
 <!--TODO: Remplacer par le graphique de Ludovic -->
-```{r, fig.cap="Road dynamics", include=FALSE}
-knitr::include_graphics("plots/animal_dynamics_around_sunrise.png", dpi = 72)
+```{r, fig.cap="Road dynamics"}
+knitr::include_graphics("plots/Repartition_of_road_sounds_in_local_time.png")
 ```
 
 Seeing those dynamics was a good sign regarding the validity of crowdsourced 
