@@ -240,7 +240,7 @@ the sunrise time of the day of the track at its location.
 # Results
 ## Environmental acoustics results 
 
-The main goal of this premliminary study was to verify the scientific value of 
+The main goal of this preliminary study was to verify the scientific value of 
 crowdsourced acoustic data and if tags are sufficients to describe user environment.
 
 The study concerns tracks bearing a tag, registered in metropolitan France. 
@@ -250,22 +250,23 @@ In the sample studied, it is possible to note a prevalence of the tags *road*,
 *chatting*, *animals* and *wind*. 
 The tags *air_traffic* and *works* are also well represented.
 
-```{r, fig.cap="Tags repartition", include=FALSE}
-knitr::include_graphics("plots/tags_repartition.png", dpi = 72)
-```
+
+### Acoustic dynamics of bird song and commutes
 
 A first axis of analysis concerns the time distribution of the tags. 
 Animal noises (tag *animals*) are more frequent in the morning and especially 
 one hour after sunrise. 
 
+<!--TODO: Remplacer par le graphique de Ludovic -->
 ```{r, fig.cap="Animals dynamics around sunrise", include=FALSE}
-knitr::include_graphics("plots/animal_dynamics_around_sunrise.png", dpi = 72)
+knitr::include_graphics("https://nicolas-roelandt.github.io/lasso-data-analysis/articles/temporal_exploratory_analysis_files/figure-html/time-after-sunrise-animals-graph-1.png")
 ```
 
 This is a common dynamic for bird song [@robbins1981effect]. 
 We also observed peaks in human activity, especially commuting [@MA2017135].
 
-```{r, fig.cap="Animals dynamics around sunrise", include=FALSE}
+<!--TODO: Remplacer par le graphique de Ludovic -->
+```{r, fig.cap="Road dynamics", include=FALSE}
 knitr::include_graphics("plots/animal_dynamics_around_sunrise.png", dpi = 72)
 ```
 
@@ -277,7 +278,11 @@ events in an authoritative database.
 
 ### Correlation between tags and physical events in the user environment
 
+As we know the user position and we have the timestamp of the recording, we are 
+able to determine the weather conditions at that time and place using the services
+of Météo-France, the French national meteorological service.
 
+<!--TODO: Introduire les graphes et le texte de Ludovic -->
 
 ## Benefits of OpenScience and literate programming
 
