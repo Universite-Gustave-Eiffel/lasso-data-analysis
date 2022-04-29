@@ -1,6 +1,6 @@
 Package: LASSO
 Title: LASSO - Crowdsourced acoustic open data analysis
-Version: 0.0.0.9000
+Version: 0.1
 Authors@R: 
     c(person(given = "Nicolas",
              family = "Roelandt",
@@ -20,4 +20,4 @@ RoxygenNote: 7.1.2
 Suggests: 
     knitr,
     rmarkdown
-VignetteBuilder: knitr
+VignetteBuilder: rmarkdown::render

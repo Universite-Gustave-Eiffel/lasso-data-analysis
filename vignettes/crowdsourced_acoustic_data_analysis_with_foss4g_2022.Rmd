@@ -1,9 +1,13 @@
 ---
 title: "Crowdsourced acoustic open data analysis with FOSS4G tools"
-output: rmarkdown::html_vignette
+pkgdown:
+  as_is: true
+output:
+  bookdown::html_document2
+  
 vignette: >
   %\VignetteIndexEntry{Crowdsourced acoustic open data analysis with FOSS4G tools}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{rmarkdown::render}
   %\VignetteEncoding{UTF-8}
 author:
 - name: Nicolas Roelandt
@@ -16,7 +20,8 @@ bibliography: bibliography.bib
 biblio-style: "apalike"
 link-citations: true
 date: "`r Sys.Date()`"
-
+figures:
+  dpi: 72
 ---
 
 ```{r, include = FALSE}
@@ -107,7 +112,7 @@ This is what this article proposes to begin.
 
 As the NoiseCapture application is Open Source and the data collection infrastructure 
 use Free and Open Source Softwares (FOSS), we decided to pursue this by using 
-open source software for data analysis.
+open source software and data for analysis part.
 
 First, we will introduce the dataset then we will present the tools we used and why we choose them.
 
@@ -151,7 +156,7 @@ analysed using a statistical analysis language.
 
 In order to be as open as possible and to work in the most collaborative way,
 we decided a FOSS toolset: PostGreSQL/Postgis to store the data and the R language 
-to analyse and produce knowlege from it.
+to analyse and produce knowledge from it.
 We also used Git as it is a great tool to facilitate remote collaboration.
 
 #### PostGIS
@@ -248,27 +253,33 @@ the sunrise time of the day of the track at its location.
 The main goal of this preliminary study was to verify the scientific value of 
 crowdsourced acoustic data and if tags are sufficients to describe user environment.
 
-The study concerns tracks bearing a tag, registered in metropolitan France. 
+The study concerns tracks bearing a tag, recorded in metropolitan France. 
 It focuses on the proportion of a certain tag in relation to all the tags for a 
 given period (time of day, season, etc.). 
-In the sample studied, it is possible to note a prevalence of the tags *road*, 
-*chatting*, *animals* and *wind*. 
-The tags *air_traffic* and *works* are also well represented.
+In the sample studied, it is possible to note a large prevalence of the  *road* tag as shown in Figure \@ref(fig:tag-representation). 
+*chatting*, *animals* and *wind* tags are also well represented.
 
+```{r tag-representation, fig.cap="Tag representation in mainland France"}
+knitr::include_graphics("plots/tags_repartition.png")
+```
+
+Noise pollution due to road noise is a major concern in France.
 
 ### Acoustic dynamics of bird song and commutes
 
 A first axis of analysis concerns the time distribution of the tags. 
 Animal noises (tag *animals*) are more frequent in the morning and especially 
-one hour after sunrise. 
+one hour after sunrise.
+This is a well known dynamic for bird song [@robbins1981effect]
+and our data shows a similar effect.
 
 <!--TODO: Remplacer par le graphique de Ludovic -->
 ```{r, fig.cap="Animals dynamics"}
 knitr::include_graphics("plots/Repartition_of_animals_sounds_in_local_time.png")
 ```
 
-This is a common dynamic for bird song [@robbins1981effect]. 
-We also observed peaks in human activity, especially commuting [@MA2017135].
+We also observed peaks in human activity, especially commuting.
+Although we find a difference from commuting times shown by @MA2017135, with a rise from 8 am and a peak around 2 pm.
 
 <!--TODO: Remplacer par le graphique de Ludovic -->
 ```{r, fig.cap="Road dynamics"}
