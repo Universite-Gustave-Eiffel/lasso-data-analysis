@@ -39,7 +39,7 @@ pkgs <- c("RPostgreSQL",
 remotes::install_cran(pkgs)
 ```
 
-```{r setup, include=FALSE}
+```{r setup, warning=FALSE, message=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
 # Database connection
@@ -174,9 +174,12 @@ Those `r nrow(filtered_track_info)` tracks correspond to `r nrow(tag_info)` tags
 ```{r tag-histo, echo=FALSE}
 tag_info %>%
   mutate(tag_name = factor(tag_name, levels = unique(tag_info$tag_name))) %>%
+  group_by(tag_name) %>% 
+  dplyr::count(name = "count") %>%
+  dplyr::arrange(desc(count)) %>%
   ggplot() +
-  aes(x = tag_name) +
-  geom_bar(fill = "#112446") +
+  aes(x = reorder(tag_name, count), y = count) +
+  geom_bar(stat="identity", fill = "#112446") +
   coord_flip()+ 
   labs(
     x = "Tag",
@@ -243,13 +246,13 @@ ggplot(tags_hourly_repartition) +
 ggsave("plots/tags_hourly_dynamics.png") 
 ```
 
-### Hourly dynmaics, details
+### Hourly dynamics, details
 
 ```{r dynamic-graphs, message=FALSE}
 dynamic_graphs <- function(tag) {
   
   title <- paste("Repartition of",gsub("_", " ",tag),"sounds in local time")
-  ggplot(tags_hourly_repartition) +
+  ggplot(tags_hourly_repartition %>% dplyr::filter(tag_name == tag)) +
   aes(x = local_time, y = percentage) +
   geom_point(shape = "circle", size = 1.5, colour = "#112446") +
   labs(
@@ -260,7 +263,6 @@ dynamic_graphs <- function(tag) {
     2017 - 2020"
   ) +
    geom_smooth(method = "loess", se = FALSE, aes(colour="loess")) + # smooth curve test (see span parameter to fit more to the peak before sunrise)
-  # geom_smooth(method = "lm", formula = y ~ poly(x, 3), se = FALSE, aes(colour="Polynomial")) +
   scale_colour_manual(values=c("blue", "red"))+
    theme_minimal()
   
@@ -278,9 +280,6 @@ graphs <- purrr::map(unique(tags_hourly_repartition$tag_name), dynamic_graphs)
 # see https://stackoverflow.com/a/51269116
 knitr::include_graphics(as.character(graphs))
 ```
-
-
-
 
 ## Seasonal repartition
 ### Animals

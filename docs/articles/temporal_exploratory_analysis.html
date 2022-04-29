@@ -112,13 +112,40 @@
 <span class="co"># Packages installation from CRAN</span>
 <span class="co"># Already installed packages won't be reinstalled</span>
 <span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_cran.html" class="external-link">install_cran</a></span><span class="op">(</span><span class="va">pkgs</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_chunk.html" class="external-link">opts_chunk</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>echo <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+
+<span class="co"># Database connection</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tomoakin/RPostgreSQL" class="external-link">RPostgreSQL</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dbi.r-dbi.org" class="external-link">DBI</a></span><span class="op">)</span>
+<span class="va">drv</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDriver.html" class="external-link">dbDriver</a></span><span class="op">(</span><span class="st">"PostgreSQL"</span><span class="op">)</span>
+
+<span class="co"># Data handling</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/" class="external-link">sf</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://purrr.tidyverse.org" class="external-link">purrr</a></span><span class="op">)</span>
+
+<span class="co"># Graphs</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://scales.r-lib.org" class="external-link">scales</a></span><span class="op">)</span>
+
+<span class="co"># time / date handling</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lubridate.tidyverse.org" class="external-link">lubridate</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/hzambran/hydroTSM" class="external-link">hydroTSM</a></span><span class="op">)</span>
+
+<span class="co"># Get sun rise time</span>
+<span class="co">## install.packages("suncalc")</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/datastorm-open/suncalc" class="external-link">suncalc</a></span><span class="op">)</span>
+
+<span class="co"># data cache handling</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/yihui/xfun" class="external-link">xfun</a></span><span class="op">)</span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="database-connection">Database connection<a class="anchor" aria-label="anchor" href="#database-connection"></a>
 </h3>
 <p>We provide the database connection parameters to make it easier to replicate and update. However, this database is not publicly available. Those parameters are here to help you connect with your own database (see the <a href="https://github.com/nicolas-roelandt/lasso-data-analysis#how-to-reproduce=" class="external-link">README</a> for more information on that aspect.</p>
 <p>To help replication, the results of SQL queries have been cached (using the <code><a href="https://rdrr.io/pkg/xfun/man/cache_rds.html" class="external-link">xfun::cache_rds</a></code> function) and are available as <code>.rds</code> files inside the github repository: <a href="https://github.com/nicolas-roelandt/lasso-data-analysis/tree/FOSS4G2022/vignettes/temporal_exploratory_analysis_cache/html" class="external-link uri">https://github.com/nicolas-roelandt/lasso-data-analysis/tree/FOSS4G2022/vignettes/temporal_exploratory_analysis_cache/html</a></p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span>
 <span class="va">drv</span>,
 dbname <span class="op">=</span><span class="st">"noisecapture"</span>,
@@ -129,7 +156,7 @@ user<span class="op">=</span><span class="st">"noisecapture"</span>,
 password<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">'noisecapture_password'</span><span class="op">)</span>
 <span class="op">)</span></code></pre></div>
 <p>You can check your connection by requesting the tag list for example.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Tag list</span>
 <span class="va">tag_list</span> <span class="op">&lt;-</span> <span class="fu">xfun</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/xfun/man/cache_rds.html" class="external-link">cache_rds</a></span><span class="op">(</span><span class="op">{</span>
   <span class="va">query</span> <span class="op">&lt;-</span> <span class="st">"SELECT distinct  * FROM noisecapture_tag;"</span>
@@ -190,7 +217,7 @@ password<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/bas
 <div class="section level4">
 <h4 id="track-information">Track information<a class="anchor" aria-label="anchor" href="#track-information"></a>
 </h4>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">track_info</span> <span class="op">&lt;-</span> <span class="fu">xfun</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/xfun/man/cache_rds.html" class="external-link">cache_rds</a></span><span class="op">(</span><span class="op">{</span>
   <span class="va">query</span> <span class="op">&lt;-</span> <span class="st">"SELECT  pk_track, record_utc, time_length, pleasantness, noise_level, track_uuid, geog
 FROM france_tracks;"</span>
@@ -198,7 +225,7 @@ FROM france_tracks;"</span>
  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">st_read</a></span><span class="op">(</span><span class="va">con</span>,query <span class="op">=</span> <span class="va">query</span><span class="op">)</span>
 <span class="op">}</span><span class="op">)</span>
 
-<span class="va">track_info</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<span class="va">track_info</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Simple feature collection with 6 features and 6 fields</span>
 <span class="co">## Geometry type: GEOMETRY</span>
 <span class="co">## Dimension:     XY</span>
@@ -219,7 +246,7 @@ FROM france_tracks;"</span>
 <span class="co">## 5 18c57c75-05ad-4205-96b5-e5b28580eda1      POINT (2.256505 48.95881)</span>
 <span class="co">## 6 947bdf1d-d586-417d-86d9-81a1096cefb9 POLYGON ((2.275491 48.97113...</span></code></pre>
 <p>Some records are not in the France metropolitan area so they need to be discarded.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Define where to save the dataset</span>
 <span class="va">extraWD</span> <span class="op">&lt;-</span> <span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org//reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="st">"raw_data"</span><span class="op">)</span>
 <span class="co"># Get some data available to anyone</span>
@@ -237,21 +264,21 @@ FROM france_tracks;"</span>
 <span class="co">## Dimension:     XY</span>
 <span class="co">## Bounding box:  xmin: -5.141277 ymin: 41.36599 xmax: 9.559961 ymax: 51.08899</span>
 <span class="co">## Geodetic CRS:  WGS 84</span></code></pre>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">filtered_track_info</span> <span class="op">&lt;-</span> <span class="va">track_info</span> <span class="op">%&gt;%</span>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">filtered_track_info</span> <span class="op">&lt;-</span> <span class="va">track_info</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html" class="external-link">st_intersects</a></span><span class="op">(</span><span class="va">.</span>, <span class="va">france_metro</span>, sparse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> </code></pre></div>
 <p>5092 tracks meets the study criteria (duration, envelop area, etc.). 67 tracks where not in France’s metropolitan area.</p>
 </div>
 <div class="section level4">
 <h4 id="tag-information">Tag information<a class="anchor" aria-label="anchor" href="#tag-information"></a>
 </h4>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">tag_info</span> <span class="op">&lt;-</span> <span class="fu">xfun</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/xfun/man/cache_rds.html" class="external-link">cache_rds</a></span><span class="op">(</span><span class="op">{</span>
   <span class="va">query</span> <span class="op">&lt;-</span> <span class="st">"SELECT ft.pk_track, tag_name FROM france_tracks as ft
 INNER JOIN noisecapture_track_tag ntt ON ft.pk_track = ntt.pk_track /* Add track tags*/
 INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/;"</span>
 
- <span class="fu">RPostgreSQL</span><span class="fu">::</span><span class="fu">dbGetQuery</span><span class="op">(</span><span class="va">con</span>,statement <span class="op">=</span> <span class="va">query</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">pk_track</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">filtered_track_info</span><span class="op">$</span><span class="va">pk_track</span><span class="op">)</span>
+ <span class="fu">RPostgreSQL</span><span class="fu">::</span><span class="fu">dbGetQuery</span><span class="op">(</span><span class="va">con</span>,statement <span class="op">=</span> <span class="va">query</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">pk_track</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">filtered_track_info</span><span class="op">$</span><span class="va">pk_track</span><span class="op">)</span>
 <span class="op">}</span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">tag_info</span><span class="op">)</span></code></pre></div>
@@ -273,10 +300,10 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 <div class="section level3">
 <h3 id="all-year">All year<a class="anchor" aria-label="anchor" href="#all-year"></a>
 </h3>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">all_info</span> <span class="op">&lt;-</span> <span class="va">tag_info</span> <span class="op">%&gt;%</span> 
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">all_info</span> <span class="op">&lt;-</span> <span class="va">tag_info</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> 
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">inner_join</a></span><span class="op">(</span>
-    <span class="va">filtered_track_info</span> <span class="op">%&gt;%</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_drop_geometry</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+    <span class="va">filtered_track_info</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_drop_geometry</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
   <span class="co"># add local hour</span>
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>local_time <span class="op">=</span> <span class="fu">lubridate</span><span class="fu">::</span><span class="fu"><a href="https://lubridate.tidyverse.org/reference/hour.html" class="external-link">hour</a></span><span class="op">(</span> <span class="co"># extract hour</span>
     <span class="fu">lubridate</span><span class="fu">::</span><span class="fu"><a href="https://lubridate.tidyverse.org/reference/with_tz.html" class="external-link">with_tz</a></span><span class="op">(</span> <span class="co"># convert to local time</span>
@@ -284,8 +311,8 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
       <span class="st">"Europe/Paris"</span><span class="op">)</span><span class="op">)</span>, <span class="co"># target timezone</span>
     season <span class="op">=</span> <span class="fu">hydroTSM</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/hydroTSM/man/time2season.html" class="external-link">time2season</a></span><span class="op">(</span><span class="fu">lubridate</span><span class="fu">::</span><span class="fu"><a href="https://lubridate.tidyverse.org/reference/date.html" class="external-link">date</a></span><span class="op">(</span><span class="va">record_utc</span><span class="op">)</span>, out.fmt <span class="op">=</span> <span class="st">"seasons"</span>, type<span class="op">=</span><span class="st">"default"</span><span class="op">)</span><span class="op">)</span> <span class="co"># compute season</span></code></pre></div>
 <pre><code><span class="co">## Joining, by = "pk_track"</span></code></pre>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">all_info</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">all_info</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <table style="width:100%;" class="table">
 <colgroup>
 <col width="6%">
@@ -378,10 +405,10 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">occurences</span> <span class="op">&lt;-</span> <span class="va">all_info</span> <span class="op">%&gt;%</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">tag_name</span>, <span class="va">local_time</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"occurences"</span><span class="op">)</span>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">occurences</span> <span class="op">&lt;-</span> <span class="va">all_info</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">tag_name</span>, <span class="va">local_time</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"occurences"</span><span class="op">)</span>
 
-<span class="va">occurences</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<span class="va">occurences</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="left">tag_name</th>
@@ -421,14 +448,14 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">tags_hourly_repartition</span> <span class="op">&lt;-</span> <span class="va">occurences</span> <span class="op">%&gt;%</span> 
-  <span class="fu">left_join</span><span class="op">(</span>
-    <span class="va">occurences</span> <span class="op">%&gt;%</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">local_time</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>total <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">occurences</span><span class="op">)</span><span class="op">)</span>,
-    by <span class="op">=</span> <span class="st">"local_time"</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">mutate</span><span class="op">(</span>percentage <span class="op">=</span> <span class="va">occurences</span> <span class="op">*</span> <span class="fl">100</span> <span class="op">/</span> <span class="va">total</span><span class="op">)</span>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">tags_hourly_repartition</span> <span class="op">&lt;-</span> <span class="va">occurences</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> 
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span>
+    <span class="va">occurences</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">local_time</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>total <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">occurences</span><span class="op">)</span><span class="op">)</span>,
+    by <span class="op">=</span> <span class="st">"local_time"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> 
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>percentage <span class="op">=</span> <span class="va">occurences</span> <span class="op">*</span> <span class="fl">100</span> <span class="op">/</span> <span class="va">total</span><span class="op">)</span>
 
-<span class="va">tags_hourly_repartition</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<span class="va">tags_hourly_repartition</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="left">tag_name</th>
@@ -482,44 +509,43 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">ggplot</span><span class="op">(</span><span class="va">tags_hourly_repartition</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">local_time</span>, y <span class="op">=</span> <span class="va">percentage</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">geom_point</span><span class="op">(</span>shape <span class="op">=</span> <span class="st">"circle"</span>, size <span class="op">=</span> <span class="fl">1.5</span>, colour <span class="op">=</span> <span class="st">"#112446"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">labs</span><span class="op">(</span>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">tags_hourly_repartition</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">local_time</span>, y <span class="op">=</span> <span class="va">percentage</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>shape <span class="op">=</span> <span class="st">"circle"</span>, size <span class="op">=</span> <span class="fl">1.5</span>, colour <span class="op">=</span> <span class="st">"#112446"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>
     x <span class="op">=</span> <span class="st">"Time of the day"</span>,
     y <span class="op">=</span> <span class="st">"Percentage"</span>,
     title <span class="op">=</span> <span class="st">"Hourly repartition of tags"</span>,
     subtitle <span class="op">=</span> <span class="st">"Noicecaptures tags in metropolitan France,
     2017 - 2020"</span>
   <span class="op">)</span> <span class="op">+</span>
-  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">facet_wrap</span><span class="op">(</span><span class="fu">vars</span><span class="op">(</span><span class="va">tag_name</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">tag_name</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="temporal_exploratory_analysis_files/figure-html/tags-hourly-repartition-graph-1.png" width="700"></p>
 <div class="section level4">
-<h4 id="hourly-dynmaics-details">Hourly dynmaics, details<a class="anchor" aria-label="anchor" href="#hourly-dynmaics-details"></a>
+<h4 id="hourly-dynamics-details">Hourly dynamics, details<a class="anchor" aria-label="anchor" href="#hourly-dynamics-details"></a>
 </h4>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">dynamic_graphs</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">tag</span><span class="op">)</span> <span class="op">{</span>
   
   <span class="va">title</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Repartition of"</span>,<span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">"_"</span>, <span class="st">" "</span>,<span class="va">tag</span><span class="op">)</span>,<span class="st">"sounds in local time"</span><span class="op">)</span>
-  <span class="fu">ggplot</span><span class="op">(</span><span class="va">tags_hourly_repartition</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">local_time</span>, y <span class="op">=</span> <span class="va">percentage</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">geom_point</span><span class="op">(</span>shape <span class="op">=</span> <span class="st">"circle"</span>, size <span class="op">=</span> <span class="fl">1.5</span>, colour <span class="op">=</span> <span class="st">"#112446"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">labs</span><span class="op">(</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">tags_hourly_repartition</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">tag_name</span> <span class="op">==</span> <span class="va">tag</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">local_time</span>, y <span class="op">=</span> <span class="va">percentage</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>shape <span class="op">=</span> <span class="st">"circle"</span>, size <span class="op">=</span> <span class="fl">1.5</span>, colour <span class="op">=</span> <span class="st">"#112446"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>
     x <span class="op">=</span> <span class="st">"Time of the day"</span>,
     y <span class="op">=</span> <span class="st">"Percentage"</span>,
     title <span class="op">=</span> <span class="va">title</span>,
     subtitle <span class="op">=</span> <span class="st">"Noicecaptures tags in metropolitan France,
     2017 - 2020"</span>
   <span class="op">)</span> <span class="op">+</span>
-   <span class="fu">geom_smooth</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"loess"</span>, se <span class="op">=</span> <span class="cn">FALSE</span>, <span class="fu">aes</span><span class="op">(</span>colour<span class="op">=</span><span class="st">"loess"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="co"># smooth curve test (see span parameter to fit more to the peak before sunrise)</span>
-  <span class="co"># geom_smooth(method = "lm", formula = y ~ poly(x, 3), se = FALSE, aes(colour="Polynomial")) +</span>
-  <span class="fu">scale_colour_manual</span><span class="op">(</span>values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"blue"</span>, <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">+</span>
-   <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span>
+   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html" class="external-link">geom_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"loess"</span>, se <span class="op">=</span> <span class="cn">FALSE</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>colour<span class="op">=</span><span class="st">"loess"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="co"># smooth curve test (see span parameter to fit more to the peak before sunrise)</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_colour_manual</a></span><span class="op">(</span>values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"blue"</span>, <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">+</span>
+   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span>
   
   <span class="co"># save graphs</span>
-  <span class="fu">ggsave</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"plots/"</span>,<span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">" "</span>, <span class="st">"_"</span>,<span class="va">title</span><span class="op">)</span>,<span class="st">".png"</span><span class="op">)</span><span class="op">)</span> 
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsave.html" class="external-link">ggsave</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"plots/"</span>,<span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">" "</span>, <span class="st">"_"</span>,<span class="va">title</span><span class="op">)</span>,<span class="st">".png"</span><span class="op">)</span><span class="op">)</span> 
 <span class="op">}</span>
 
 <span class="co"># Render graphs</span>
@@ -533,24 +559,24 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 <div class="section level4">
 <h4 id="animals">Animals<a class="anchor" aria-label="anchor" href="#animals"></a>
 </h4>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">seasonal_occurences</span> <span class="op">&lt;-</span> <span class="va">all_info</span> <span class="op">%&gt;%</span> 
-  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">tag_name</span>, <span class="va">local_time</span>, <span class="va">season</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">seasonal_occurences</span> <span class="op">&lt;-</span> <span class="va">all_info</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> 
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">tag_name</span>, <span class="va">local_time</span>, <span class="va">season</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> 
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"occurences"</span><span class="op">)</span>
 
-<span class="va">animals_seasonal_repartition</span> <span class="op">&lt;-</span> <span class="va">seasonal_occurences</span> <span class="op">%&gt;%</span> 
-  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">tag_name</span> <span class="op">==</span> <span class="st">"animals"</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">mutate</span><span class="op">(</span>seasonal_time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">season</span>,<span class="st">'_'</span>,<span class="va">local_time</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu">left_join</span><span class="op">(</span>
-    <span class="va">seasonal_occurences</span> <span class="op">%&gt;%</span>
-      <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">local_time</span>, <span class="va">season</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-      <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>total <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">occurences</span><span class="op">)</span><span class="op">)</span><span class="op">%&gt;%</span> 
-      <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>seasonal_time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">season</span>,<span class="st">'_'</span>,<span class="va">local_time</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="va">season</span><span class="op">)</span>,
-    by <span class="op">=</span> <span class="st">"seasonal_time"</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">mutate</span><span class="op">(</span>percentage <span class="op">=</span> <span class="va">occurences</span> <span class="op">*</span> <span class="fl">100</span> <span class="op">/</span> <span class="va">total</span><span class="op">)</span></code></pre></div>
+<span class="va">animals_seasonal_repartition</span> <span class="op">&lt;-</span> <span class="va">seasonal_occurences</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> 
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">tag_name</span> <span class="op">==</span> <span class="st">"animals"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> 
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>seasonal_time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">season</span>,<span class="st">'_'</span>,<span class="va">local_time</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span>
+    <span class="va">seasonal_occurences</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
+      <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">local_time</span>, <span class="va">season</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> 
+      <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>total <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">occurences</span><span class="op">)</span><span class="op">)</span><span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> 
+      <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>seasonal_time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">season</span>,<span class="st">'_'</span>,<span class="va">local_time</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">season</span><span class="op">)</span>,
+    by <span class="op">=</span> <span class="st">"seasonal_time"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> 
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>percentage <span class="op">=</span> <span class="va">occurences</span> <span class="op">*</span> <span class="fl">100</span> <span class="op">/</span> <span class="va">total</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `summarise()` has grouped output by 'local_time'. You can override using the `.groups` argument.</span></code></pre>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">animals_seasonal_repartition</span> <span class="op">%&gt;%</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">local_time.y</span>, <span class="op">-</span><span class="va">seasonal_time</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">animals_seasonal_repartition</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">local_time.y</span>, <span class="op">-</span><span class="va">seasonal_time</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="left">tag_name</th>
@@ -611,45 +637,45 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">ggplot</span><span class="op">(</span><span class="va">animals_seasonal_repartition</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">local_time.x</span>, y <span class="op">=</span> <span class="va">percentage</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">geom_point</span><span class="op">(</span>shape <span class="op">=</span> <span class="st">"circle"</span>, size <span class="op">=</span> <span class="fl">1.5</span>, colour <span class="op">=</span> <span class="st">"#112446"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">labs</span><span class="op">(</span>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">animals_seasonal_repartition</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">local_time.x</span>, y <span class="op">=</span> <span class="va">percentage</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>shape <span class="op">=</span> <span class="st">"circle"</span>, size <span class="op">=</span> <span class="fl">1.5</span>, colour <span class="op">=</span> <span class="st">"#112446"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>
     x <span class="op">=</span> <span class="st">"Local time"</span>,
     y <span class="op">=</span> <span class="st">"Percentage"</span>,
     title <span class="op">=</span> <span class="st">"Seasonal occurences of animals sounds"</span>
   <span class="op">)</span> <span class="op">+</span>
-  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">facet_wrap</span><span class="op">(</span><span class="fu">vars</span><span class="op">(</span><span class="va">season</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">season</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="temporal_exploratory_analysis_files/figure-html/animals-hourly-repartition-season-graph-1.png" width="700"></p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">season_graphs</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">tag</span><span class="op">)</span> <span class="op">{</span>
   
   <span class="va">title</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Seasonal occurences of"</span>,<span class="va">tag</span>,<span class="st">"sounds"</span><span class="op">)</span>
-  <span class="va">seasonal_occurences</span> <span class="op">%&gt;%</span> 
-  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">tag_name</span> <span class="op">==</span> <span class="va">tag</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">mutate</span><span class="op">(</span>seasonal_time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">season</span>,<span class="st">'_'</span>,<span class="va">local_time</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu">left_join</span><span class="op">(</span>
-    <span class="va">seasonal_occurences</span> <span class="op">%&gt;%</span>
-      <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">local_time</span>, <span class="va">season</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-      <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>total <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">occurences</span><span class="op">)</span><span class="op">)</span><span class="op">%&gt;%</span> 
-      <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>seasonal_time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">season</span>,<span class="st">'_'</span>,<span class="va">local_time</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="va">season</span><span class="op">)</span>,
-    by <span class="op">=</span> <span class="st">"seasonal_time"</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">mutate</span><span class="op">(</span>percentage <span class="op">=</span> <span class="va">occurences</span> <span class="op">*</span> <span class="fl">100</span> <span class="op">/</span> <span class="va">total</span><span class="op">)</span> <span class="op">%&gt;%</span>
-    <span class="fu">ggplot</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">local_time.x</span>, y <span class="op">=</span> <span class="va">percentage</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">geom_point</span><span class="op">(</span>shape <span class="op">=</span> <span class="st">"circle"</span>, size <span class="op">=</span> <span class="fl">1.5</span>, colour <span class="op">=</span> <span class="st">"#112446"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">labs</span><span class="op">(</span>
+  <span class="va">seasonal_occurences</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> 
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">tag_name</span> <span class="op">==</span> <span class="va">tag</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> 
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>seasonal_time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">season</span>,<span class="st">'_'</span>,<span class="va">local_time</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span>
+    <span class="va">seasonal_occurences</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
+      <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">local_time</span>, <span class="va">season</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> 
+      <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>total <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">occurences</span><span class="op">)</span><span class="op">)</span><span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> 
+      <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>seasonal_time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">season</span>,<span class="st">'_'</span>,<span class="va">local_time</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">season</span><span class="op">)</span>,
+    by <span class="op">=</span> <span class="st">"seasonal_time"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> 
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>percentage <span class="op">=</span> <span class="va">occurences</span> <span class="op">*</span> <span class="fl">100</span> <span class="op">/</span> <span class="va">total</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
+    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">local_time.x</span>, y <span class="op">=</span> <span class="va">percentage</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>shape <span class="op">=</span> <span class="st">"circle"</span>, size <span class="op">=</span> <span class="fl">1.5</span>, colour <span class="op">=</span> <span class="st">"#112446"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>
     x <span class="op">=</span> <span class="st">"Local time"</span>,
     y <span class="op">=</span> <span class="st">"Percentage"</span>,
     title <span class="op">=</span> <span class="va">title</span>
   <span class="op">)</span> <span class="op">+</span>
-  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">facet_wrap</span><span class="op">(</span><span class="fu">vars</span><span class="op">(</span><span class="va">season</span><span class="op">)</span><span class="op">)</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">season</span><span class="op">)</span><span class="op">)</span>
   
   <span class="co"># save graphs</span>
-  <span class="fu">ggsave</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"plots/"</span>,<span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">" "</span>, <span class="st">"_"</span>,<span class="va">title</span><span class="op">)</span>,<span class="st">".png"</span><span class="op">)</span><span class="op">)</span> 
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsave.html" class="external-link">ggsave</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"plots/"</span>,<span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">" "</span>, <span class="st">"_"</span>,<span class="va">title</span><span class="op">)</span>,<span class="st">".png"</span><span class="op">)</span><span class="op">)</span> 
 <span class="op">}</span>
 
 <span class="co"># Render graphs</span>
@@ -661,7 +687,7 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 <div class="section level2">
 <h2 id="sound-dynamics-sunrise-study">Sound dynamics: sunrise study<a class="anchor" aria-label="anchor" href="#sound-dynamics-sunrise-study"></a>
 </h2>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">get_sunrise</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">pk_track</span>, <span class="va">date</span>, <span class="va">lat</span>, <span class="va">lon</span>, <span class="va">tz</span> <span class="op">=</span><span class="st">"UTC"</span><span class="op">)</span> <span class="op">{</span>
   <span class="co"># compute sunrise time from localisation and UTC time</span>
   <span class="co">#return NA if error</span>
@@ -685,19 +711,19 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 <span class="op">}</span>
 
 <span class="co"># Compute track centroid coordinates</span>
-<span class="va">suncalc_prep</span> <span class="op">&lt;-</span> <span class="va">filtered_track_info</span> <span class="op">%&gt;%</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind.html" class="external-link">bind_cols</a></span><span class="op">(</span>
-  <span class="va">filtered_track_info</span> <span class="op">%&gt;%</span> <span class="fu">st_centroid</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">st_coordinates</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">as_tibble</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">select</span><span class="op">(</span>lat <span class="op">=</span> <span class="va">Y</span>, lon <span class="op">=</span> <span class="va">X</span><span class="op">)</span>
+<span class="va">suncalc_prep</span> <span class="op">&lt;-</span> <span class="va">filtered_track_info</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind.html" class="external-link">bind_cols</a></span><span class="op">(</span>
+  <span class="va">filtered_track_info</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html" class="external-link">st_centroid</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_coordinates.html" class="external-link">st_coordinates</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span>lat <span class="op">=</span> <span class="va">Y</span>, lon <span class="op">=</span> <span class="va">X</span><span class="op">)</span>
 <span class="op">)</span> </code></pre></div>
 <pre><code><span class="co">## Warning in st_centroid.sf(.): st_centroid assumes attributes are constant over</span>
 <span class="co">## geometries of x</span></code></pre>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Compute sunrise hours for each track in a new dataframe</span>
-<span class="va">sunrises</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map2.html" class="external-link">pmap_dfr</a></span><span class="op">(</span><span class="va">suncalc_prep</span> <span class="op">%&gt;%</span> <span class="fu">select</span><span class="op">(</span><span class="va">pk_track</span>, date <span class="op">=</span> <span class="va">record_utc</span>, <span class="va">lat</span>, <span class="va">lon</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="va">st_drop_geometry</span>, <span class="va">get_sunrise</span> <span class="op">)</span></code></pre></div>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Compute sunrise hours for each track in a new dataframe</span>
+<span class="va">sunrises</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map2.html" class="external-link">pmap_dfr</a></span><span class="op">(</span><span class="va">suncalc_prep</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">pk_track</span>, date <span class="op">=</span> <span class="va">record_utc</span>, <span class="va">lat</span>, <span class="va">lon</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="va">st_drop_geometry</span>, <span class="va">get_sunrise</span> <span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># join sunrises to study data</span>
 <span class="co"># removes records where sunrise time cannot be compute (track 265404)</span>
-<span class="va">time_after_sunrise</span> <span class="op">&lt;-</span> <span class="va">suncalc_prep</span> <span class="op">%&gt;%</span> 
-  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">inner_join</a></span><span class="op">(</span><span class="va">sunrises</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">sunrise</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="co">#remove NAs to avoid errors later on</span>
+<span class="va">time_after_sunrise</span> <span class="op">&lt;-</span> <span class="va">suncalc_prep</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> 
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">inner_join</a></span><span class="op">(</span><span class="va">sunrises</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">sunrise</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="co">#remove NAs to avoid errors later on</span>
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>local_time <span class="op">=</span> <span class="fu">lubridate</span><span class="fu">::</span><span class="fu"><a href="https://lubridate.tidyverse.org/reference/hour.html" class="external-link">hour</a></span><span class="op">(</span> <span class="co"># extract hour</span>
     <span class="fu">lubridate</span><span class="fu">::</span><span class="fu"><a href="https://lubridate.tidyverse.org/reference/with_tz.html" class="external-link">with_tz</a></span><span class="op">(</span> <span class="co"># convert to local time</span>
       <span class="fu">lubridate</span><span class="fu">::</span><span class="fu"><a href="https://lubridate.tidyverse.org/reference/ymd_hms.html" class="external-link">ymd_hms</a></span><span class="op">(</span><span class="va">record_utc</span>, tz <span class="op">=</span> <span class="st">"UTC"</span><span class="op">)</span>, <span class="co"># convert text to date</span>
@@ -707,11 +733,11 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
       <span class="fu">lubridate</span><span class="fu">::</span><span class="fu"><a href="https://lubridate.tidyverse.org/reference/ymd_hms.html" class="external-link">ymd_hms</a></span><span class="op">(</span><span class="va">sunrise</span>, tz <span class="op">=</span> <span class="st">"UTC"</span><span class="op">)</span>, <span class="co"># convert text to date</span>
       <span class="st">"Europe/Paris"</span><span class="op">)</span><span class="op">)</span>,
     time_after_sunrise <span class="op">=</span> <span class="va">local_time</span> <span class="op">-</span><span class="va">local_sunrise</span>
-    <span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">left_join</span><span class="op">(</span> <span class="va">all_info</span> <span class="op">%&gt;%</span> <span class="fu">select</span><span class="op">(</span><span class="va">pk_track</span>,<span class="va">tag_name</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+    <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span> <span class="va">all_info</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">pk_track</span>,<span class="va">tag_name</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Joining, by = "pk_track"</span>
 <span class="co">## Joining, by = "pk_track"</span></code></pre>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">time_after_sunrise</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">time_after_sunrise</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <table class="table">
 <colgroup>
 <col width="3%">
@@ -844,16 +870,16 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">occurences</span> <span class="op">&lt;-</span> <span class="va">time_after_sunrise</span> <span class="op">%&gt;%</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_drop_geometry</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">tag_name</span>, <span class="va">time_after_sunrise</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"occurences"</span><span class="op">)</span>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">occurences</span> <span class="op">&lt;-</span> <span class="va">time_after_sunrise</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_drop_geometry</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">tag_name</span>, <span class="va">time_after_sunrise</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"occurences"</span><span class="op">)</span>
 
-<span class="va">time_after_sunrise_repartition</span> <span class="op">&lt;-</span> <span class="va">occurences</span> <span class="op">%&gt;%</span> 
-  <span class="fu">left_join</span><span class="op">(</span>
-    <span class="va">occurences</span> <span class="op">%&gt;%</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">time_after_sunrise</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>total <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">occurences</span><span class="op">)</span><span class="op">)</span>,
-    by <span class="op">=</span> <span class="st">"time_after_sunrise"</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">mutate</span><span class="op">(</span>percentage <span class="op">=</span> <span class="va">occurences</span> <span class="op">*</span> <span class="fl">100</span> <span class="op">/</span> <span class="va">total</span><span class="op">)</span>
+<span class="va">time_after_sunrise_repartition</span> <span class="op">&lt;-</span> <span class="va">occurences</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> 
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span>
+    <span class="va">occurences</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">time_after_sunrise</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>total <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">occurences</span><span class="op">)</span><span class="op">)</span>,
+    by <span class="op">=</span> <span class="st">"time_after_sunrise"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> 
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>percentage <span class="op">=</span> <span class="va">occurences</span> <span class="op">*</span> <span class="fl">100</span> <span class="op">/</span> <span class="va">total</span><span class="op">)</span>
 
-<span class="va">time_after_sunrise_repartition</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<span class="va">time_after_sunrise_repartition</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="left">tag_name</th>
@@ -907,41 +933,41 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">ggplot</span><span class="op">(</span><span class="va">time_after_sunrise_repartition</span><span class="op">)</span> <span class="op">+</span>
-   <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">time_after_sunrise</span>, y <span class="op">=</span> <span class="va">percentage</span><span class="op">)</span> <span class="op">+</span>
-   <span class="fu">geom_point</span><span class="op">(</span>shape <span class="op">=</span> <span class="st">"circle"</span>, size <span class="op">=</span> <span class="fl">1.5</span>, colour <span class="op">=</span> <span class="st">"#112446"</span><span class="op">)</span> <span class="op">+</span>
-   <span class="fu">labs</span><span class="op">(</span>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">time_after_sunrise_repartition</span><span class="op">)</span> <span class="op">+</span>
+   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time_after_sunrise</span>, y <span class="op">=</span> <span class="va">percentage</span><span class="op">)</span> <span class="op">+</span>
+   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>shape <span class="op">=</span> <span class="st">"circle"</span>, size <span class="op">=</span> <span class="fl">1.5</span>, colour <span class="op">=</span> <span class="st">"#112446"</span><span class="op">)</span> <span class="op">+</span>
+   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>
      x <span class="op">=</span> <span class="st">"Time before or after sunrise"</span>,
      y <span class="op">=</span> <span class="st">"Percentage"</span>,
      title <span class="op">=</span> <span class="st">"Hourly repartition of tags"</span>,
      subtitle <span class="op">=</span> <span class="st">"Noicecaptures tags in metropolitan France,
      2017 - 2020"</span>
    <span class="op">)</span> <span class="op">+</span>
-   <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-   <span class="fu">facet_wrap</span><span class="op">(</span><span class="fu">vars</span><span class="op">(</span><span class="va">tag_name</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">tag_name</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="temporal_exploratory_analysis_files/figure-html/time-after-sunrise-graph-1.png" width="700"></p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">sunrise_graphs</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">tag</span><span class="op">)</span> <span class="op">{</span>
   
   <span class="va">title</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Repartition of"</span>,<span class="va">tag</span>,<span class="st">"sounds around sunrise time"</span><span class="op">)</span>
-  <span class="fu">ggplot</span><span class="op">(</span><span class="va">time_after_sunrise_repartition</span> <span class="op">%&gt;%</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">tag_name</span> <span class="op">==</span> <span class="va">tag</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-   <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">time_after_sunrise</span>, y <span class="op">=</span> <span class="va">percentage</span><span class="op">)</span> <span class="op">+</span>
-   <span class="fu">geom_point</span><span class="op">(</span>shape <span class="op">=</span> <span class="st">"circle"</span>, size <span class="op">=</span> <span class="fl">1.5</span>, colour <span class="op">=</span> <span class="st">"#112446"</span><span class="op">)</span> <span class="op">+</span>
-   <span class="fu">labs</span><span class="op">(</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">time_after_sunrise_repartition</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">tag_name</span> <span class="op">==</span> <span class="va">tag</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time_after_sunrise</span>, y <span class="op">=</span> <span class="va">percentage</span><span class="op">)</span> <span class="op">+</span>
+   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>shape <span class="op">=</span> <span class="st">"circle"</span>, size <span class="op">=</span> <span class="fl">1.5</span>, colour <span class="op">=</span> <span class="st">"#112446"</span><span class="op">)</span> <span class="op">+</span>
+   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>
      x <span class="op">=</span> <span class="st">"Time before or after sunrise"</span>,
      y <span class="op">=</span> <span class="st">"Percentage"</span>,
      title <span class="op">=</span> <span class="va">title</span>,
      subtitle <span class="op">=</span> <span class="st">"Noicecaptures tags in metropolitan France,
      2017 - 2020"</span>
    <span class="op">)</span> <span class="op">+</span>
-   <span class="fu">geom_smooth</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"loess"</span>, se <span class="op">=</span> <span class="cn">FALSE</span>, <span class="fu">aes</span><span class="op">(</span>colour<span class="op">=</span><span class="st">"loess"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="co"># smooth curve test (see span parameter to fit more to the peak before sunrise)</span>
+   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html" class="external-link">geom_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"loess"</span>, se <span class="op">=</span> <span class="cn">FALSE</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>colour<span class="op">=</span><span class="st">"loess"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="co"># smooth curve test (see span parameter to fit more to the peak before sunrise)</span>
   <span class="co"># geom_smooth(method = "lm", formula = y ~ poly(x, 3), se = FALSE, aes(colour="Polynomial")) +</span>
-  <span class="fu">scale_colour_manual</span><span class="op">(</span>values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"blue"</span>, <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">+</span>
-   <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_colour_manual</a></span><span class="op">(</span>values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"blue"</span>, <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">+</span>
+   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span>
   
   <span class="co"># save graphs</span>
-  <span class="fu">ggsave</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"plots/"</span>,<span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">" "</span>, <span class="st">"_"</span>,<span class="va">title</span><span class="op">)</span>,<span class="st">".png"</span><span class="op">)</span><span class="op">)</span> 
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsave.html" class="external-link">ggsave</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"plots/"</span>,<span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">" "</span>, <span class="st">"_"</span>,<span class="va">title</span><span class="op">)</span>,<span class="st">".png"</span><span class="op">)</span><span class="op">)</span> 
 <span class="op">}</span>
 
 <span class="co"># Render graphs</span>
@@ -951,19 +977,19 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 <div class="section level2">
 <h2 id="monthly-repartition">Monthly repartition<a class="anchor" aria-label="anchor" href="#monthly-repartition"></a>
 </h2>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">monthly_occurences</span> <span class="op">&lt;-</span> <span class="va">all_info</span> <span class="op">%&gt;%</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>local_month <span class="op">=</span> <span class="fu">lubridate</span><span class="fu">::</span><span class="fu"><a href="https://lubridate.tidyverse.org/reference/month.html" class="external-link">month</a></span><span class="op">(</span> <span class="co"># extract hour</span>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">monthly_occurences</span> <span class="op">&lt;-</span> <span class="va">all_info</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>local_month <span class="op">=</span> <span class="fu">lubridate</span><span class="fu">::</span><span class="fu"><a href="https://lubridate.tidyverse.org/reference/month.html" class="external-link">month</a></span><span class="op">(</span> <span class="co"># extract hour</span>
     <span class="fu">lubridate</span><span class="fu">::</span><span class="fu"><a href="https://lubridate.tidyverse.org/reference/with_tz.html" class="external-link">with_tz</a></span><span class="op">(</span> <span class="co"># convert to local time</span>
       <span class="fu">lubridate</span><span class="fu">::</span><span class="fu"><a href="https://lubridate.tidyverse.org/reference/ymd_hms.html" class="external-link">ymd_hms</a></span><span class="op">(</span><span class="va">record_utc</span>, tz <span class="op">=</span> <span class="st">"UTC"</span><span class="op">)</span>, <span class="co"># convert text to date</span>
-      <span class="st">"Europe/Paris"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">tag_name</span>, <span class="va">local_month</span>, <span class="va">season</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+      <span class="st">"Europe/Paris"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">tag_name</span>, <span class="va">local_month</span>, <span class="va">season</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> 
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"occurences"</span><span class="op">)</span>
 
-<span class="va">tags_monthly_repartition</span> <span class="op">&lt;-</span> <span class="va">monthly_occurences</span> <span class="op">%&gt;%</span>  <span class="fu">left_join</span><span class="op">(</span>
-    <span class="va">monthly_occurences</span> <span class="op">%&gt;%</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">local_month</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>total <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">occurences</span><span class="op">)</span><span class="op">)</span>,
-    by <span class="op">=</span> <span class="st">"local_month"</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">mutate</span><span class="op">(</span>percentage <span class="op">=</span> <span class="va">occurences</span> <span class="op">*</span> <span class="fl">100</span> <span class="op">/</span> <span class="va">total</span><span class="op">)</span></code></pre></div>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<span class="va">tags_monthly_repartition</span> <span class="op">&lt;-</span> <span class="va">monthly_occurences</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span>
+    <span class="va">monthly_occurences</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">local_month</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>total <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">occurences</span><span class="op">)</span><span class="op">)</span>,
+    by <span class="op">=</span> <span class="st">"local_month"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> 
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>percentage <span class="op">=</span> <span class="va">occurences</span> <span class="op">*</span> <span class="fl">100</span> <span class="op">/</span> <span class="va">total</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">data_breaks</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">3</span>, <span class="fl">6</span>, <span class="fl">9</span><span class="op">)</span>,  <span class="co"># Create data with breaks</span>
                           end <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">6</span>, <span class="fl">9</span>, <span class="fl">12</span><span class="op">)</span>,
                           Seasons <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Winter"</span>, <span class="st">"Spring"</span>, <span class="st">"Summer"</span>, <span class="st">"Autumn"</span><span class="op">)</span>, 
@@ -975,33 +1001,33 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 <span class="co">## 2     3   6  Spring</span>
 <span class="co">## 3     6   9  Summer</span>
 <span class="co">## 4     9  12  Autumn</span></code></pre>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">ggplot</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="co"># Add background colors to plot</span>
-  <span class="fu">geom_rect</span><span class="op">(</span>data <span class="op">=</span> <span class="va">data_breaks</span>,
-            <span class="fu">aes</span><span class="op">(</span>xmin <span class="op">=</span> <span class="va">start</span>,
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_rect</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data_breaks</span>,
+            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xmin <span class="op">=</span> <span class="va">start</span>,
                 xmax <span class="op">=</span> <span class="va">end</span>,
                 ymin <span class="op">=</span> <span class="op">-</span> <span class="cn">Inf</span>,
                 ymax <span class="op">=</span> <span class="cn">Inf</span>,
                 fill <span class="op">=</span> <span class="va">Seasons</span><span class="op">)</span>,
             alpha <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">scale_fill_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Winter"</span> <span class="op">=</span> <span class="st">"white"</span>,
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Winter"</span> <span class="op">=</span> <span class="st">"white"</span>,
                                <span class="st">"Spring"</span> <span class="op">=</span> <span class="st">"green"</span>,
                                <span class="st">"Summer"</span> <span class="op">=</span> <span class="st">"yellow"</span>,
                                <span class="st">"Autumn"</span> <span class="op">=</span> <span class="st">"brown"</span>
                                <span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">geom_point</span><span class="op">(</span>data <span class="op">=</span> <span class="va">tags_monthly_repartition</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">local_month</span>, y <span class="op">=</span> <span class="va">percentage</span><span class="op">)</span>,
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">tags_monthly_repartition</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">local_month</span>, y <span class="op">=</span> <span class="va">percentage</span><span class="op">)</span>,
              shape <span class="op">=</span> <span class="st">"circle"</span>, size <span class="op">=</span> <span class="fl">1.5</span>, colour <span class="op">=</span> <span class="st">"#112446"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">labs</span><span class="op">(</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>
     x <span class="op">=</span> <span class="st">"Month"</span>,
     y <span class="op">=</span> <span class="st">"Percentage"</span>,
     title <span class="op">=</span> <span class="st">"Monthly repartition of tags"</span>,
     subtitle <span class="op">=</span> <span class="st">"Noicecaptures tags in metropolitan France,
     2017 - 2020"</span>
   <span class="op">)</span> <span class="op">+</span>
-  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">scale_x_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/breaks_pretty.html" class="external-link">pretty_breaks</a></span><span class="op">(</span><span class="op">)</span>, labels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Jan"</span>,<span class="st">"Feb"</span>,<span class="st">"Apr"</span>,<span class="st">"Jun"</span>, <span class="st">"Aug"</span>, <span class="st">"Oct"</span>, <span class="st">"Dec"</span>, <span class="st">"null"</span><span class="op">)</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">12</span><span class="op">)</span><span class="op">)</span><span class="op">+</span>
-  <span class="fu">facet_wrap</span><span class="op">(</span><span class="fu">vars</span><span class="op">(</span><span class="va">tag_name</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/breaks_pretty.html" class="external-link">pretty_breaks</a></span><span class="op">(</span><span class="op">)</span>, labels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Jan"</span>,<span class="st">"Feb"</span>,<span class="st">"Apr"</span>,<span class="st">"Jun"</span>, <span class="st">"Aug"</span>, <span class="st">"Oct"</span>, <span class="st">"Dec"</span>, <span class="st">"null"</span><span class="op">)</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">12</span><span class="op">)</span><span class="op">)</span><span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">tag_name</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Warning: Removed 16 rows containing missing values (geom_rect).</span></code></pre>
 <p><img src="temporal_exploratory_analysis_files/figure-html/tags-monthly-repartition-graph-1.png" width="700"></p>
 <pre><code><span class="co">## Warning: Removed 16 rows containing missing values (geom_rect).</span></code></pre>
@@ -1019,7 +1045,7 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 <div class="section level2">
 <h2 id="packages-citations">Packages citations<a class="anchor" aria-label="anchor" href="#packages-citations"></a>
 </h2>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"tidyverse"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## </span>
 <span class="co">##   Wickham et al., (2019). Welcome to the tidyverse. Journal of Open</span>
@@ -1037,7 +1063,7 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 <span class="co">##     pages = {1686},</span>
 <span class="co">##     doi = {10.21105/joss.01686},</span>
 <span class="co">##   }</span></code></pre>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"sf"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## </span>
 <span class="co">## To cite package sf in publications, please use:</span>
@@ -1059,7 +1085,7 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 <span class="co">##     volume = {10},</span>
 <span class="co">##     number = {1},</span>
 <span class="co">##   }</span></code></pre>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"hydroTSM"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## </span>
 <span class="co">## To cite hydroTSM in publications use:</span>
@@ -1081,7 +1107,7 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 <span class="co">## </span>
 <span class="co">## I have invested an important amount of time and effort in creating</span>
 <span class="co">## hydroTSM, please cite it if you use it !</span></code></pre>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"suncalc"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## </span>
 <span class="co">## To cite package 'suncalc' in publications use:</span>
@@ -1130,7 +1156,7 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 <div class="section level3">
 <h3 id="database-information">Database information<a class="anchor" aria-label="anchor" href="#database-information"></a>
 </h3>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># print software versions</span>
 <span class="va">pg_version</span>  <span class="op">&lt;-</span> <span class="fu">xfun</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/xfun/man/cache_rds.html" class="external-link">cache_rds</a></span><span class="op">(</span><span class="op">{</span>
   <span class="fu">RPostgreSQL</span><span class="fu">::</span><span class="fu">dbGetQuery</span><span class="op">(</span><span class="va">con</span>,statement <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"SELECT version();"</span><span class="op">)</span><span class="op">)</span> <span class="co"># should return PostgreSQL 10.15 or higher</span>
@@ -1138,14 +1164,14 @@ INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/
 <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">pg_version</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##                                                                                                                             version</span>
 <span class="co">## 1 PostgreSQL 10.19 (Ubuntu 10.19-1.pgdg18.04+1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0, 64-bit</span></code></pre>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">postgis_version</span>  <span class="op">&lt;-</span> <span class="fu">xfun</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/xfun/man/cache_rds.html" class="external-link">cache_rds</a></span><span class="op">(</span><span class="op">{</span>
   <span class="fu">RPostgreSQL</span><span class="fu">::</span><span class="fu">dbGetQuery</span><span class="op">(</span><span class="va">con</span>,statement <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"SELECT postgis_full_version();"</span><span class="op">)</span><span class="op">)</span> <span class="co"># should return PostGIS 2.5 or higher</span>
 <span class="op">}</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">postgis_version</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##                                                                                                                                                                                            postgis_full_version</span>
 <span class="co">## 1 POSTGIS="2.5.5" [EXTENSION] PGSQL="100" GEOS="3.7.1-CAPI-1.11.1 27a5e771" PROJ="Rel. 4.9.3, 15 August 2016" GDAL="GDAL 2.4.2, released 2019/06/28" LIBXML="2.9.4" LIBJSON="0.12.1" LIBPROTOBUF="1.2.1" RASTER</span></code></pre>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># close connection</span>
 <span class="fu">RPostgreSQL</span><span class="fu">::</span><span class="fu">dbDisconnect</span><span class="op">(</span><span class="va">con</span><span class="op">)</span></code></pre></div>
 </div>

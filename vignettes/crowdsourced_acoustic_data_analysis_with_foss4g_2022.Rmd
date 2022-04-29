@@ -221,7 +221,13 @@ where the climate in the West Indies, Reunion, New Caledonia and Polynesia is of
 the tropical maritime type [@ClimatsOutremerMeteoFrance].
 That motivated our need to separate overseas records from metropolitan ones
 
-In order to facilitate the replication of the study on areas without this kind of issues this as not been done within the database but at the begining of the Rmarkdown document where analysis is conducted.
+In order to facilitate the replication of the study on areas without this kind 
+of issues, this as not been done within the database but at the begining of the 
+Rmarkdown document where analysis is conducted.
+
+The code producing the analysis and the graphics presented here are separated in several complementary documents[^5].
+
+[^5]: https://nicolas-roelandt.github.io/lasso-data-analysis/articles/temporal_exploratory_analysis.html
 
 The Rmarkdown document establishes the connection with the materialized view and then 
 performs the operations allowing to finalize data preparation and analyze the data.
@@ -257,7 +263,7 @@ Animal noises (tag *animals*) are more frequent in the morning and especially
 one hour after sunrise. 
 
 <!--TODO: Remplacer par le graphique de Ludovic -->
-```{r, fig.cap="Animals dynamics around sunrise"}
+```{r, fig.cap="Animals dynamics"}
 knitr::include_graphics("plots/Repartition_of_animals_sounds_in_local_time.png")
 ```
 
