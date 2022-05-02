@@ -346,7 +346,7 @@ for the scientific community.
 
 For oneself, the advantages are numerous, they allow to serenely resume work on 
 a subject even after a break of several months if the code is sufficiently documented.
-Lettered programming allows one to go further than just commenting on the code 
+Literate programming allows one to go further than just commenting on the code 
 because the information can be organized, prioritized and developed.
 The commentary of a figure is as close as possible to the figure and the code 
 that produced it.
@@ -356,7 +356,7 @@ Does the code still work after the updates?
 
 For the team or the laboratory in which the project takes place, the benefits 
 are also numerous.
-The work done is accessible, especially if collaborative work tools have been 
+The work done is accessible, especially if collaborative tools have been 
 put in place.
 Within the framework of the analysis presented here, an initial exploratory 
 analysis revealed certain known dynamics in environmental acoustics.
@@ -367,7 +367,7 @@ Nevertheless, the other technical aspects of the analysis (creation of SQL views
 connection and interrogation of the database with R, etc.)
 would have been more difficult to master if they were not already illustrated in 
 a detailed document.
-It is at this point that lettered programming comes into its own, since more than 
+It is at this point that literate programming comes into its own, since more than 
 a series of instructions, the reader is also provided with the methodology and 
 the analysis of the results produced.
 This represents a considerable time saving at the beginning of the project.
@@ -384,6 +384,19 @@ methods, code and even the scientific literature produced are open and documente
 makes it much easier to revisit the work in order to answer one's own questions 
 because it provides a complete example and not just final results.
 
+<!-- Pertinence de cette partie ? C'est une limite de la reproductibilité qui n'a 
+pas été traitée dans cette étude, c'est un point d'amélioration -->
+
+While being a valuable aid for reproducibility, the FOSS and literate programming
+with notebook tools such as Rmarkdown used in this project suffer from some limitations. 
+It is possible to restart the calculations by trying to
+to reproduce the software environment (the versions of the software and packages used are provided),
+but there is no guarantee that the result will be exactly the same.
+
+The package R [renv](https://rstudio.github.io/renv/index.html) can help to reproduce an R environment and 
+environment by providing functions for saving and restoring dependencies at the project level.
+In some cases, if this is not enough, it will be necessary to turn to higher-level
+solutions such as [Docker](https://www.docker.com/) and [Guix](https://guix.gnu.org/).
 
 # Conclusion {-}
 The first results are encouraging because road dynamics related to commuting or 
