@@ -155,7 +155,7 @@ This is what this article proposes to begin.</p>
 </h3>
 <p>As the NoiseCapture application is Open Source and the data collection infrastructure
 use Free and Open Source Softwares (FOSS), we decided to pursue this by using
-open source software and data for analysis part.</p>
+open source software and data for the analysis part.</p>
 <p>First, we will introduce the dataset then we will present the tools we used and why we choose them.</p>
 <div class="section level4" number="1.1.1">
 <h4 id="data">
@@ -264,9 +264,10 @@ where the climate in the West Indies, Reunion, New Caledonia and Polynesia is of
 the tropical maritime type <span class="citation">(<a href="#ref-ClimatsOutremerMeteoFrance" role="doc-biblioref">Météo-France 2020b</a>)</span>.
 That motivated our need to separate overseas records from metropolitan ones</p>
 <p>In order to facilitate the replication of the study on areas without this kind
-of issues, this as not been done within the database but at the begining of the
+of issues, this as not been done within the database but at the beginning of the
 Rmarkdown document where analysis is conducted.</p>
-<p>The code producing the analysis and the graphics presented here are separated in several complementary documents<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a>.</p>
+<p>The code producing the analysis and the graphics presented here are separated in
+several complementary documents<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a>.</p>
 <p>The Rmarkdown document establishes the connection with the materialized view and then
 performs the operations allowing to finalize data preparation and analyze the data.
 It is a document mixing narrative, figures and code (in R but also several programming languages).</p>
@@ -293,7 +294,8 @@ crowdsourced acoustic data and if tags are sufficients to describe user environm
 <p>The study concerns tracks bearing a tag, recorded in metropolitan France.
 It focuses on the proportion of a certain tag in relation to all the tags for a
 given period (time of day, season, etc.).
-In the sample studied, it is possible to note a large prevalence of the <em>road</em> tag as shown in Figure <a href="#fig:tag-representation">2.1</a>.
+In the sample studied, it is possible to note a large prevalence of the <em>road</em>
+tag as shown in Figure <a href="#fig:tag-representation">2.1</a>.
 <em>chatting</em>, <em>animals</em> and <em>wind</em> tags are also well represented.</p>
 <div class="figure">
 <span style="display:block;" id="fig:tag-representation"></span>
@@ -307,22 +309,24 @@ Figure 2.1: Tag representation in mainland France
 <span class="header-section-number">2.1.1</span> Acoustic dynamics of bird song and commutes<a class="anchor" aria-label="anchor" href="#acoustic-dynamics-of-bird-song-and-commutes"></a>
 </h4>
 <p>A first axis of analysis concerns the time distribution of the tags.
-Animal noises (tag <em>animals</em>) are more frequent in the morning and especially
+Figure <a href="#fig:animals-sunrise">2.2</a> shows that animal noises (tag <em>animals</em>) are more frequent in the morning and especially
 one hour after sunrise.
 This is a well known dynamic for bird song <span class="citation">(<a href="#ref-robbins1981effect" role="doc-biblioref">Robbins 1981</a>)</span>
 and our data shows a similar effect.</p>
 <!--TODO: Remplacer par le graphique de Ludovic -->
 <div class="figure">
-<span style="display:block;" id="fig:unnamed-chunk-2"></span>
+<span style="display:block;" id="fig:animals-sunrise"></span>
 <img src="plots/Repartition_of_animals_sounds_in_local_time.png" alt="Animals dynamics" width="1050"><p class="caption">
 Figure 2.2: Animals dynamics
 </p>
 </div>
-<p>We also observed peaks in human activity, especially commuting.
-Although we find a difference from commuting times shown by <span class="citation"><a href="#ref-MA2017135" role="doc-biblioref">Ma et al.</a> (<a href="#ref-MA2017135" role="doc-biblioref">2017</a>)</span>, with a rise from 8 am and a peak around 2 pm.</p>
+<p>We also observed peaks in human activity, especially commuting (see Figure
+<a href="#fig:road-dynamics">2.3</a>.
+Although we find a difference from commuting times shown by <span class="citation"><a href="#ref-MA2017135" role="doc-biblioref">Ma et al.</a> (<a href="#ref-MA2017135" role="doc-biblioref">2017</a>)</span>, with a
+rise from 8 am and a peak around 2 pm.</p>
 <!--TODO: Remplacer par le graphique de Ludovic -->
 <div class="figure">
-<span style="display:block;" id="fig:unnamed-chunk-3"></span>
+<span style="display:block;" id="fig:road-dynamics"></span>
 <img src="plots/Repartition_of_road_sounds_in_local_time.png" alt="Road dynamics" width="1050"><p class="caption">
 Figure 2.3: Road dynamics
 </p>
@@ -337,7 +341,7 @@ events in an authoritative database.</p>
 <h4 id="correlation-between-tags-and-physical-events-in-the-user-environment">
 <span class="header-section-number">2.1.2</span> Correlation between tags and physical events in the user environment<a class="anchor" aria-label="anchor" href="#correlation-between-tags-and-physical-events-in-the-user-environment"></a>
 </h4>
-<p>As we know the user position and we have the timestamp of the recording, we are
+<p>As we know the user position and we have the time stamp of the recording, we are
 able to determine the weather conditions at that time and place using the services
 of Météo-France, the French national meteorological service.</p>
 <!--TODO: Introduire les graphes et le texte de Ludovic -->
@@ -429,7 +433,9 @@ Wickham, Hadley, Mara Averick, Jennifer Bryan, Winston Chang, Lucy D’Agostino 
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
 
-      </div>
+        <nav id="toc" data-toggle="toc"><h2 data-toc-skip>Contents</h2>
+    </nav>
+</div>
 
 </div>
 

@@ -4,7 +4,6 @@ pkgdown:
   as_is: true
 output:
   bookdown::html_document2
-  
 vignette: >
   %\VignetteIndexEntry{Crowdsourced acoustic open data analysis with FOSS4G tools}
   %\VignetteEngine{rmarkdown::render}
@@ -22,6 +21,7 @@ link-citations: true
 date: "`r Sys.Date()`"
 figures:
   dpi: 72
+toc: true
 ---
 
 ```{r, include = FALSE}
@@ -112,7 +112,7 @@ This is what this article proposes to begin.
 
 As the NoiseCapture application is Open Source and the data collection infrastructure 
 use Free and Open Source Softwares (FOSS), we decided to pursue this by using 
-open source software and data for analysis part.
+open source software and data for the analysis part.
 
 First, we will introduce the dataset then we will present the tools we used and why we choose them.
 
@@ -227,10 +227,11 @@ the tropical maritime type [@ClimatsOutremerMeteoFrance].
 That motivated our need to separate overseas records from metropolitan ones
 
 In order to facilitate the replication of the study on areas without this kind 
-of issues, this as not been done within the database but at the begining of the 
+of issues, this as not been done within the database but at the beginning of the 
 Rmarkdown document where analysis is conducted.
 
-The code producing the analysis and the graphics presented here are separated in several complementary documents[^5].
+The code producing the analysis and the graphics presented here are separated in 
+several complementary documents[^5].
 
 [^5]: https://nicolas-roelandt.github.io/lasso-data-analysis/articles/temporal_exploratory_analysis.html
 
@@ -256,7 +257,8 @@ crowdsourced acoustic data and if tags are sufficients to describe user environm
 The study concerns tracks bearing a tag, recorded in metropolitan France. 
 It focuses on the proportion of a certain tag in relation to all the tags for a 
 given period (time of day, season, etc.). 
-In the sample studied, it is possible to note a large prevalence of the  *road* tag as shown in Figure \@ref(fig:tag-representation). 
+In the sample studied, it is possible to note a large prevalence of the  *road* 
+tag as shown in Figure \@ref(fig:tag-representation). 
 *chatting*, *animals* and *wind* tags are also well represented.
 
 ```{r tag-representation, fig.cap="Tag representation in mainland France"}
@@ -268,21 +270,23 @@ Noise pollution due to road noise is a major concern in France.
 ### Acoustic dynamics of bird song and commutes
 
 A first axis of analysis concerns the time distribution of the tags. 
-Animal noises (tag *animals*) are more frequent in the morning and especially 
+Figure  \@ref(fig:animals-sunrise) shows that animal noises (tag *animals*) are more frequent in the morning and especially 
 one hour after sunrise.
 This is a well known dynamic for bird song [@robbins1981effect]
 and our data shows a similar effect.
 
 <!--TODO: Remplacer par le graphique de Ludovic -->
-```{r, fig.cap="Animals dynamics"}
+```{r animals-sunrise, fig.cap="Animals dynamics"}
 knitr::include_graphics("plots/Repartition_of_animals_sounds_in_local_time.png")
 ```
 
-We also observed peaks in human activity, especially commuting.
-Although we find a difference from commuting times shown by @MA2017135, with a rise from 8 am and a peak around 2 pm.
+We also observed peaks in human activity, especially commuting (see Figure 
+\@ref(fig:road-dynamics).
+Although we find a difference from commuting times shown by @MA2017135, with a 
+rise from 8 am and a peak around 2 pm.
 
 <!--TODO: Remplacer par le graphique de Ludovic -->
-```{r, fig.cap="Road dynamics"}
+```{r road-dynamics, fig.cap="Road dynamics"}
 knitr::include_graphics("plots/Repartition_of_road_sounds_in_local_time.png")
 ```
 
@@ -294,7 +298,7 @@ events in an authoritative database.
 
 ### Correlation between tags and physical events in the user environment
 
-As we know the user position and we have the timestamp of the recording, we are 
+As we know the user position and we have the time stamp of the recording, we are 
 able to determine the weather conditions at that time and place using the services
 of Météo-France, the French national meteorological service.
 
