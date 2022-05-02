@@ -1,23 +1,44 @@
 ---
 title: "Temporal exploratory analysis"
-author: "Nicolas Roelandt"
+author:
+- name: Nicolas Roelandt
+  affiliation: AME, Univ. Gustave Eiffel, IFSTTAR, F-69675 Bron, France
+- name: Pierre Aumond
+  affiliation: UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France
+- name: Ludovic Moisan
+  affiliation: UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France
 date: "`r Sys.Date()`"
-output: html_document
+pkgdown:
+  as_is: true
+output:
+  bookdown::html_document2
 params:
   database: FALSE
 ---
 
 # Replication
-## Setup
-As the analysis part of project as been treated as R package, the easiest way to 
-reproduce is to install the package on your computer with the following command.
+## Get the source code
+
+As the analysis part of project as been treated as R package, there is several ways 
+to get the code source:
+
+- using git
+
+```{bash git-clone, eval=FALSE}
+git clone https://github.com/nicolas-roelandt/lasso-data-analysis
+```
+
+- using R and the [remotes package](https://remotes.r-lib.org/):
 
 ```{r package-installation, eval=FALSE}
-# We suggest to use the remotes packages to install required packages
+# We suggest to use the remotes package
 # install.packages("remotes")
 remotes::install_github("nicolas-roelandt/lasso-data-analysis")
 ```
 
+- download as a [zip archive](https://github.com/nicolas-roelandt/lasso-data-analysis/archive/refs/heads/main.zip)
+
+## Setup
 This analysis use several packages that you'll need to install beforehand.
 
 ```{r setup-preparation, eval=FALSE}
@@ -35,6 +56,7 @@ pkgs <- c("RPostgreSQL",
           "xfun")
 
 # Packages installation from CRAN
+# We suggest to use the remotes package to install required packages
 # Already installed packages won't be reinstalled
 remotes::install_cran(pkgs)
 ```
