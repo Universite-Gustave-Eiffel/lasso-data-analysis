@@ -3,7 +3,9 @@ title: "Crowdsourced acoustic open data analysis with FOSS4G tools"
 pkgdown:
   as_is: true
 output:
-  bookdown::html_document2
+  bookdown::html_document2:
+    toc: true
+    number_sections: true
 vignette: >
   %\VignetteIndexEntry{Crowdsourced acoustic open data analysis with FOSS4G tools}
   %\VignetteEngine{rmarkdown::render}
@@ -21,7 +23,6 @@ link-citations: true
 date: "`r Sys.Date()`"
 figures:
   dpi: 72
-toc: true
 ---
 
 ```{r, include = FALSE}
@@ -152,7 +153,7 @@ National Institute of Geographic and Forest Information [@institutgeographiquena
 The raw data has been stored and pre-filtered in a geospatial database and has been
 analysed using a statistical analysis language.
 
-### Tools
+### Tools{#tools}
 
 In order to be as open as possible and to work in the most collaborative way,
 we decided a FOSS toolset: PostGreSQL/Postgis to store the data and the R language 
@@ -306,11 +307,85 @@ of Météo-France, the French national meteorological service.
 
 ## Benefits of OpenScience and literate programming
 
-allowed the resumption and 
-continuation of the analyses shown here. 
 
 
-# Conclusion
+Intrinsically, Free and Open Source Software (FOSS) brings many benefits to a 
+project, whether it is a scientific one or not.
+The problem of licenses is greatly facilitated because they are usable by all, 
+without discrimination and without additional cost.
+The question of having to acquire licenses and how to do so is no longer an issue.
+Another advantage, as long as one has the necessary skills, is to be able to adapt 
+the tool to one's needs, an important quality in an often innovative field.
+Free software favors interoperability and this aspect is important when creating 
+complex processing chains, implementing several different tools.
+
+As shown in Section \@ref(tools), this study use a rather small toolset of FOSS.
+The reduction of the number of tools needed for the scientific production was 
+possible thanks to the use of a programming language allowing to cover practically 
+all the aspects of the project, whether it is the connection to the database, 
+the statistical analyses, the production of tables and graphs as well as reports.
+
+While free software facilitates the implementation of tools, literate programming is 
+more oriented to communication between humans.
+Thus, as early as 1984, Donald Knuth, who invented the concept, questions the 
+relationship between the developer of a program and the source code he produces.
+He proposes that, beyond the simple transmission of instructions to a computer, 
+the source code should be a means of communicating the intentions of the developer 
+to another human being [@knuth1984LiterateProgramming].
+
+As @schulte2012MultiLanguageComputingEnvironment explains, literate programming 
+mixes source code and natural language, divided into blocks of instructions for 
+the computer and blocks of text for human understanding. The code blocks are 
+useful for scientific production because they participate in data processing and 
+information extraction, while the text blocks are intended to explain both the 
+methods and the results for the benefit of the human reader.
+
+In the context of scientific research, the benefits brought by free software and 
+literate programming are valid at several levels: for oneself, for the team/laboratory, 
+for the scientific community.
+
+For oneself, the advantages are numerous, they allow to serenely resume work on 
+a subject even after a break of several months if the code is sufficiently documented.
+Lettered programming allows one to go further than just commenting on the code 
+because the information can be organized, prioritized and developed.
+The commentary of a figure is as close as possible to the figure and the code 
+that produced it.
+By restarting the analysis, it is possible to see if all the conditions are met 
+to resume the work: is the necessary software present? Is the data accessible?
+Does the code still work after the updates?
+
+For the team or the laboratory in which the project takes place, the benefits 
+are also numerous.
+The work done is accessible, especially if collaborative work tools have been 
+put in place.
+Within the framework of the analysis presented here, an initial exploratory 
+analysis revealed certain known dynamics in environmental acoustics.
+This motivated the recruitment of a new team member to carry out a more thorough analysis. 
+The problem of setting up the database did not arise again because the server 
+used for the exploratory analysis was still functional.
+Nevertheless, the other technical aspects of the analysis (creation of SQL views, 
+connection and interrogation of the database with R, etc.)
+would have been more difficult to master if they were not already illustrated in 
+a detailed document.
+It is at this point that lettered programming comes into its own, since more than 
+a series of instructions, the reader is also provided with the methodology and 
+the analysis of the results produced.
+This represents a considerable time saving at the beginning of the project.
+
+For the scientific community, the COVID-19 health crisis has shown that public 
+confidence in the scientific community is fragile.
+Especially in times of doubt, when the information provided by studies can be contradictory. 
+The production of knowledge in open mode, where everything is described and 
+auditable, can help not only the scientific community to validate the soundness 
+of the work and the results presented, but also the general public to appropriate them.
+
+For a researcher working on similar questions, a research project where the data, 
+methods, code and even the scientific literature produced are open and documented, 
+makes it much easier to revisit the work in order to answer one's own questions 
+because it provides a complete example and not just final results.
+
+
+# Conclusion {-}
 The first results are encouraging because road dynamics related to commuting or 
 animal activity can be observed.
 The main question was to determine if these known dynamics in environmental acoustics 
@@ -322,7 +397,18 @@ representativeness of samples that are sometimes weak for certain time periods.
 
 The systematic use of open source software, the provision of documented code files 
 and a document mixing narrative, figures and code have allowed the resumption and
-continuation of the analyses shown here. 
-This work in progress will complete the final article.
+continuation of the analyses shown here.
+
+We also wanted to show that Free and Open Source Software can be used to produce 
+scientific knowledge all along the production chain, from data collection, 
+storage, analysis and even presentation.
+By mobilizing only a few tools, it is quite possible to produce scientific 
+knowledge in a more reproducible way.
+
+
+We are aware that the acquisition of the necessary skills to mobilize these tools 
+is not easy but we believe that the gain is much higher than the cost. 
+For the more technical parts, such as the implementation of database servers, 
+the presence of a research software engineer is a real plus.
 
 # References {-}
