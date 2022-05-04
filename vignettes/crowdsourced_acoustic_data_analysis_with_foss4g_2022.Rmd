@@ -272,13 +272,13 @@ Noise pollution due to road noise is a major concern in France.
 
 A first axis of analysis concerns the time distribution of the tags. 
 Figure  \@ref(fig:animals-sunrise) shows that animal noises (tag *animals*) are more frequent in the morning and especially 
-one hour after sunrise.
+in the few hours after sunrise.
 This is a well known dynamic for bird song [@robbins1981effect]
 and our data shows a similar effect.
 
 <!--TODO: Remplacer par le graphique de Ludovic -->
 ```{r animals-sunrise, fig.cap="Animals dynamics"}
-knitr::include_graphics("plots/Repartition_of_animals_sounds_in_local_time.png")
+knitr::include_graphics("plots/animals_sunrise.png")
 ```
 
 We also observed peaks in human activity, especially commuting (see Figure 
@@ -288,7 +288,7 @@ rise from 8 am and a peak around 2 pm.
 
 <!--TODO: Remplacer par le graphique de Ludovic -->
 ```{r road-dynamics, fig.cap="Road dynamics"}
-knitr::include_graphics("plots/Repartition_of_road_sounds_in_local_time.png")
+knitr::include_graphics("plots/road_local_time")
 ```
 
 Seeing those dynamics was a good sign regarding the validity of crowdsourced 
