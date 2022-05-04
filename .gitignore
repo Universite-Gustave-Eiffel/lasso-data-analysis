@@ -6,6 +6,8 @@
 documentation/ #local documentation
 documentation
 inst/doc
+cache
 
+vignettes/*.rds
 # ignore generated plots in vignettes folder
 vignettes/plots/*
