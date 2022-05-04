@@ -1,0 +1,3109 @@
+---
+title: "Rapport de stage"
+subtitle: "Analyse de la base de données NoiseCapture"
+author: "Ludovic Moisan from Nicolas Roelandt"
+supervisors: "Pierre aumond, Paul Chapron"
+date: "`r Sys.Date()`"
+output: html_document
+toc: True
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup}
+setwd("~/Stage/Scripts/lasso-data-analysis-main")
+
+# Database connection
+library(RPostgreSQL)
+library(DBI)
+drv <- DBI::dbDriver("PostgreSQL")
+#library(sys)
+
+# Data handling
+library(sf)
+library(dplyr)
+library(purrr)
+library(tidyr)
+
+# Graphes
+library(ggplot2)
+
+library(ggpubr)
+
+library(scales)
+
+# time / date handling
+library(lubridate)
+library(hydroTSM)
+
+library(rmarkdown)
+
+#Geo
+library(lwgeom)
+library(leaflet)
+library(osmdata)
+library(geosphere)
+library(sp)
+
+
+# Get sun rise time
+## install.packages("suncalc")
+library(suncalc)
+
+library(reticulate)
+
+```
+
+```{r con-parameters, include = False}
+con <- DBI::dbConnect(
+drv,
+dbname ="noisecapture",
+host = "lassopg.ifsttar.fr", #server IP or hostname
+port = 5432, #Port on which we ran the proxy
+user="noisecapture",
+password= "yvbxGBQqcATg75Yzea" #Sys.getenv('noisecapture_password') # password stored in .Renviron. Use this to edit it : usethis::edit_r_environ()
+)
+```
+
+#Introduction
+
+Le travail de ce stage consiste en une analyse des données de l'application NoiseCapture. Les données de cette étude sont disponibles via l'utilisation de scripts SQL préparant des vues sur une backup des données globales de l'applications sur la période Aout 2017 - Aout 2020. le thème principal de cette étude est l'analyse de la répartition et de l'utilisation des tags, ainsi que les informations pouvant découler de ces informations catégorielles, sur un plan temporel et spatial.
+
+Les scripts permettant de récupérer ces données sont téléchargeables ici : [lien github]
+
+#Visualisation de la base de données
+
+Les requêtes SQL et graphiques suivants ont pour but de définir les limites d'interprétation de nos analyses de la base de données
+
+Les vues ont été créé sur la base de données (POSTGRE) grâce aux scripts SQL disponibles ici : [lien]
+
+La première étude à réaliser dans le cadre de ce stage est l'analyse de la répartition temporelle des données d'utilisateurs. Seule l'heure UTC est récupérée lors de la mesure par l'application, nous avons donc besoin de convertir cette heure UTC en heure locale en se basant sur la zone géographique de la mesure afin de réaliser nos analyses. En considérant cela, seules les traces ayant une mesure géographique ont pu être pris en compte dans cette étude. Une perte d'environ 36% des données est donc à prendre en compte (localisation non activée par l'utilisateur par exemple).
+
+```{r analysis-sql1}
+
+#Get all tracks and classify them by local_hour. Are considered only tracks with geographical data (around 64% of tracks only [100 - 94938 / 260422 * 100])
+
+query <- "SELECT local_hour, COUNT(*) as Count_hour FROM tracks_countries GROUP BY local_hour ORDER BY local_hour"
+
+count_tracks <- RPostgreSQL::dbGetQuery(con,statement = query)
+
+sum(count_tracks$count_hour)
+count_tracks
+
+ggplot(count_tracks) +
+  aes(x = local_hour, y = count_hour) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label=count_hour), vjust=0-0.5) +
+  labs(
+    x = "Local hour",
+    y = "Count",
+    title = "Repartition of tracks by local hour",
+    subtitle = "Noisecapture's data,
+      2017-2020"
+  )
+  #facet_wrap(vars(admin))
+
+```
+
+Le graphique ci-dessus nous montre la répartition temporelle des données sur une base de 24h. Il apparait évident que l'utilisation de l'application suit les heures d'activités humaines.
+
+Les mesures effectuées peuvent se diviser en 2 catégories, les traces possédants des tags signalant la nature du bruit enregistré (animaux, routes etc.) et celles sans tags. Nous voulons connaitre la répartition d'utilisation de cette fonctionnalité.
+
+```{r analysis-sql2}
+
+query <- "SELECT  local_hour, COUNT(*) as count_hour_tag FROM unique_tagged_tracks GROUP BY local_hour ORDER BY local_hour"
+
+count_tags <- RPostgreSQL::dbGetQuery(con,statement = query)
+
+sum(count_tags$count_hour_tag)
+count_tags
+
+ggplot(count_tags) +
+  aes(x = local_hour, y = count_hour_tag) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label=count_hour_tag), vjust=-0.5) +
+  labs(
+    x = "Local hour",
+    y = "Count",
+    title = "Repartition of tagged tracks by local hour",
+    subtitle = "Noisecapture's data,
+      2017-2020"
+  ) 
+  #facet_wrap(vars(admin))
+
+```
+
+Le graphique ci-dessus nous montre une dynamique d'utilisation des tags suivant celle de l'utilisation globale de l'application précédemment illustrée.
+
+Il apparait à premier abord que nos analyses pourraient donc se trouver biaisées par l'utilisation globale horaire lors de nos calculs de pourcentages de répartitions des différents tags selon les heures de la journée. En effet, les heures de forte utilisation pourraient comporter un plus grand pourcentage de mesures taggées, ou inversement, lors d'horaires de faible utilisation.
+
+Afin de vérifier les limites d'interprétation de nos données, il est donc important de vérifier cette hypothèse en calculant le pourcentage des données taggées par rapport aux données totales sur toutes nos heures.
+
+```{r visu-data}
+
+df_test <- inner_join(count_tags, count_tracks)
+
+df_test <- df_test %>% dplyr::mutate(percentage = count_hour_tag * 100 / count_hour)
+
+df_test
+
+ggplot(df_test) +
+  aes(x = local_hour, y = percentage) +
+  geom_bar(stat = "identity") +
+  geom_smooth(method = "lm") +
+  geom_text(aes(label= round(percentage,1)), vjust=-0.5) +
+  labs(
+    x = "Local hour",
+    y = "Percentage of tagged tracks",
+    title = "Percentage of tagged tracks by local hour",
+    subtitle = "Noisecapture's data,
+      2017-2020"
+  ) 
+
+sd(df_test$percentage)
+cor(df_test %>% select(local_hour,percentage))
+
+```
+
+Il apparait sur ce graphique que les données taggées sont réparties plutôt régulièrement sur les heures de la journée.
+
+Ce graphique tend à démontrer que l'utilisation des tags ne dépend que peu des heures locales, et peut donc être considérée comme indépendante de l'utilisation horaire globale de l'application pour nos futures analyses. Concrètement, Il apparait que nous pouvons à la fois diviser le nombre de tags par heure soit par le nombre total de traces, soit par le nombre total de traces taggées, sans que cela n'apporte de grandes différence lors de nos visualisations et analyses.
+
+#Pré-traitement des données
+
+Les données de la base ne sont pas exploitables telles quelles. Beaucoup de traces possèdent des données géographiques incohérentes, voir manquantes, tandis que d'autres ne possèdent pas de tags Certaines informations nécessaires à nos analyses sont également manquantes, telles que le pays dans lequel la trace se situe, son heure locale etc.
+
+##Nettoyage des données
+
+Il est donc essentiel de commencer par un nettoyage des données.
+
+####ECRITURE ICI
+
+```{r tag-list, include=FALSE}
+# Tag list
+query <- "SELECT distinct * FROM noisecapture_tag;"
+tag_list <- RPostgreSQL::dbGetQuery(con,statement = query) 
+```
+
+Filtering tracks that are tagged "indoor" or "test", and with a duration under 5s. Only considered tagged tracks.
+
+```{r join-track-info}
+query <- "SELECT  tv.pk_track, record_utc, time_length, pleasantness, noise_level, geog FROM tracks_view as tv ;"
+
+filtered_track_info <- sf::st_read(con, query = query)
+
+query <- "SELECT admin, iso_a2_eh, geog FROM countries;"
+
+countries <- sf::st_read(con,query = query)
+countries$iso_a2_eh[countries$iso_a2_eh=="-99"] <- NA
+
+sf_use_s2(TRUE)
+
+filtered_track_info <- st_join(filtered_track_info, countries, largest = TRUE)
+
+st_crs(filtered_track_info) <- 4326
+
+(filtered_track_info)
+
+#saveRDS(filtered_track_info, file = "vignettes/filtered_track_info.rds")
+#filtered_track_info <- readRDS("vignettes/filtered_track_info.rds")
+
+```
+
+```{r}
+
+query <- "SELECT pk_track, measure_count FROM noisecapture_track_frame"
+
+measures <- RPostgreSQL::dbGetQuery(con,statement = query)
+
+measures
+
+```
+
+
+```{r join-track-info}
+
+query <- "SELECT  ct.pk_track, record_utc, time_length, pleasantness, noise_level, track_uuid, geog FROM clean_tracks as ct ;"
+
+test <- sf::st_read(con,query = query)
+
+test <- filtered_track_info %>% left_join(tags, by = "pk_track")
+
+test %>% filter(measure_count > 5 )
+
+length(unique(test$pk_track))
+
+test
+```
+
+```{r df-geo-points, include=FALSE}
+
+sf_use_s2(FALSE)
+
+filtered_track_info <- st_join(filtered_track_info, countries)
+
+filtered_track_info <- left_join(filtered_track_info, measures)
+
+(filtered_track_info)
+
+```
+
+
+```{r df-geo-points include=FALSE}
+
+
+query <- "SELECT np.pk_point, np.pk_track, np.the_geom, np.accuracy FROM noisecapture_point as np
+INNER JOIN tracks_view tv ON np.pk_track = tv.pk_track
+WHERE np.accuracy > 0"
+
+track_points <- sf::st_read(con,query = query)
+st_crs(track_points) <- 4326
+
+#saveRDS(track_points, file = "track_points_tempo.rds")
+#saveRDS(track_points, file = "track_points.rds")
+#track_points <- readRDS("track_points.rds")
+
+str(track_points)
+
+```
+
+`length(unique(track_points\$pk_track))`
+
+
+
+```{r clear-outliers }
+library(CoordinateCleaner)
+
+coord_points <- track_points %>% dplyr::bind_cols(
+  track_points %>% st_centroid() %>% st_coordinates() %>% as_tibble() %>% dplyr::select(lon = X, lat = Y))
+
+coord_points <- coord_points %>% sf::st_drop_geometry()
+
+filtered_coord_points <- base::data.frame(matrix(ncol = 3, nrow = 0))
+colnames(filtered_coord_points) <- c('pk_track', 'lon', 'lat')
+datalist = list()
+datalist_pts = list()
+n = 1
+#Loop to clean outliers points in tracks, does not consider tracks of 1
+Sys.time()
+for(pk in filtered_track_info$pk_track){
+  
+  if(typeof(filtered_track_info$geog[[n]]) == "double"){
+    track <- filtered_track_info %>% dplyr::filter(pk_track == pk)
+    datalist_pts[[n]] <- track
+    n = n+1
+    next
+  }
+  
+  track <- coord_points %>% dplyr::filter(pk_track == pk)
+  #Filter outliers based on the median distance between points
+  x <- cc_outl(track, lon = "lon", lat = "lat", species = "pk_track", method = "mad", min_occs = 2, verbose = FALSE)
+  #Check if any point is still very far after the filtering, can occur if the track is solely composed of points very far from each others
+  #In this case, the track is not usable and will not be kept (unit = m)
+  #Filtre distance à revoir entre pts conséq -> virer > 15km/h
+  x_coord <- x %>% select(lon,lat)
+  temp <- sapply(2:nrow(x_coord),function(i){distm(x_coord[i-1,],x_coord[i,])})
+  if(length(temp[temp > 8]) > 0){
+    n = n+1
+    next
+  }
+#  if(any(as.double(st_distance(st_as_sf(x, coords=c("lon","lat"), crs = st_crs(4326)))) > 500)){
+#    n = n+1
+#    next
+#  }
+  datalist[[n]] <- x
+  n = n+1
+}
+Sys.time()
+
+filtered_points = do.call(rbind, datalist_pts)
+filtered_coord_points = do.call(rbind, datalist)
+
+saveRDS(filtered_points, file = "filtered_points_clean.rds")
+#saveRDS(filtered_coord_points, file = "filtered_coord_points_clean.rds")
+#saveRDS(filtered_coord_points, file = "filtered_coord_points_clean_tempo2_eightm.rds")
+#saveRDS(filtered_coord_points, file = "filtered_coord_points_clean_tempo_eightm.rds")
+#filtered_coord_points <- readRDS("filtered_coord_points_clean.rds")
+#filtered_coord_points <- readRDS("filtered_coord_points_clean_tempo.rds")
+#filtered_coord_points <- readRDS("vignettes/filtered_coord_points_clean_tempo2_eightm.rds")
+#filtered_points <- readRDS("vignettes/filtered_points_clean.rds")
+
+#1836 for check, 5 pts to remove
+```
+
+```{r track-poly}
+
+xys = st_as_sf(filtered_coord_points, coords=c("lon","lat"), crs = 4326)
+
+xymp  = st_sf(
+  aggregate(
+    xys,
+    by=list(xys$pk_track),
+    do_union=FALSE,
+    FUN=function(vals){vals[1]}))
+
+test <- st_transform(xymp, 4326)
+
+sf_use_s2(FALSE)
+
+xypoly = st_cast(test, 'POLYGON')
+
+xypoly$area <- st_area(xypoly)
+
+#important pour la partie spatiale, à réfléchir pour tempo vu qu'on a déjà enlevé les tracks avec pts espacés de + de 8m
+#xypoly_big <- subset(xypoly, as.double(area) > 625)
+#xypoly <- subset(xypoly, as.double(area) < 625)
+
+
+
+plot((xypoly %>% filter(pk_track == 2275))$geometry)
+hist(xypoly$area, labels = TRUE)
+
+filtered_points <- rename(filtered_points,geometry = geog)
+
+clean_track_info <- filtered_track_info %>% st_drop_geometry() 
+temp <- full_join(xypoly, filtered_points %>% as.data.frame())
+
+clean_track_info <- inner_join(clean_track_info, temp %>% dplyr::select(pk_track,geometry), by = "pk_track")
+clean_track_info <- st_as_sf(clean_track_info, crs = 4326)
+
+#clean_track_info <- st_transform(clean_track_info, 4326)
+
+#Get centroid of bounding box coordinates for later uses
+list_lon = list()
+list_lat = list()
+for(i in 1:nrow(clean_track_info)){
+list_lon <- append(list_lon,
+  mean(c(st_bbox(clean_track_info$geometry[i])$xmax,st_bbox(clean_track_info$geometry[i])$xmin)))
+list_lat <- append(list_lat,
+    mean(c(st_bbox(clean_track_info$geometry[i])$ymax,st_bbox(clean_track_info$geometry[i])$ymin)))
+}
+
+clean_track_info$lon <- list_lon
+clean_track_info$lat <- list_lat
+
+#clean_track_info <- clean_track_info %>% dplyr::bind_cols(
+#  clean_track_info %>% geosphere::centroid() %>% st_coordinates() %>% as_tibble() %>% dplyr::select(lon = X, lat = Y))
+
+str(clean_track_info)
+
+#saveRDS(clean_track_info, file = "vignettes/clean_track_info_tempo_8m.rds")
+#clean_track_info <- readRDS(file = "vignettes/clean_track_info.rds")
+#clean_track_info <- readRDS(file = "vignettes/clean_track_info_tempo_8m.rds")
+
+```
+
+
+```{r df geo clean include=FALSE}
+
+list_tracks<-split(track_points, track_points$pk_track)
+list_tracks %>% head()
+
+#From ~60% to ~88% of all tagged data with this new filtering method
+```
+
+```{r leaflet}
+
+tr <- ((xypoly %>% filter(pk_track == 59408)))
+
+leaflet(tr) %>% addProviderTiles(providers$CartoDB.Positron) %>% 
+  addPolygons(color = "red", weight = 1, smoothFactor = 0.5,
+    opacity = 1.0, fillOpacity = 0.5,
+    fillColor = "red",
+    highlightOptions = highlightOptions(color = "white", weight = 2,
+      bringToFront = TRUE))
+
+```
+
+```{r df timezone}
+
+query <- "SELECT fid as timezone_id, geom, utc_format, tz_name1st FROM timezones;"
+
+timezones <- sf::st_read(con,query = query)
+timezones_clean <- timezones[!(is.na(timezones$tz_name1st) | timezones$tz_name1st==""), ] #Dropping rows with NA values to prevent future mistakes
+
+
+```
+
+```{r intersect geo timezones}
+library(s2)
+
+st_crs(clean_track_info) #to check norm id <- 4326 (world default)
+
+st_crs(timezones) <- 4326 #specify world ref to match previous one since NA
+st_transform(timezones, crs = 4326)
+
+sf_use_s2(FALSE) #disable spherical geometry use
+
+#clean_track_info$geometry <- clean_track_info$geometry %>% #code found to repair geo for s2 compatibility (spherical projection)
+#  s2::s2_rebuild(s2_options(split_crossing_edges = TRUE, edge_type = "undirected")) %>%
+#  sf::st_as_sfc()
+
+full_info <- sf::st_join(clean_track_info, timezones) #intersect tracks geog with timezones geom
+full_info
+
+#saveRDS(full_info, file = "vignettes/full_info.rds")
+
+```
+
+### Tag information
+
+```{r tag-info}
+query <- "SELECT tv.pk_track, tag_name FROM tracks_view as tv
+INNER JOIN noisecapture_track_tag ntt ON tv.pk_track = ntt.pk_track /* Add track tags*/
+INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/;"
+
+tag_info <- RPostgreSQL::dbGetQuery(con,statement = query) %>% dplyr::filter(pk_track %in% clean_track_info$pk_track)
+(tag_info)
+
+```
+
+Those `r nrow(filtered_track_info)` #nb tracks tracks correspond to `r nrow(tag_info)` #nb tags tags as a track can have multiple tags.
+
+```{r tag-histo, echo=FALSE}
+ggplot(tag_info) +
+  aes(y = tag_name) +
+  geom_bar(fill = "#112446") +
+  labs(
+    x = "Tag",
+    title = "Tag repartition in the subset for temporal analysis",
+    caption = "Count of each tag"
+  ) 
+#ggsave("C:/Users/moisan/Documents/Stage/Scripts/lasso-data-analysis-main/plots/world_tag_repartitions_tempo.png", width = 12) 
+```
+
+# Time repartition
+
+## All year
+
+```{r merge-informations timezones}
+all_info <- tag_info %>% 
+  dplyr::inner_join(
+    full_info %>% filter(!is.na(tz_name1st)) %>% sf::st_drop_geometry()) %>%
+  # add local date
+  dplyr::mutate(local_time = (lubridate::local_time(lubridate::ymd_hms(record_utc, tz = "UTC"),tz_name1st,   units="hours"))) # target timezone
+  
+  #season = hydroTSM::time2season(lubridate::date(record_utc), out.fmt = "seasons", type="default")) # compute season
+
+#Simple, fonctionne, mais ne prend pas en compte le daylight saving
+#all_info %>% all_info %>% mutate(local_date_whDL = ymd_hms(record_utc) + hm(utc_format))
+
+#Beaucoup plus complexe, mais prend en compte le daylight saving déjà pris en compte par le local_time (lubridate)
+all_info <- all_info %>% mutate(local_date = case_when(
+  ymd(substr(ymd_hms(record_utc) + hm(utc_format),1,10)) == ymd(substr(record_utc,1,10)) ~ ymd_hms((paste(substr(record_utc,1,10),"00:00:00"))) + local_time,
+  ymd(substr(ymd_hms(record_utc) + hm(utc_format),1,10)) < ymd(substr(record_utc,1,10)) ~ ymd_hms((paste(substr(record_utc,1,10),"00:00:00"))) - 86400 + local_time,
+    ymd(substr(ymd_hms(record_utc) + hm(utc_format),1,10)) > ymd(substr(record_utc,1,10)) ~ ymd_hms((paste(substr(record_utc,1,10),"00:00:00"))) + 86400 + local_time
+))
+
+all_info$lon <- as.numeric(all_info$lon)
+all_info$lat <- as.numeric(all_info$lat)
+
+#>Les saisons doivent être calculées selon la date ET la latitude.
+#>Le calcul de la librairie hydroTSM ne fonctionne que pour la france métropolitaine ou la polynésie française (à spécifier dans "type=")
+#>Les dates des débuts de saisons ci-dessous sont génériques, la précision de la date à l'heure près n'est pas nécessaire ici.
+#>Les saisons ne sont présentes qu'entres les latitudes (-)23.5 et (-)66.5.
+#>L'équateur et les pôles, ne possédant pas vraiment des saisons, sont notées à part, dans la colonne "season" et "hemisphere"
+
+y_m <- format(all_info$record_utc, format ="%m-%d")
+all_info$ym <- y_m
+
+north_spring <- "03-21"
+north_summer <- "06-22"
+north_autumn <- "09-22"
+north_winter <- "12-22"
+start_year <- "01-01"
+end_year <- "12-31"
+south_autumn <- "03-21"
+south_winter <- "06-22"
+south_spring <- "09-22"
+south_summer <- "12-22"
+
+all_info <- all_info %>%
+  mutate(season = case_when(
+    lat > 23.5 & lat < 66.5 & y_m >= north_spring & y_m < north_summer  ~ "spring",
+    lat > 23.5 & lat < 66.5 & y_m >= north_summer & y_m < north_autumn  ~ "summer",
+    lat > 23.5 & lat < 66.5 & y_m >= north_autumn & y_m < north_winter  ~ "autumn",
+    lat > 23.5 & lat < 66.5 & y_m >= north_winter & y_m <= end_year  ~ "winter",
+        lat > 23.5 & lat < 66.5 & y_m >= start_year & y_m < north_spring  ~ "winter",
+
+    lat < -23.5 & lat > -66.5 & y_m >= south_autumn & y_m < south_winter  ~ "autumn",
+    lat < -23.5 & lat > -66.5 & y_m >= south_winter & y_m < south_spring  ~ "winter",
+    lat < -23.5 & lat > -66.5 & y_m >= south_spring & y_m < south_summer  ~ "spring",
+    lat < -23.5 & lat > -66.5 & y_m >= south_summer & y_m <= end_year  ~ "summer",
+        lat < -23.5 & lat > -66.5 & y_m >= start_year & y_m < south_autumn  ~ "summer",
+    
+    lat <= 23.5 & lat >= -23.5 ~ "equator",
+    lat >= 66.5 | lat <= -66.5 ~ "pole"
+    ))
+
+all_info <- all_info %>%
+  mutate(hemisphere = case_when(
+    lat > 23.5 & lat < 66.5 ~ "north",
+    lat < -23.5 & lat > -66.5 ~ "south",
+    lat <= 23.5 & lat >= -23.5 ~ "equator",
+    lat >= 66.5 | lat <= -66.5 ~ "pole"
+  ))
+
+#>La France possède de nombreux territoires d'outre mer qui sont considérés dans nos données sous le même nom "France"
+#>Le territoire est renommé "France_dromcom" si sa position ne fait pas partie d'une bounding box lat(40;55) lon(-6;10) 
+#>(approximation large autour de la France)
+#>Ce processus pourrait être remplacé par une meilleure définition des pays dès le départ, mais je n'ai pas eu le  temps de proposer une nouvelle création de tables de données POSTGRE pertinentes pour le projet
+
+all_info <- all_info %>% 
+  mutate(admin = case_when(
+    admin == "France" & ((lat < 40 | lat > 55) & (lon < -6 | lon > 10)) ~ "Dromcom",
+    TRUE ~ admin
+  ))
+
+library(chron)
+all_info <- all_info %>% mutate(week_end = case_when(
+  chron::is.weekend(local_date) ~ TRUE,
+  TRUE ~ FALSE
+))
+
+#saveRDS(all_info, file = "vignettes/all_info.rds")
+#all_info <- readRDS(file = "vignettes/all_info.rds")
+```
+
+```{r compute-tags-occurrences-for-countries}
+#Hours are rounded via floor() function (4.6 = 4)
+
+occurences <- all_info %>% dplyr::group_by(tag_name, admin, local_time = as.numeric(round(local_time))) %>% dplyr::count(name = "track_occurences")
+
+occurences["local_time"][occurences["local_time"] == 0] <- 24
+
+occurences <- all_info %>% dplyr::group_by(tag_name, admin, local_time = as.numeric(floor(local_time))) %>% dplyr::count(name = "track_occurences")
+
+
+occurences #%>% head() #%>% knitr::kable()
+
+```
+
+```{r compute-tags-hourly-repartition Country}
+
+tags_hourly_repartition <- occurences %>% 
+  left_join(
+    occurences %>%  dplyr::group_by(local_time, admin) %>% dplyr::summarise(total = sum(track_occurences)),
+    by = c("local_time", "admin"))
+
+tags_hourly_repartition <- tags_hourly_repartition %>% dplyr::group_by(local_time,admin) %>% dplyr::mutate(percentage = track_occurences * 100 / total)
+
+tags_hourly_repartition #%>% dplyr::filter(admin == "France") #%>% head() #%>% knitr::kable()
+
+```
+
+```{r tags-hourly-repartition-graph Country}
+ggplot(tags_hourly_repartition %>% filter(admin == "France")) +
+  aes(x = local_time, y = percentage) +
+  geom_col() + geom_smooth(method = "loess", se = FALSE, color = "blue") +
+  labs(
+    x = "Local hour",
+    y = "Proportion of tag per hour",
+    title = "Hourly repartition of tags",
+    subtitle = "Noicecaptures tags in France,
+    2017 - 2020"
+  ) +
+  scale_x_continuous(breaks = c(1,6,12,18,24))+
+  facet_wrap(vars(tag_name), scales = "free_y")
+
+#loess graph by stats::loess(percentage ~ local_time, data = tags_hourly_repartition %>% filter(admin == "France"))
+
+#ggsave("C:/Users/moisan/Documents/Stage/Scripts/lasso-data-analysis-main/plots/tags_hourly_dynamics_france_on_all.png", width = 20, height = 10) 
+```
+
+```{r compute-tags-occurrences-world}
+#Hours are rounded via floor() function (4.6 = 4)
+occurences_world <- all_info %>% dplyr::group_by(tag_name, local_time = as.numeric(round(local_time))) %>% dplyr::count(name = "track_occurences")
+
+occurences_world["local_time"][occurences_world["local_time"] == 0] <- 24
+
+```
+
+```{r compute-tags-hourly-repartition world}
+
+tags_hourly_repartition_world <- occurences_world %>% 
+  left_join(
+    occurences_world %>%  dplyr::group_by(local_time) %>% dplyr::summarise(total = sum(track_occurences)),
+    by = c("local_time"))
+
+tags_hourly_repartition_world <- tags_hourly_repartition_world %>% dplyr::group_by(local_time) %>% dplyr::mutate(percentage = track_occurences * 100 / total)
+
+```
+
+```{r compute-tags-hourly-repartition}
+
+tags_hourly_repartition <- occurences %>% 
+  left_join(
+    occurences %>%  dplyr::group_by(local_time) %>% dplyr::summarise(total = sum(track_occurences)),
+    by = "local_time")
+
+tags_hourly_repartition <- tags_hourly_repartition %>% dplyr::group_by(local_time) %>% dplyr::mutate(percentage = track_occurences * 100 / total)
+
+tags_hourly_repartition %>% dplyr::filter(admin == "France") #%>% head() #%>% knitr::kable()
+
+```
+
+
+
+```{r tags-hourly-repartition-graph world}
+ggplot(tags_hourly_repartition_world) +
+  aes(x = local_time, y = percentage) +
+  geom_col() + geom_smooth(method = "loess", se = FALSE, color = "blue") +
+```
+
+
+```{r tags-hourly-repartition-graph}
+ggplot(tags_hourly_repartition %>% filter(admin == "Switzerland")) +
+  aes(x = local_time, y = percentage) +
+  geom_col() +
+  labs(
+    x = "Local hour",
+    y = "Proportion of tag per hour",
+    title = "Hourly repartition of tags",
+    subtitle = "Noicecaptures tags in the world,
+    2017 - 2020"
+  ) +
+  scale_x_continuous(breaks = c(1,6,12,18,24))+
+  facet_wrap(vars(tag_name), scales = "free_y")
+
+#ggsave("C:/Users/moisan/Documents/Stage/Scripts/lasso-data-analysis-main/plots/tags_hourly_dynamics_france_on_all.png", width = 20, height = 10) 
+
+  facet_wrap(vars(tag_name), scales = "free_y")
+
+ggsave("C:/Users/moisan/Documents/Stage/Scripts/lasso-data-analysis-main/plots/tags_hourly_dynamics_suisse.png", width = 20, height = 10) 
+
+```
+
+
+Un point important à considérer lors de notre analyse temporelle est l'importance de la météo sur la répartition ou la présence de certains tags. Il apparait essentiel par exemple que le tag "rain" doit être présent uniquement si de la pluie était factuellement présente ou proche lors de la prise de mesure, mais il est également intéressant de voir si la pluie a une influence sur la présence d'autres tags, tels que "footstep", "animals" ou "chatting."
+La température pourrait également être un facteur 
+
+
+```{r meteo-get-data}
+#library(rnoaa)
+
+#Meteo
+#https://donneespubliques.meteofrance.fr/?fond=produit&id_produit=90&id_rubrique=32
+#Documentation: https://donneespubliques.meteofrance.fr/client/document/parametres-inclus-dans-les-fichiers-de-donnees-synop_283.pdf
+library(RCurl)
+library(data.table)
+library(lubridate)
+
+#Stations list
+setwd("~/Stage/Scripts/lasso-data-analysis-main/raw_data")
+
+filename <- "postesSynop.csv"
+
+if(!file.exists(filename)){
+  f = CFILE(filename, mode="wb")
+  curlPerform(url = "https://donneespubliques.meteofrance.fr/donnees_libres/Txt/Synop/postesSynop.csv", writedata = f@ref)
+  close(f)
+}
+
+synopStations <- read.csv2(filename)
+
+#Weather data
+meteoData <- list()
+
+date <- as.Date("20170101",format="%Y%m%d")
+
+while(format(date,"%Y%m") < format(Sys.Date(),"%Y%m")){
+  
+  month(date) <- month(date) + 1
+  
+  #Download file
+  filename <- gsub(" ", "",paste ("synop.",format(date,"%Y%m"),".csv.gz"))
+  
+  if(!file.exists(filename) | (format(date,"%Y%m") == format(Sys.Date(),"%Y%m"))){
+    f = CFILE(filename, mode="wb")
+    curlPerform(url = gsub(" ", "",paste("https://donneespubliques.meteofrance.fr/donnees_libres/Txt/Synop/Archive/synop.",format(date,"%Y%m"),".csv.gz")), writedata = f@ref)
+    close(f)
+  }
+  
+  meteoData[[format(date,"%Y%m")]] <- read.csv2(gzfile(filename))
+  print(format(date,"%Y%m"))
+}
+
+#Perform date transformations
+for (name in names(meteoData)) {
+  #Date characters
+  meteoData[[name]]$date_string <- format(meteoData[[name]]$date, scientific = FALSE)
+  meteoData[[name]]$date_string <- as.character(meteoData[[name]]$date_string)
+  #Year
+  meteoData[[name]]$year <- as.numeric(substr(meteoData[[name]]$date_string, 1, 4))
+  #Month
+  meteoData[[name]]$month <- as.numeric(substr(meteoData[[name]]$date_string, 5, 6))
+  #Day
+  meteoData[[name]]$day <- as.numeric(substr(meteoData[[name]]$date_string, 7, 8))
+  #Hour
+  meteoData[[name]]$hour <- as.numeric(substr(meteoData[[name]]$date_string, 9, 10))
+  #Format date
+  meteoData[[name]]$date_r <- paste(substr(meteoData[[name]]$date_string, 1, 4),
+                                    substr(meteoData[[name]]$date_string, 5, 6),
+                                    substr(meteoData[[name]]$date_string, 7, 8),
+                                    substr(meteoData[[name]]$date_string, 9, 10),
+                                    sep = "-")
+}
+
+#Export to CSV
+
+exportFilename <- "synop.csv"
+file.remove(exportFilename)
+
+count <- 0
+for (name in names(meteoData)) {
+  print(name)
+  if(count == 0){
+    write.table(meteoData[[name]], file = exportFilename,sep = ";",row.names = FALSE,col.names = TRUE)
+  } else{
+    write.table(meteoData[[name]], file = exportFilename, append=TRUE,sep = ";",row.names = FALSE,col.names = FALSE)
+  }
+  count <- count+1
+}
+
+setwd("~/Stage/Scripts/lasso-data-analysis-main")
+
+synopStations <- read.csv('raw_data/postesSynop.csv', sep=";", header = TRUE)
+get_nearest_station <- function(long,lat){
+  if(!exists("synopStations")){
+  synopStations <- read.csv('raw_data/postesSynop.csv', sep=";", header = TRUE)
+  }
+  synopStations$distance <- apply(synopStations[,c('Longitude','Latitude')], 1,
+                                  function(x){
+                                    synopStations$distance <- 
+                                      distGeo(c( as.numeric(x['Longitude']),as.numeric(x['Latitude'])),c(long,lat))
+                                  })
+  
+  synopStations[which(synopStations$distance==min(synopStations$distance, na.rm = TRUE)), ]
+}
+
+stations <- fread('raw_data/synop.csv', sep=";", header = TRUE, 
+                       select = c("numer_sta"="numeric","date_r"="character",
+                                  "rr3"="character","ff"="character","t"="character",
+                                  "year"="numeric","month"="numeric","day"="numeric","hour"="numeric"))
+get_weather <- function(long,lat,y,m=1,d=1,h=12){
+  ID <- (get_nearest_station(long, lat))$ID
+  dist <- (get_nearest_station(long, lat))$distance
+  if(!exists("stations")){
+  stations <- fread('raw_data/synop.csv', sep=";", header = TRUE, 
+                       select = c("numer_sta"="numeric","date_r"="character",
+                                  "rr3"="character","ff"="numeric","t"="numeric",
+                                  "year"="numeric","month"="numeric","day"="numeric","hour"="numeric"))
+  }
+  station <- stations %>% filter(numer_sta == ID & year == y & month == m & day == d & hour == ceiling(h/3)*3)
+  if(length(station$rr3)==0){
+    rain <- NA
+  }
+  if(length(station$rr3)!=0){
+    rain <- as.numeric(station$rr3)
+  }
+    if(length(station$ff)==0){
+    wind <- NA
+  }
+  if(length(station$ff)!=0){
+    wind <- as.numeric(station$ff)
+  }
+    if(length(station$t)==0){
+    kelvin <- NA
+  }
+  if(length(station$t)!=0){
+    kelvin <- as.numeric(station$t)
+  }
+  #print(paste(rain,"mm",sep=""))
+  #print(paste(dist,"m",sep=""))
+  info_rain <- c(rain,kelvin,wind,dist)
+  return(info_rain)
+}
+#tests
+#get_nearest_station(-4.167936,47.84279)
+#get_nearest_station(2.327728,48.857487)$Longitude
+#get_weather(-4.167936,47.84279,2019,4,2,6)
+#row <- rain_df[2357,]
+#get_weather(row$lon,row$lat,year(row$record_utc),month(row$record_utc),day(row$record_utc),hour(row$record_utc))
+
+df_meteo = as.data.frame(matrix(nrow = 1, ncol = 6))
+time_after_sunrise_france <- time_after_sunrise %>% filter(admin == "France" & lat > 35 & lat < 55 & lon > -6 & lon < 9)
+meteo_df <- time_after_sunrise_france
+for(i in 1:nrow(meteo_df)) {
+    row <- meteo_df[i,]
+    track <- row$pk_track
+    tag <- row$tag_name
+    meteo_info <- 
+      get_weather(row$lon,row$lat,year(row$record_utc),month(row$record_utc),day(row$record_utc),hour(row$record_utc))
+    info <- c(track,tag,meteo_info)
+    df_meteo[nrow(df_meteo) + 1,] <- info
+}
+
+df_meteo <- df_meteo %>% slice(2:nrow(df_meteo))
+
+#saveRDS(df_meteo, file = "vignettes/df_meteo.rds")
+#df_meteo <- readRDS(file = "vignettes/df_meteo.rds")
+
+meteo_france <- df_meteo %>% mutate(pk_track = as.numeric(V1), tag_name = V2, rain_mm = as.numeric(V3), celsius = as.numeric(V4) - 273.15, wind = as.numeric(V5)*3.6, dist_station = as.numeric(V6)) %>% select(pk_track,tag_name,rain_mm,celsius,wind,dist_station)
+
+meteo_france <- inner_join(meteo_france, all_info %>% filter(admin=="France"), by = c("pk_track","tag_name")) %>% select(pk_track,tag_name,rain_mm,celsius,wind,dist_station,season,local_date)
+
+#saveRDS(meteo_france, file = "vignettes/meteo_france.rds")
+#meteo_france <- readRDS(file = "vignettes/meteo_france.rds")
+
+```
+
+
+```{r track-to-sunrise}
+
+occurences_sunrise <- time_after_sunrise %>% dplyr::group_by(tag_name, admin, after_sunrise = as.numeric(floor(after_sunrise))) %>% dplyr::count(name = "track_occurence")
+occurences_sunrise_full_tag <- occurences_sunrise %>% group_by(after_sunrise) %>% dplyr::summarise(total = sum(track_occurence))
+
+tags_sunrise_repartition <- occurences_sunrise %>% 
+  left_join(occurences_sunrise_full_tag)%>% dplyr::filter(track_occurence>2 && tag_name == "animals" )  %>% mutate(percentage = track_occurence * 100 / total)
+    
+ggplot(tags_sunrise_repartition) +
+  aes(x = after_sunrise, y = percentage)+
+  geom_col() +
+  labs(
+    x = "Number of hours after sunrise",
+    y = "Proportion of tag (%) per hour") +
+  
+   facet_wrap(vars(admin), scales = "free_y")
+#ggsave("C:/Users/moisan/Documents/Stage/Scripts/lasso-data-analysis-main/plots/road_tag_dynamics_around_sunrise.png", width = 20, height = 10) 
+```
+
+
+
+```{r mapping}
+#install the osmdata, sf, tidyverse and ggmap package
+if(!require("osmdata")) install.packages("osmdata")
+if(!require("tidyverse")) install.packages("tidyverse")
+if(!require("sf")) install.packages("sf")
+if(!require("ggmap")) install.packages("ggmap")
+
+#load packages
+library(tidyverse)
+library(osmdata)
+library(sf)
+library(ggmap)
+
+#Nous allons ici récupérer les centroids des tracks avec tags "chatting" et calculer leur distance avec les bars ou autres "amenities" récupérables avec openstreetmap
+#Dans le but de chercher une corrélation entre la présence de ces tags, leur niveau sonore et/ou pleasantness, et leur proximité avec des lieux de sorties
+
+#récupère le tableau complet avec l'ensemble de nos données, full info + tags avec géométries
+track_infos_geo <- st_as_sf(tag_info %>% 
+  dplyr::inner_join(
+    full_info %>% filter(!is.na(tz_name1st))))
+#Chatting en France
+chat_france <- track_infos_geo %>% dplyr::filter(admin == "France") %>% dplyr::filter(tag_name == "chatting")
+
+chat_france <- chat_france %>% dplyr::bind_cols(
+  chat_france %>% st_centroid() %>% st_coordinates() %>% as_tibble() %>% select(lat = Y, lon = X))
+
+#Method to get POIs (Points Of Interests) - here bars - within radius around a precise point (lon, lat)
+#x <- opq_around (lon, lat, radius, key, value) %>% osmdata_sf()
+
+datalist = list()
+
+for(i in (1:nrow(chat_france))){
+  
+x <- opq_around(chat_france[[i,14]], chat_france[[i,13]], 500, "amenity", "bar") %>% osmdata_sf()
+
+dat <- x$osm_points$geometry
+dat$i = i
+dat$pk_track = chat_france[[i,1]]
+datalist[[i]] <- dat
+print(i) #Only to check where the calculation is at, since it's a pretty long process
+}
+
+#saveRDS(datalist, file = "datalist_tracks.rds")
+#datalist <- readRDS(file = "datalist_tracks.rds")
+
+#Calculate distance between track centroid and POIs . distance in meters
+#For a first test, calculating distance between first amenity in list with the corresponding track centroid
+library(geosphere)
+
+#distm(c(lon1, lat1), c(lon2, lat2), fun = distHaversine)
+distm(c(x$osm_points$geometry[[1]][1], x$osm_points$geometry[[1]][2]), c(chat_france[[1,14]], chat_france[[1,13]]), fun = distGeo)
+#385m which match with google map result, so method seems to be good
+#Next step is to apply this measure to all the data
+
+
+
+```
+
+```{r analyse-meteo}
+
+meteo_france_clean <- meteo_france %>% drop_na()
+#meteo_france_clean$rain_mm <- round(meteo_france_clean$rain_mm)
+#meteo_france_clean <- meteo_france_clean %>% mutate(rain_mm = case_when(rain_mm < 0 ~ 0,TRUE ~ rain_mm))
+
+#Echelle de pluie non officielle mais suggérée par météo france :
+#http://pluiesextremes.meteo.fr/france-metropole/Intensite-de-precipitations.html
+
+brks = 
+  c(min(meteo_france_clean$rain_mm),0,0.2,0.4,0.6,1.4,2,7,max(meteo_france_clean$rain_mm))
+  #c(min(meteo_france_clean$rain_mm),0,0.2,0.4,0.55,0.6,0.8,1.4,1.6,2.57,3.6,60),
+  #c(min(meteo_france_clean$rain_mm),0,0.5,3,5,8,max(meteo_france_clean$rain_mm)),
+  #c(0,2,4,6,8,1000),
+  #c(0,0.5,3,7,1000),
+meteo_france_clean$groups_rain <- cut(meteo_france_clean$rain_mm, 
+                      breaks = brks,
+                      include.lowest = TRUE, labels = FALSE)
+
+med_raingroup <- c()
+for(i in 1:(length(brks)-1)){med_raingroup <- append(med_raingroup,(median((meteo_france_clean %>% filter(groups_rain == i))$rain_mm)))}
+
+meteo_france_clean$beaufort <- cut(meteo_france_clean$wind,
+                      breaks = c(0,1,5,11,19,28,38,49,61,74,88,102,117),
+                      include.lowest = TRUE, labels = FALSE)-1
+meteo_france_clean$groups_temp <- cut(meteo_france_clean$celsius,
+                      breaks = seq(floor(min(meteo_france_clean$celsius)/3)*3,ceiling(max(meteo_france_clean$celsius)/3)*3,by=3),
+                      include.lowest = TRUE)
+
+meteo_france_tag_rain <- meteo_france_clean %>% filter(tag_name == "rain") %>% drop_na(rain_mm)
+meteo_france_tag_wind <- meteo_france_clean %>% filter(tag_name =="wind") %>% drop_na(wind)
+meteo_france_tag_chat <- meteo_france_clean %>% filter(tag_name =="chatting") %>% drop_na(celsius)
+meteo_france_tag_animals <- meteo_france_clean %>% filter(tag_name =="animals") %>% drop_na(celsius)
+
+#rain
+
+quantile(meteo_france_tag_rain$dist_station, seq(0,1,by=0.05))
+#> 
+#> The median distance between french "rain" tagged tracks' centroids and stations is 11.48km
+plot(seq(0,100,by=5),quantile(meteo_france_tag_rain$dist_station, seq(0,1,by=0.05))/1000, xlab = "Quantile Percentage", ylab = "Distance from station (km)", type = "o", main = "French rain tags")
+
+#calcul avec distance mediane
+rain_france_close <- meteo_france_tag_rain %>% filter(dist_station <= median(meteo_france_tag_rain$dist_station))
+rain_france_rain <- meteo_france_tag_rain %>% filter(dist_station <= median(meteo_france_tag_rain$dist_station) & rain_mm > 0)
+rain_france_no_rain <- meteo_france_tag_rain %>% filter(dist_station <= median(meteo_france_tag_rain$dist_station) & rain_mm <= 0)
+
+nrow(rain_france_rain)/length(unique((rain_france_close)$pk_track))*100
+#>77.21% des tracks taggés rain avec une station à moins de 11.48km ont effectivement eu de la pluie
+
+rain_prop <- c()
+for(i in 1:length(unique(meteo_france_clean$groups_rain))){
+  print(i)
+  rain_prop <- append(rain_prop,(nrow(meteo_france_tag_rain %>% filter(groups_rain == i))/ length(unique((meteo_france_clean %>% filter(groups_rain == i))$pk_track)))*100)
+}
+
+#c("-no rain-","(0;0.5]mm/h","(0.5;3]mm/h", "(3;5]mm/h", "(5;8]mm/h","(8+]mm/h")
+#c("-no rain-","(0;2]mm/h","(2;4]mm/h", "(4;6]mm/h", "(6;8]mm/h","(8+]mm/h")
+#c("-no rain-", "1-3mm/h", "4-7mm/h", "8+mm/h")
+
+ggplot() +
+  geom_col(aes(x = c("-no rain-","(0,0.2]","(0.2,0.4]","(0.4,0.6]","(0.6,1.4]","(1.4,2]","(2,7]","(7,+)"), y = rain_prop)) +
+  labs(
+    x = "Precipitation (mm/h)",
+    y = "Proportion of tracks with rain tag (%)",
+    title = "Repartition of tracks with rain tags based on precipitation",
+    subtitle = "Noisecapture's tags in France,
+      2017-2020")
+
+ggplot() +
+  geom_smooth(method = "lm", aes(x = med_raingroup, y = rain_prop)) + #geom_point(aes(x = med_raingroup, y = rain_prop))+
+  labs(
+    x = "Precipitation (mm/h)",
+    y = "Proportion of tracks with rain tag (%)",
+    title = "Repartition of tracks with rain tags based on precipitation",
+    subtitle = "Noisecapture's tags in France,
+      2017-2020")
+
+rain_footsteps <- meteo_france_clean %>% filter(tag_name =="footsteps") %>% drop_na(rain_mm)
+
+footsteps_rain_prop <- c()
+for(i in 1:length(unique(meteo_france_clean$groups_rain))){
+  print(i)
+  footsteps_rain_prop <- append(footsteps_rain_prop,(nrow(rain_footsteps %>% filter(groups_rain == i))/ length(unique((meteo_france_clean %>% filter(groups_rain == i))$pk_track)))*100)
+}
+
+ggplot() +
+  geom_col(aes(x = c("-no rain-", "1-3mm/h", "4-7mm/h", "8+mm/h"), y = footsteps_rain_prop)) +
+  labs(
+    x = "Precipitation",
+    y = "Proportion of tracks with footsteps tag (%)",
+    title = "Repartition of tracks with footsteps tags based on precipitation",
+    subtitle = "Noisecapture's tags in France,
+      2017-2020")
+
+rain_chat <- meteo_france_clean %>% filter(tag_name =="chatting") %>% drop_na(rain_mm)
+
+chat_rain_prop <- c()
+for(i in 1:length(unique(meteo_france_clean$groups_rain))){
+  print(i)
+  chat_rain_prop <- append(chat_rain_prop,(nrow(rain_chat %>% filter(groups_rain == i))/ length(unique((meteo_france_clean %>% filter(groups_rain == i))$pk_track)))*100)
+}
+
+ggplot() +
+  geom_col(aes(x = c("-no rain-", "1-3mm/h", "4-7mm/h", "8+mm/h"), y = chat_rain_prop)) +
+  labs(
+    x = "Precipitation",
+    y = "Proportion of tracks with chatting tag (%)",
+    title = "Repartition of tracks with chatting tag based on precipitation",
+    subtitle = "Noisecapture's tags in France,
+      2017-2020")
+
+  
+#wind
+quantile(meteo_france_tag_wind$dist_station, seq(0,1,by=0.05))
+#> 
+#> The median distance between french "wind" tagged tracks' centroids and stations is 12.91km
+plot(seq(0,100,by=5),quantile(meteo_france_tag_wind$dist_station, seq(0,1,by=0.05))/1000, xlab = "Quantile Percentage", ylab = "Distance from station (km)", type = "o", main = "French wind tags")
+
+#calcul avec distance mediane
+wind_france_close <- meteo_france_tag_wind %>% filter(dist_station <= median(meteo_france_tag_wind$dist_station))
+wind_france_wind <- meteo_france_tag_wind %>% filter(dist_station <= median(meteo_france_tag_wind$dist_station) & wind > 0)
+wind_france_no_wind <- meteo_france_tag_wind %>% filter(dist_station <= median(meteo_france_tag_wind$dist_station) & wind <= 0)
+
+nrow(wind_france_wind)/nrow(wind_france_close)*100
+nrow(wind_france_no_wind)/nrow(wind_france_close)*100
+#>100% des tracks taggés wind avec une station à moins de 12.91km ont effectivement eu du vent
+
+wind_prop <- c()
+len <- (length(unique(meteo_france_clean$beaufort)))-1
+for(i in 0:len){
+  wind_prop <- append(wind_prop,(nrow(meteo_france_tag_wind %>% filter(beaufort == i))/length(unique((meteo_france_clean %>% filter(beaufort == i))$pk_track)))*100)
+}
+
+ggplot() +
+  geom_col(aes(x = seq(from = 0, to =len), y = wind_prop)) +
+  labs(
+    x = "Beaufort Scale",
+    y = "Proportion of tracks with wind tag (%)",
+    title = "Repartition of tracks with wind tags based on wind force",
+    subtitle = "Noisecapture's tags in France,
+      2017-2020")
+
+
+#temperature / chatting
+
+quantile(meteo_france_tag_chat$celsius, seq(0,1,by=0.05))
+#> 
+#> The median distance between french "wind" tagged tracks' centroids and stations is 12.91km
+plot(seq(0,100,by=5),quantile(meteo_france_tag_chat$celsius, seq(0,1,by=0.05)), xlab = "Quantile Percentage", ylab = "Temperature (Celsius)", type = "o", main = "French chat tags")
+
+
+df_temp_chat <- data.frame(matrix(nrow=4,ncol = 15))
+colnames(df_temp_chat) <- c(levels(meteo_france_clean$groups_temp),"saison")
+n = 1
+for(s in (unique(meteo_france_clean$season))){
+  chat_prop <- c()
+  for(g in sort(unique(meteo_france_clean$groups_temp))){
+    chat_prop <- append(chat_prop,(nrow(meteo_france_tag_chat %>% filter(groups_temp == g & season == s))/length(unique((meteo_france_clean %>% filter(groups_temp == g & season == s))$pk_track)))*100)
+  }
+  chat_prop <- append(chat_prop,s)
+  print(chat_prop)
+  df_temp_chat[n,] <- chat_prop 
+  n = n+1
+}
+
+df_temp_chat <- melt(df_temp_chat, id.vars ="saison")
+df_temp_chat$value <- as.numeric(df_temp_chat$value)
+
+ggplot(df_temp_chat, aes(x= variable, y= value)) +
+  geom_col() +
+  labs(
+    x = "Temperature groups",
+    y = "Proportion of chat tag (%)",
+    title = "Repartition of chat tags based on temperature",
+    subtitle = "Noisecapture's tags in France,
+      2017-2020")+
+  facet_grid(rows = vars(saison))
+
+#Assemblage des données
+
+meteo_france$groups_rain <- cut(meteo_france$rain_mm, 
+                      breaks = c(min(meteo_france$rain_mm %>% na.omit()),0,1,3,5,7,
+                                 max(meteo_france$rain_mm %>% na.omit())),
+                      include.lowest = TRUE, labels = FALSE)
+meteo_france$beaufort <- cut(meteo_france$wind,
+                      breaks = c(0,1,5,11,19,28,38,49,61,74,88,102,117),
+                      include.lowest = TRUE, labels = FALSE)-1
+meteo_france$groups_temp <- cut(meteo_france$celsius,
+                      breaks = seq(floor(min(meteo_france$celsius %>% na.omit())/3)*3, ceiling(max(meteo_france$celsius %>% na.omit())/3)*3,by=3),
+                      include.lowest = TRUE)
+
+all_info <- left_join(all_info,meteo_france)
+
+
+```
+
+La proportion des tags "wind" et "rain" dépendent grandement de la quantité de ces éléments.
+Le tag "wind" à l'air de se plafonner à la moitié des tracks taggées lors de vents forts à partir de la force 7 sur l'échelle de beaufort (50+km/h)
+La proportion du tag "chatting" n'a pas l'air de dépendre de la température moyenne, même en fonction des saisons.
+
+
+```{python test}
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+df_chat = r.chat_france
+dict_arround = r.datalist
+
+import geopy.distance
+
+#Loops to only keep tracks where there are POIs associated
+liste_tracks_bar = []
+liste_no_bar = []
+for dict in dict_arround :
+  if len(dict) > 2 :
+    liste_tracks_bar.append(dict)
+  else :
+    liste_no_bar.append(dict)
+;
+
+
+liste_pk_tracks_bar = []
+
+for dict in liste_tracks_bar :
+  for key, value in dict.items():
+    if key == "pk_track" :
+      liste_pk_tracks_bar.append(value)
+;
+
+df_chat_bar = df_chat[df_chat['pk_track'].isin(liste_pk_tracks_bar)]
+
+coords_point = list(zip(df_chat_bar["lon"], df_chat_bar["lat"]))
+
+dist_bar = []
+for i in range(len(coords_point)):
+  for j in range(len(liste_tracks_bar[i].values())-2):
+    dist_bar.append(geopy.distance.distance(tuple(list(liste_tracks_bar[i].values())[j]), coords_point[i]).m)
+;
+
+#the r function opq_around was supposed to filter bars out of a 500m range, while we find bars going up to 771m away from the point 
+>>> max(dist_bar)
+#771.5880870484272
+>>> min(dist_bar)
+#2.304924542575358
+
+```
+
+
+
+
+```{r prep tempo analysis}
+
+occurences_sunrise_france_full <- time_after_sunrise_france %>% dplyr::group_by(tag_name, after_sunrise = as.numeric(round(after_sunrise))) %>% dplyr::count(name = "track_occurences")
+occurences_sunrise_france_full["after_sunrise"][occurences_sunrise_france_full["after_sunrise"] == -13] <- 12
+  
+tags_repartition_sunrise_france_full <- occurences_sunrise_france_full %>% 
+  left_join(
+    occurences_sunrise_france_full %>%  dplyr::group_by(after_sunrise) %>% dplyr::summarise(total = sum(track_occurences)),
+    by = c("after_sunrise"))
+
+occurences_time_france_full <- time_after_sunrise_france %>% dplyr::group_by(tag_name, local_time = as.numeric(round(local_time))) %>% dplyr::count(name = "track_occurences")
+occurences_time_france_full["local_time"][occurences_time_france_full["local_time"] == 0] <- 24
+  
+tags_repartition_time_france_full <- occurences_sunrise_france_full %>% 
+  left_join(
+    occurences_time_france_full %>%  dplyr::group_by(local_time) %>% dplyr::summarise(total = sum(track_occurences)),
+    by = c("local_time"))
+
+```
+
+
+```{r chi-square}
+
+test_time <- table(time_after_sunrise_france$groups_sunrise, round(time_after_sunrise_france$local_time))
+names(dimnames(test_time)) <- c("group_sunrise", "local_time")
+prop_test_time <- round(prop.table(test_time),3)
+prop_test_time <- addmargins(prop_test_time)
+
+summary(test_time)
+
+test_time_sum <- addmargins(test_time)
+fisher.test(test_time_sum, simulate.p.value=TRUE)
+
+test_sunrise <- table(time_after_sunrise_france$groups_sunrise, round(time_after_sunrise_france$after_sunrise))
+names(dimnames(test_sunrise)) <- c("group_sunrise", "after_sunrise")
+prop_test_sunrise <- round(prop.table(test_sunrise),3)
+prop_test_sunrise <- addmargins(prop_test_sunrise)
+
+summary(test_sunrise)
+
+test_sunrise_sum <- addmargins(test_sunrise)
+fisher.test(test_sunrise_sum, simulate.p.value=TRUE)
+
+```
+
+```{r analyse-day-off}
+
+day_off_world <- data.frame(matrix(ncol = 9))
+colnames(day_off_world) <- c("date","localName","name","countryCode","fixed","global","counties","launchYear","type")
+get_public_holiday <- function(y,code){
+  jsonlite::fromJSON(paste("https://date.nager.at/api/v2/publicholidays/",y,"/",code,sep=""))
+}
+available_country <- jsonlite::fromJSON("https://date.nager.at/api/v3/AvailableCountries")
+
+start_year <- min(year(all_info$record_utc))
+end_year <- max(year(all_info$record_utc))
+code_liste <- all_info$iso_a2_eh[!is.na(all_info$iso_a2_eh)]
+
+for(y in start_year:end_year){
+  for(c in unique(code_liste)){
+    if(c %in% available_country$countryCode){
+    day_off_world <- rbind(day_off_world,get_public_holiday(y,c))
+    }
+    else{
+      next
+    }
+  }
+}
+#Un jour important dans nos analyses mais non considéré comme un jour férié est la "Fête de la musique" le 21 Juin
+#Cette fête est présente dans plusieurs pays, mais les dates diffèrent. En France, la date est fixe.
+for(y in start_year:end_year){
+  day_off_world[nrow(day_off_world)+1,] <- 
+    c(paste(y,"-06-21",sep=""),"Fête de la musique","Music Day","FR",TRUE,FALSE,NA,1982,"Public")
+}
+
+#Jours fériés pour tous les pays / World
+
+day_info <- all_info %>% select(pk_track,tag_name,admin,iso_a2_eh,season,local_date,week_end)
+dayoff_info <- data.frame(matrix(ncol = ncol(day_info)+1))
+colnames(dayoff_info) <- c(colnames(day_info),"ferie")
+dayoff_info$local_date <- as_datetime(dayoff_info$local_date)
+
+for(c in unique(day_info$iso_a2_eh)){
+  day_info_country <- day_info %>% filter(iso_a2_eh == c)
+  day_off_country <- day_off_world %>% filter(countryCode == c)
+  dayoff_info_country <- day_info_country %>% mutate(ferie = case_when(
+  as.Date(local_date) %in% as.Date(day_off_country$date) ~ TRUE,
+  TRUE ~FALSE
+  ))
+  dayoff_info <- rbind(dayoff_info,dayoff_info_country)
+}
+
+dayoff_info <- na.omit(dayoff_info)
+
+tags_norm <- c()
+tags_off <- c()
+tags_week <- c()
+tags_weekend <- c()
+for(t in unique(dayoff_info$tag_name)){
+test_off <- (nrow(dayoff_info %>% filter(ferie == TRUE & tag_name == t))/ 
+               length(unique(dayoff_info %>% filter(ferie == TRUE))$pk_track))*100
+test_norm <- (nrow(dayoff_info %>% filter(ferie == FALSE & tag_name == t))/
+                length(unique(dayoff_info %>% filter(ferie == FALSE))$pk_track))*100
+
+test_week <- (nrow(dayoff_info %>% filter(week_end == FALSE & tag_name == t))/
+                length(unique(dayoff_info %>% filter(week_end == FALSE))$pk_track))*100
+test_weekend <- (nrow(dayoff_info %>% filter(week_end == TRUE & tag_name == t))/
+                length(unique(dayoff_info %>% filter(week_end == TRUE))$pk_track))*100
+tags_norm <- append(tags_norm,test_norm)
+tags_week <- append(tags_week,test_week)
+tags_weekend <- append(tags_weekend,test_weekend)
+tags_off <- append(tags_off,test_off)
+}
+df_temp1 <- data.frame(proportion = tags_norm, tag = unique(dayoff_info$tag_name), day_type = "All days")
+df_temp2 <- data.frame(proportion = tags_week, tag = unique(dayoff_info$tag_name), day_type = "Weekdays")
+df_temp3 <- data.frame(proportion = tags_weekend, tag = unique(dayoff_info$tag_name), day_type = "Weekends")
+df_temp4 <- data.frame(proportion = tags_off, tag = unique(dayoff_info$tag_name), day_type = "Holidays")
+
+df_tags_day_type <- rbind(df_temp1,df_temp2,df_temp3,df_temp4)
+
+plot_world_days <- ggplot(df_tags_day_type, aes(fill=day_type, y=proportion, x=tag)) + 
+    geom_bar(position="dodge", stat="identity")+ 
+  scale_fill_manual(values = c("#007eed","#e100ed","#edae00","#ed4700"))+
+  labs(
+    x = "Tag names",
+    y = "Proportion of tags (%)",
+    title = "Repartition of tags by type of day",
+    subtitle = "Noisecapture's tags in the World,
+      2017-2020")
+
+#Etude plus précise sur la France
+  
+tags_norm_fr <- c()
+tags_off_fr <- c()
+tags_week_fr <- c()
+tags_weekend_fr <- c()
+for(t in unique(dayoff_info_fr$tag_name)){
+test_off_fr <- (nrow(dayoff_info_fr %>% filter(ferie == TRUE & tag_name == t))/ 
+               length(unique(dayoff_info_fr %>% filter(ferie == TRUE))$pk_track))*100
+test_norm_fr <- (nrow(dayoff_info_fr %>% filter(ferie == FALSE & tag_name == t))/
+                length(unique(dayoff_info_fr %>% filter(ferie == FALSE))$pk_track))*100
+
+test_week_fr <- (nrow(dayoff_info_fr %>% filter(week_end == FALSE & tag_name == t))/
+                length(unique(dayoff_info_fr %>% filter(week_end == FALSE))$pk_track))*100
+test_weekend_fr <- (nrow(dayoff_info_fr %>% filter(week_end == TRUE & tag_name == t))/
+                length(unique(dayoff_info_fr %>% filter(week_end == TRUE))$pk_track))*100
+tags_norm_fr <- append(tags_norm_fr,test_norm_fr)
+tags_week_fr <- append(tags_week_fr,test_week_fr)
+tags_weekend_fr <- append(tags_weekend_fr,test_weekend_fr)
+tags_off_fr <- append(tags_off_fr,test_off_fr)
+}
+
+df_temp1_fr <- data.frame(proportion = tags_norm_fr, tag = unique(dayoff_info_fr$tag_name), day_type = "All days")
+df_temp2_fr <- data.frame(proportion = tags_week_fr, tag = unique(dayoff_info_fr$tag_name), day_type = "Weekdays")
+df_temp3_fr <- data.frame(proportion = tags_weekend_fr, tag = unique(dayoff_info_fr$tag_name), day_type = "Weekends")
+df_temp4_fr <- data.frame(proportion = tags_off_fr, tag = unique(dayoff_info_fr$tag_name), day_type = "Holidays")
+
+df_tags_day_type_fr <- rbind(df_temp1_fr,df_temp2_fr,df_temp3_fr,df_temp4_fr)
+
+plot_france_days <- ggplot(df_tags_day_type_fr, aes(fill=day_type, y=proportion, x=tag)) + 
+  geom_bar(position="dodge", stat="identity")+ 
+  scale_fill_manual(values = c("#007eed","#e100ed","#edae00","#ed4700"))+
+  labs(
+    x = "Tag names",
+    y = "Proportion of tags (%)",
+    title = "Repartition of tags by type of day",
+    subtitle = "Noisecapture's tags in France,
+      2017-2020")
+
+library(gridExtra)
+grid.arrange(plot_world_days,plot_france_days)
+
+#Covid
+dayoff_info_fr <- dayoff_info %>% filter(admin == "France")
+
+lockdown_fr_1 <- interval(as_date("2020-03-17"),as_date("2020-05-11"))
+lockdown_fr_2 <- interval(as_date("2020-10-30"),as_date("2020-12-15"))
+lockdown_fr_3 <- interval(as_date("2021-04-04"),as_date("2021-05-03"))
+all_info_france <- all_info %>% filter(admin == "France")
+is_lockdown <- function(d){
+  if(d %within% lockdown_fr_1 | d %within% lockdown_fr_2 | d %within% lockdown_fr_3){
+    return(TRUE)
+  }
+  else{
+    return(FALSE)
+  }
+}
+
+dayoff_info_fr$lockdown <- lapply(dayoff_info_fr$local_date, is_lockdown)
+tag_covid_fr <- sum(dayoff_info_fr$lockdown == TRUE)/length(dayoff_info_fr$lockdown)*100
+
+interval_fr <- interval(min(all_info_france$local_date),max(all_info_france$local_date))
+interval_lkwn_fr <- interval(min((dayoff_info_fr %>% filter(lockdown == TRUE))$local_date),
+                             max((dayoff_info_fr %>% filter(lockdown == TRUE))$local_date))
+
+nb_jours_fr <- as.period(interval_fr)$year*365 + as.period(interval_fr)$month*30 + as.period(interval_fr)$day
+nb_jours_lkdw_fr <- as.period(interval_lkwn_fr)$year*365 + as.period(interval_lkwn_fr)$month*30 + as.period(interval_lkwn_fr)$day
+nb_jours_covid_fr <- nb_jours_lkdw_fr/nb_jours_fr*100
+
+tracks_covid_fr <- length(unique((dayoff_info_fr %>% filter(lockdown == TRUE))$pk_track))/
+  length(unique(dayoff_info_fr$pk_track))*100
+
+#//FAIRE QUAND MEME ANALYSE DE LA DIFF ENTRE COVID-NON COVID//
+#La proportion de données concernées par un confinement sont minimes, et notre travail de prédiction ne cherche pas à prédire ce genre de situation extrèmement précise et peu susceptible de se reproduire
+
+all_info <- left_join(all_info,dayoff_info)
+
+```
+`r tracks_covid_fr  % des traces françaises ont été réalisées lors d'un confinement`
+`Soit r tag_covid_fr % des tags français`
+`Sur une période équivalente à r nb_jours_covid_fr % de l'intervalle d'étude complet`
+
+# Sound dynamics: sunrise study
+
+```{r compute-sunrise}
+get_sunrise <- function(pk_track, date, lat, lon, tz= "UTC") {
+  # compute sunrise time from localisation and UTC time
+  #return NA if error
+  in_pk_track = pk_track
+  in_lat = round(lat,5)
+  in_lon = round(lon,5)
+  in_tz = tz
+  
+  sunrise = tryCatch(suncalc::getSunlightTimes(
+    date = lubridate::date(date),
+    lat = in_lat,
+    lon = in_lon,
+    tz   = in_tz
+  )$sunrise, error=function(e) NA)
+
+  return(dplyr::tribble(
+ ~pk_track, ~sunrise_utc,
+ in_pk_track, sunrise)
+)
+}
+
+get_sunset <- function(pk_track, date, lat, lon, tz= "UTC") {
+  # compute sunset time from localisation and UTC time
+  #return NA if error
+  in_pk_track = pk_track
+  in_lat = round(lat,5)
+  in_lon = round(lon,5)
+  in_tz = tz
+  
+  sunset = tryCatch(suncalc::getSunlightTimes(
+    date = lubridate::date(date),
+    lat = in_lat,
+    lon = in_lon,
+    tz   = in_tz
+  )$sunset, error=function(e) NA)
+
+  return(dplyr::tribble(
+ ~pk_track, ~sunset_utc,
+ in_pk_track, sunset)
+)
+}
+
+
+
+# Compute sunrise hours for each track in a new dataframe
+# Impossible de calculer directement pour la timezone définie avec la local_date, le package suncalc ayant un bug
+# Plus de détail : https://github.com/datastorm-open/suncalc/issues/2
+
+sunrises <- purrr::pmap_dfr(all_info[!duplicated(all_info$pk_track),] %>% select(pk_track, date = record_utc, lat, lon), get_sunrise)
+sunsets <- purrr::pmap_dfr(all_info[!duplicated(all_info$pk_track),] %>% select(pk_track, date = record_utc, lat, lon), get_sunset)
+
+sunrises <- inner_join(sunrises %>% dplyr::filter(!is.na(sunrise_utc)),
+            all_info %>% dplyr::select(pk_track, tag_name, tz_name1st),
+            by = "pk_track") %>% dplyr::mutate(local_sunrise = lubridate::local_time(sunrise_utc,tz_name1st, units = "hours"))
+sunsets <- inner_join(sunsets %>% dplyr::filter(!is.na(sunset_utc)),
+            all_info %>% dplyr::select(pk_track, tag_name, tz_name1st),
+            by = "pk_track") %>% dplyr::mutate(local_sunset = lubridate::local_time(sunset_utc,tz_name1st, units = "hours"))
+
+sun_info <- inner_join(sunrises,sunsets)
+
+#saveRDS(sunrises, file = "vignettes/sunrises.rds") #Sunrises takes a long time to calculate, better to save it before altering it
+#saveRDS(sunsets, file = "vignettes/sunsets.rds")
+#saveRDS(sunrises, file = "vignettes/sunrisestempo.rds")
+#saveRDS(sunsets, file = "vignettes/sunsetstempo.rds")
+#sunrises <- readRDS(file = "vignettes/sunrisestempo.rds")
+#sunsets <- readRDS(file = "vignettes/sunsetstempo.rds")
+```
+
+```{r time-after-sunrise}
+# join sunrises to study data
+
+time_after_sunrise <- left_join(all_info,sun_info)
+
+time_after_sunrise <- time_after_sunrise %>% mutate(after_sunrise = case_when(
+                    local_time - local_sunrise >= 12 ~ -(24 - local_time + local_sunrise),
+                    TRUE ~ local_time - local_sunrise))
+
+time_after_sunrise <- time_after_sunrise %>% mutate(after_sunset = case_when(
+  local_time - local_sunset > 12 ~ -(24 - local_time - local_sunset),
+  local_time - local_sunset < -12 ~ 24 - abs(local_time - local_sunset),
+  TRUE ~ local_time - local_sunset
+))
+
+
+#Graphique pour visualiser si les USA font du sens au niveau du lever du soleil ou si bug
+ggplot(time_after_sunrise %>% filter(admin == "United States of America" & month(record_utc) == 6 & round(lat,1)==38)) +
+  aes(x = lon, y = round(local_sunrise,1))+
+  geom_point()+
+  #labs(y = "Sunrise hour UTC", x = "Longitude", title = "UTC hour of sunrise in USA")
+  labs(y = "Local Sunrise hour", x = "Longitude", title = "Local sunrise in USA")
+
+
+#saveRDS(time_after_sunrise, file = "vignettes/time_after_sunrise.rds")
+#time_after_sunrise <- readRDS(file = "vignettes/time_after_sunrise.rds")
+```
+
+```{r track-to-sunrise-country}
+
+occurences_sunrise <- time_after_sunrise %>% dplyr::group_by(tag_name, admin,  after_sunrise = as.numeric(round(after_sunrise))) %>% dplyr::count(name = "track_occurence")
+
+occurences_sunrise["after_sunrise"][occurences_sunrise["after_sunrise"] == -13] <- 12
+#occurences_sunrise["after_sunrise"][occurences_sunrise["after_sunrise"] == -12] <- 12
+
+occurences_sunrise_full_tag <- occurences_sunrise %>% group_by(after_sunrise, admin) %>% dplyr::summarise(total = sum(track_occurence))
+
+tags_sunrise_repartition <- occurences_sunrise %>% 
+  left_join(occurences_sunrise_full_tag)%>% dplyr::filter(track_occurence>0)  %>% mutate(percentage = track_occurence * 100 / total)
+    
+ggplot(tags_sunrise_repartition %>% filter(admin=="France")) +
+  aes(x = after_sunrise, y = percentage)+
+  geom_col() + geom_smooth(method = "loess", se = FALSE, color = "blue")  +
+  labs(
+    x = "Number of hours after sunrise",
+    y = "Proportion of tag (%)",
+    title = "Repartition of tags from local sunrise",
+    subtitle = "Noisecapture's tags in France,
+      2017-2020") +
+  scale_x_continuous(breaks = c(-11,-6,0,6,12))+
+   facet_wrap(vars(tag_name), scales = "free_y")
+
+#ggsave("C:/Users/moisan/Documents/Stage/Scripts/lasso-data-analysis-main/plots/animals_tag_dynamics_around_sunriseV2.png", width = 14, height = 7) 
+
+ggplot(tags_sunrise_repartition %>% filter(admin=="France") ) +
+  aes(x = tag_name, y = after_sunrise, fill = tag_name, weight = percentage)+
+  geom_boxplot() +
+  labs(
+    x = "Tags",
+    y = "Hours from local sunrise",
+    title = "Boxplot repartition of tags from local sunrise",
+    subtitle = "Noisecapture's tags in France,
+      2017-2020") #+
+  facet_wrap(vars(season))
+  
+  ggplot_build(plot = last_plot())$data
+  
+```
+
+
+```{r track-to-sunrise-country-season}
+
+occurences_sunrise <- time_after_sunrise %>% dplyr::group_by(tag_name, admin, season,  after_sunrise = as.numeric(round(after_sunrise))) %>% dplyr::count(name = "track_occurence")
+
+occurences_sunrise["after_sunrise"][occurences_sunrise["after_sunrise"] == -13] <- 12
+#occurences_sunrise["after_sunrise"][occurences_sunrise["after_sunrise"] == -12] <- 12
+
+occurences_sunrise_full_tag <- occurences_sunrise %>% group_by(after_sunrise, admin, season) %>% dplyr::summarise(total = sum(track_occurence))
+
+tags_sunrise_repartition <- occurences_sunrise %>% 
+  left_join(occurences_sunrise_full_tag)%>% dplyr::filter(track_occurence>0)  %>% mutate(percentage = track_occurence * 100 / total)
+
+
+ggplot(tags_sunrise_repartition %>% filter(admin=="France") ) +
+  aes(x = tag_name, y = after_sunrise, fill = tag_name, weight = percentage)+
+  geom_boxplot() +
+  labs(
+    x = "Tags",
+    y = "Hours from local sunrise",
+    title = "Boxplot repartition of tags from local sunrise",
+    subtitle = "Noisecapture's tags in France,
+      2017-2020") +
+  facet_wrap(vars(season))
+  
+  ggplot_build(plot = last_plot())$data
+  
+  
+```
+
+
+```{r track-to-sunrise world}
+
+occurences_sunrise_world <- time_after_sunrise %>% dplyr::group_by(tag_name,  after_sunrise = as.numeric(round(after_sunrise))) %>% dplyr::count(name = "track_occurence")
+
+occurences_sunrise_world["after_sunrise"][occurences_sunrise_world["after_sunrise"] == -13] <- 12
+#occurences_sunrise_world["after_sunrise"][occurences_sunrise_world["after_sunrise"] == -12] <- 12
+
+occurences_sunrise_full_tag_world <- occurences_sunrise_world %>% group_by(after_sunrise) %>% dplyr::summarise(total = sum(track_occurence))
+
+tags_sunrise_repartition_world <- occurences_sunrise_world %>% 
+  left_join(occurences_sunrise_full_tag_world)%>% dplyr::filter(track_occurence>0)  %>% mutate(percentage = track_occurence * 100 / total)
+
+#geom_hist check
+ggplot(time_after_sunrise) +
+  geom_histogram(aes(x = after_sunrise), bins = 25) +
+  facet_wrap(vars(tag_name), scales = "free_y")
+  #+ #geom_smooth(method = "loess", se = FALSE, color = "blue") +
+  
+labs(
+    x = "Number of hours after sunrise",
+    y = "Proportion of tag (%)",
+    title = "Repartition of tags from local sunrise",
+    subtitle = "Noisecapture's tags in the World,
+      2017-2020") +
+  scale_x_continuous(breaks = c(-11,-6,0,6,12))+
+   facet_wrap(vars(tag_name), scales = "free_y")
+
+
+ggplot(tags_sunrise_repartition_world) +
+  aes(x = tag_name, y = after_sunrise, fill = tag_name, weight = percentage)+
+  geom_boxplot() +
+  labs(
+    x = "Tags",
+    y = "Hours from local sunrise",
+    title = "Boxplot repartition of tags from local sunrise",
+    subtitle = "Noisecapture's tags in the world,
+      2017-2020") #+
+
+
+```
+
+```{r sunrise-tempo-only-predict, echo = FALSE}
+library(plyr)
+
+div = 0.5
+
+time_after_sunrise_france <- time_after_sunrise %>% filter(admin=="France")
+# get categories
+time_after_sunrise_france$groups_sunrise <- cut(as.numeric(time_after_sunrise_france$local_sunrise), 
+                      breaks = seq(floor(min(as.numeric(time_after_sunrise_france$local_sunrise))),
+                                 ceiling(max(as.numeric(time_after_sunrise_france$local_sunrise))), by = div), include.lowest = TRUE, labels = FALSE)
+
+
+df_max_val <- data.frame(matrix(nrow = 1, ncol = 25/div-1+4))
+colnames(df_max_val) <- c(seq(-12,12,by=div),"max_from_sunrise","max","group_sunrise", "tag_name")
+
+for(group in sort(unique(time_after_sunrise_france$groups_sunrise))){
+
+  occurences_sunrise_france <- time_after_sunrise_france %>% filter(groups_sunrise == group) %>% dplyr::group_by(tag_name,  after_sunrise = as.numeric(round(after_sunrise))) %>% dplyr::count(name = "track_occurences")
+  occurences_sunrise_france["after_sunrise"][occurences_sunrise_france["after_sunrise"] == -13] <- 12
+  
+  tags_repartition_sunrise_france <- occurences_sunrise_france %>% 
+    left_join(
+      occurences_sunrise_france_full %>%  dplyr::group_by(after_sunrise) %>% dplyr::summarise(total = sum(track_occurences)),
+      by = c("after_sunrise"))
+  
+  tags_repartition_sunrise_france <- tags_repartition_sunrise_france %>% dplyr::group_by(after_sunrise) %>%     dplyr::mutate(percentage = track_occurences * 100 / total)
+  
+  
+#tags_repartition_sunrise_france$group_sunrise <- cut(as.numeric(tags_repartition_sunrise_france$after_sunrise), 
+#                        breaks = seq(round(min(as.numeric(tags_repartition_sunrise_france$after_sunrise))),
+#                                   round(max(as.numeric(tags_repartition_sunrise_france$after_sunrise))), by = 1), #include.lowest = TRUE)
+  
+  df_tags_sunrise <- data.frame(matrix(nrow = 1, ncol = 25/div-1))
+  colnames(df_tags_sunrise) <- c(seq(-12,12,by=div))
+  liste_tag <- c()
+    for(tag in tag_list$tag_name){
+      if(tag %in% tags_repartition_sunrise_france$tag_name){
+
+        print(tag)
+        print(group)
+        res <- try(stats::loess(percentage ~ after_sunrise, data = tags_repartition_sunrise_france %>%
+                             filter(tag_name == tag), silent = TRUE))
+        print(class(res))
+        
+        if(class(res)!="try-error"){
+        liste_tag <- append(liste_tag, tag)
+        fun <- stats::loess(percentage ~ after_sunrise, data = tags_repartition_sunrise_france %>%
+                             filter(tag_name == tag))
+        liste_after_sunrise <- (tags_repartition_sunrise_france %>%
+                             filter(tag_name == tag))$after_sunrise
+        predict_df <- as.data.frame(t(data.frame(predict = predict(fun, data = tags_repartition_sunrise_france %>% filter(tag_name == tag)))))
+        colnames(predict_df) <- liste_after_sunrise
+        print("-------")
+
+        df_tags_sunrise <- rbind.fill(df_tags_sunrise, predict_df)
+        }
+        else{
+          next
+        }
+      }
+    }
+
+  print("meh")
+  if(nrow(df_tags_sunrise) > 1){
+  df_tags_sunrise <- df_tags_sunrise %>% slice(2:nrow(df_tags_sunrise))
+  liste_tag <-  paste(liste_tag, group, sep=".")
+  print("1")
+  rownames(df_tags_sunrise) <- liste_tag
+  print("2")
+  df_tags_sunrise[, "max_from_sunrise"] <- 
+    colnames(df_tags_sunrise)[max.col(replace(df_tags_sunrise, is.na(df_tags_sunrise), -Inf),ties.method="first")]
+  print("3")
+  df_tags_sunrise[, "max"] <- apply(df_tags_sunrise[,1:(25/div-1)], 1, max, na.rm = TRUE)
+    print("4")
+  df_tags_sunrise[, "group_sunrise"] <- group
+    print("5")
+
+  df_tags_sunrise[, "tag_name"] <- substring(row.names(df_tags_sunrise),1,nchar(row.names(df_tags_sunrise))-2)
+  colnames(df_tags_sunrise) <- c(seq(-12,12,by=div),"max_from_sunrise","max","group_sunrise", "tag_name")
+  df_max_val <- rbind(df_max_val, df_tags_sunrise)
+  }
+  
+}
+
+df_max_val <- df_max_val %>% slice(2:nrow(df_max_val))
+df_max_val$max_from_sunrise <- as.integer(df_max_val$max_from_sunrise)
+#df_max_val <- df_max_val %>% drop_na()
+
+```
+
+```{r sunrise-tempo-only-predict-local_time, echo = FALSE}
+
+library(plyr)
+
+
+
+time_after_sunrise_france <- time_after_sunrise %>% filter(admin=="France")
+# get categories
+time_after_sunrise_france$groups_sunrise <- cut(as.numeric(time_after_sunrise_france$local_sunrise), 
+                      breaks = seq(floor(min(as.numeric(time_after_sunrise_france$local_sunrise))),
+                                 ceiling(max(as.numeric(time_after_sunrise_france$local_sunrise))), by = 1), include.lowest = TRUE, labels = FALSE)
+
+df_max_val <- data.frame(matrix(nrow = 1, ncol = 29))
+colnames(df_max_val) <- c(0:24,"max_from_sunrise","max","group_sunrise", "tag_name")
+
+for(group in sort(unique(time_after_sunrise_france$groups_sunrise))){
+
+  occurences_sunrise_france <- time_after_sunrise_france %>% filter(groups_sunrise == group) %>% dplyr::group_by(tag_name,  local_time = as.numeric(round(local_time))) %>% dplyr::count(name = "track_occurences")
+
+occurences_sunrise_france["local_time"][occurences_sunrise_france["local_time"] == 0] <- 24
+  
+  tags_repartition_sunrise_france <- occurences_sunrise_france %>% 
+    left_join(
+      occurences_sunrise_france %>%  dplyr::group_by(local_time) %>% dplyr::summarise(total = sum(track_occurences)),
+      by = c("local_time"))
+  
+  tags_repartition_sunrise_france <- tags_repartition_sunrise_france %>% dplyr::group_by(local_time) %>%     dplyr::mutate(percentage = track_occurences * 100 / total)
+
+  df_tags_sunrise <- data.frame(matrix(nrow = 1, ncol = 25))
+  colnames(df_tags_sunrise) <- c(0:24)
+  liste_tag <- c()
+    for(tag in tag_list$tag_name){
+      if(tag %in% tags_repartition_sunrise_france$tag_name){
+
+        print(tag)
+        print(group)
+        res <- try(stats::loess(percentage ~ local_time, data = tags_repartition_sunrise_france %>%
+                             filter(tag_name == tag), silent = TRUE))
+        
+        if(class(res)!="try-error"){
+        liste_tag <- append(liste_tag, tag)
+        fun <- stats::loess(percentage ~ local_time, data = tags_repartition_sunrise_france %>%
+                             filter(tag_name == tag))
+        liste_after_sunrise <- (tags_repartition_sunrise_france %>%
+                             filter(tag_name == tag))$local_time
+        predict_df <- as.data.frame(t(data.frame(predict = predict(fun, data = tags_repartition_sunrise_france %>% filter(tag_name == tag)))))
+        colnames(predict_df) <- liste_after_sunrise
+
+        df_tags_sunrise <- rbind.fill(df_tags_sunrise, predict_df)
+        }
+        else{
+          next
+        }
+      }
+    }
+
+  if(nrow(df_tags_sunrise) > 1){
+  df_tags_sunrise <- df_tags_sunrise %>% slice(2:nrow(df_tags_sunrise))
+  liste_tag <-  paste(liste_tag, group, sep=".")
+  rownames(df_tags_sunrise) <- liste_tag
+  df_tags_sunrise[, "max_from_sunrise"] <- 
+    colnames(df_tags_sunrise)[max.col(replace(df_tags_sunrise, is.na(df_tags_sunrise), -Inf),ties.method="first")]
+  df_tags_sunrise[, "max"] <- apply(df_tags_sunrise[,1:25], 1, max, na.rm = TRUE)
+  df_tags_sunrise[, "group_sunrise"] <- group
+
+  df_tags_sunrise[, "tag_name"] <- substring(row.names(df_tags_sunrise),1,nchar(row.names(df_tags_sunrise))-2)
+  colnames(df_tags_sunrise) <- c(0:24,"max_from_sunrise","max","group_sunrise", "tag_name")
+  df_max_val <- rbind(df_max_val, df_tags_sunrise)
+  }
+}
+
+df_max_val <- df_max_val %>% slice(2:nrow(df_max_val))
+df_max_val$max_from_sunrise <- as.integer(df_max_val$max_from_sunrise)
+
+```
+
+
+```{r analysis-graph}
+
+ggplot(data = df_max_val,aes(x = group_sunrise, y = max_from_sunrise))+
+  geom_smooth(method = "lm", se = FALSE, color = "blue", alpha = 0.4)+
+  geom_point()+
+  facet_wrap(facets = vars(tag_name))
+
+```
+
+
+```{r testd-hist}
+
+library(plyr)
+
+
+# Only use France's Data
+time_after_sunrise_france <- time_after_sunrise %>% filter(admin=="France")
+# get categories of sunrise hour (by 0.5h)
+time_after_sunrise_france$groups_sunrise <- cut(as.numeric(time_after_sunrise_france$local_sunrise), 
+                      breaks = seq(floor(min(as.numeric(time_after_sunrise_france$local_sunrise))),
+                                 ceiling(max(as.numeric(time_after_sunrise_france$local_sunrise))), by = 0.5), include.lowest = TRUE, labels = FALSE)
+
+#Create empty df with final dimensions to set the rbind in the for loop
+df_max_local <- data.frame(matrix(nrow = 1, ncol = 3))
+colnames(df_max_local) <- c("max_local_hour","tag","group")
+
+#subset the data with the sunrise groups, each loop iteration get the max percentage of data per tag for each local_sunrise group
+for(group in sort(unique(time_after_sunrise_france$groups_sunrise))){
+
+  occurences_sunrise_france <- time_after_sunrise_france %>% filter(groups_sunrise == group) %>%  dplyr::group_by(tag_name,  local_time = as.numeric(round(local_time))) %>% dplyr::count(name = "track_occurences")
+
+  #with rounding, midnight is divided into 0h and 24h, merge them
+  occurences_sunrise_france["local_time"][occurences_sunrise_france["local_time"] == 0] <- 24
+  
+  #calculate percentages of track occurences per tag based on total per hour (using occurences_time_france_full to get totals of the whole dataset, not only the sunrise group subset)
+  tags_repartition_sunrise_france <- occurences_sunrise_france %>% 
+    left_join(
+      occurences_time_france_full %>%  dplyr::group_by(local_time) %>% dplyr::summarise(total = sum(track_occurences)),
+      by = c("local_time"))
+  tags_repartition_sunrise_france <- tags_repartition_sunrise_france %>% dplyr::group_by(local_time) %>%     dplyr::mutate(percentage = track_occurences * 100 / total)
+
+  #Loop to calculate the local_hour of the max occurences per tag in each sunrise group
+  liste_tag <- c()
+    for(tag in tag_list$tag_name){
+      if(tag %in% tags_repartition_sunrise_france$tag_name){
+
+        print(tag)
+        print(group)
+        tags_repartition_sunrise_france_tag <- tags_repartition_sunrise_france %>% filter(tag_name == tag)
+        max_local_hour <- 
+          (tags_repartition_sunrise_france_tag$local_time[which.max((tags_repartition_sunrise_france_tag$percentage))])
+        df_temp <- data.frame(max_local_hour, tag, group)
+        df_max_local <- rbind(df_max_local,df_temp)
+        }
+        else{
+          next
+        }
+      }
+    
+
+  print("meh")
+
+
+}
+  #Cut first empty row
+  df_max_local <- df_max_local %>% slice(2:nrow(df_max_local))
+
+```
+
+```{r analysis-graph}
+
+test <- split(df_max_local, df_max_local$tag)
+df_regres_r <- data.frame(matrix(nrow = 1, ncol = 2)) 
+colnames(df_regres_r) <- c("tag","R")
+
+for(tag in test){
+  regres <- glm(tag$max_local_hour ~ tag$group)
+  r <- regres$R
+  print(unique(tag$tag))
+  print(cor.test(tag$group, tag$max_local_hour))
+  #print(anova(regres))
+  #print(r)
+  #print(summary(regres))
+  }
+
+ggplot(data = df_max_local,aes(x = group, y = max_local_hour))+
+  geom_smooth(method = "glm", se = FALSE, color = "blue", alpha = 0.4)+
+  geom_point()+
+  facet_wrap(facets = vars(tag))
+
+```
+
+
+```{r tracks-to-sunset analysis}
+
+occurences_sunset <- time_after_sunset %>% dplyr::group_by(tag_name, admin, after_sunset = as.numeric(round(after_sunset))) %>% dplyr::count(name = "track_occurence")
+occurences_sunset_full_tag <- occurences_sunset %>% group_by(after_sunset, admin) %>% dplyr::summarise(total = sum(track_occurence))
+
+occurences_sunset["after_sunset"][occurences_sunset["after_sunset"] == -13] <- 12
+#occurences_sunset["after_sunset"][occurences_sunset["after_sunset"] == -12] <- 12
+
+tags_sunset_repartition <- occurences_sunset %>% 
+  left_join(occurences_sunset_full_tag)%>% dplyr::filter(track_occurence>0)  %>% mutate(percentage = track_occurence * 100 / total)
+
+ggplot(tags_sunset_repartition %>% dplyr::filter(admin =="France")) +
+  aes(x = after_sunset, y = percentage)+ 
+  geom_col() + geom_smooth(method = "loess", se = FALSE, color = "blue")  +
+  labs(
+    x = "Number of hours after sunset",
+    y = "Proportion of tag (%)",
+    title = "Repartition of tags from local sunset",
+    subtitle = "Noisecapture's tags in France,
+      2017-2020") +
+  scale_x_continuous(breaks = c(-11,-6,0,6,12))+
+  facet_wrap(vars(tag_name), scales = "free_y")
+
+```
+
+
+```{r tracks-to-sunset-season analysis}
+
+occurences_sunset_season <- time_after_sunset %>% dplyr::group_by(tag_name, admin, season, after_sunset = as.numeric(round(after_sunset))) %>% dplyr::count(name = "track_occurence")
+occurences_sunset_full_tag_season <- occurences_sunset_season %>% group_by(after_sunset, admin, season) %>% dplyr::summarise(total = sum(track_occurence))
+
+tags_sunset_repartition_season <- occurences_sunset_season %>% 
+  left_join(occurences_sunset_full_tag_season)%>% dplyr::filter(track_occurence>0)  %>% mutate(percentage = track_occurence * 100 / total)
+
+ggplot() +
+  aes(x = after_sunset, y = percentage)+ 
+    geom_smooth(data = tags_sunset_repartition_season %>% dplyr::filter(admin =="France" & season =="winter"),
+  method = "loess", se = FALSE, color = "blue")  +
+    geom_smooth(data = tags_sunset_repartition_season %>% dplyr::filter(admin =="France" & season =="summer"),
+  method = "loess", se = FALSE, color = "red")  +
+    geom_smooth(data = tags_sunset_repartition_season %>% dplyr::filter(admin =="France" & season =="spring"),
+  method = "loess", se = FALSE, color = "yellow")  +
+    geom_smooth(data = tags_sunset_repartition_season %>% dplyr::filter(admin =="France" & season =="autumm"),
+  method = "loess", se = FALSE, color = "brown")  +
+  labs(
+    x = "Number of hours after sunset",
+    y = "Proportion of tag (%)",
+    title = "Repartition of tags from local sunset",
+    subtitle = "Noisecapture's tags in France,
+      Only Springs 2017-2020") +
+  scale_x_continuous(breaks = c(-12,-6,0,6,12))+
+  facet_wrap(vars(tag_name), scales = "free_y")
+
+```
+
+
+```{r test}
+
+table_ex_xtabs <- xtabs(~round(after_sunset)+season, data=time_after_sunset%>%filter(admin=="France"&tag_name=="chatting"))
+summary(table_ex_xtabs)
+
+
+time_after_sunrise_france <- time_after_sunrise %>% filter(admin=="France")
+# get categories
+time_after_sunrise_france$groups_sunrise <- cut(as.numeric(time_after_sunrise_france$local_sunrise), 
+                      breaks = seq(round(min(as.numeric(time_after_sunrise_france$local_sunrise))),
+                                 round(max(as.numeric(time_after_sunrise_france$local_sunrise))), by = 0.5))
+time_after_sunrise_france$groups_local_time <- cut(as.numeric(time_after_sunrise_france$local_time), 
+                      breaks = seq(round(min(as.numeric(time_after_sunrise_france$local_time))),
+                                 round(max(as.numeric(time_after_sunrise_france$local_time))), by = 0.5))
+
+
+occurences_france <- all_info %>% filter(admin=="France") %>% dplyr::group_by(tag_name, local_time = as.numeric(round(local_time,1))) %>% dplyr::count(name = "track_occurences")
+occurences_france["local_time"][occurences_france["local_time"] == 0] <- 24
+
+occurences_sunrise_france <- time_after_sunrise %>% dplyr::group_by(tag_name,  local_sunrise = as.numeric(round(local_sunrise,1))) %>% dplyr::count(name = "track_occurences")
+occurences_sunrise_france["local_sunrise"][occurences_sunrise_france["local_sunrise"] == -13] <- 12
+
+
+tags_repartition_france <- occurences_france %>% 
+  left_join(
+    occurences_france %>%  dplyr::group_by(local_time) %>% dplyr::summarise(total = sum(track_occurences)),
+    by = c("local_time"))
+tags_repartition_france <- tags_repartition_france %>% dplyr::group_by(local_time) %>% dplyr::mutate(percentage = track_occurences * 100 / total)
+tags_repartition_france$group_time <- cut(as.numeric(tags_repartition_france$local_time), 
+                      breaks = seq(round(min(as.numeric(tags_repartition_france$local_time))),
+                                 round(max(as.numeric(tags_repartition_france$local_time))), by = 0.5))
+
+tags_repartition_sunrise_france <- occurences_sunrise_france %>% 
+  left_join(
+    occurences_sunrise_france %>%  dplyr::group_by(local_sunrise) %>% dplyr::summarise(total = sum(track_occurences)),
+    by = c("local_sunrise"))
+tags_repartition_sunrise_france <- tags_repartition_sunrise_france %>% dplyr::group_by(local_sunrise) %>% dplyr::mutate(percentage = track_occurences * 100 / total)
+tags_repartition_sunrise_france$group_sunrise <- cut(as.numeric(tags_repartition_sunrise_france$local_sunrise), 
+                      breaks = seq(round(min(as.numeric(tags_repartition_sunrise_france$local_sunrise)),1),
+                                 round(max(as.numeric(tags_repartition_sunrise_france$local_sunrise)),1), by = 0.5))
+
+
+
+
+
+
+
+
+# calculate group counts:
+table_tag_sunrise <- table(time_after_sunrise_france$groups, time_after_sunrise_france$tag_name)
+table_tag_sunrise <- table(time_after_sunrise_france$after_sunrise, time_after_sunrise_france$tag_name)
+
+
+table_tag_sunrise
+summary(table_tag_sunrise)
+
+```
+
+
+
+# Monthly repartition
+
+```{r monthly-repartition}
+monthly_occurences <- all_info %>% dplyr::mutate(local_month = lubridate::month( # extract hour
+    lubridate::with_tz( # convert to local time
+      lubridate::ymd_hms(record_utc, tz = "UTC"), # convert text to date
+      "Europe/Paris"))) %>%
+  dplyr::group_by(tag_name, local_month, season) %>% 
+  dplyr::count(name = "occurences")
+
+tags_monthly_repartition <- monthly_occurences %>%  left_join(
+    monthly_occurences %>% dplyr::group_by(local_month) %>% dplyr::summarise(total = sum(occurences)),
+    by = "local_month") %>% 
+  mutate(percentage = occurences * 100 / total)
+```
+
+```{r tags-monthly-repartition-graph}
+
+data_breaks <- data.frame(start = c(0, 3, 6, 9),  # Create data with breaks
+                          end = c(3, 6, 9, 12),
+                          Seasons = factor(c("Winter", "Spring", "Summer", "Autumn"), 
+                                          levels = c("Winter", "Spring", "Summer", "Autumn"),
+                          labels = c("Winter", "Spring", "Summer", "Autumn")))
+data_breaks                                       # Print data with breaks
+
+ggplot() +
+  # Add background colors to plot
+  geom_rect(data = data_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Seasons),
+            alpha = 0.25) +
+  scale_fill_manual(values = c("Winter" = "white",
+                               "Spring" = "green",
+                               "Summer" = "yellow",
+                               "Autumn" = "brown"
+                               )) +
+  geom_point(data = tags_monthly_repartition, aes(x = local_month, y = percentage),
+             shape = "circle", size = 1.5, colour = "#112446") +
+  labs(
+    x = "Month",
+    y = "Percentage",
+    title = "Monthly repartition of tags",
+    subtitle = "Noicecaptures tags in metropolitan France,
+    2017 - 2020"
+  ) +
+  theme_minimal() +
+  scale_x_continuous(breaks = scales::pretty_breaks(), labels=c("Jan","Feb","Apr","Jun", "Aug", "Oct", "Dec", "null"), limits = c(1,12))+
+  facet_wrap(vars(tag_name))
+
+# ggsave("plots/tags_monthly_dynamics.png") 
+```
+
+#Spatial analysis
+
+```{r maps}
+library(shiny)    # for shiny apps
+library(leaflet)  # renderLeaflet function
+library(leafpop)
+library(htmlwidgets)
+library(rsconnect)
+
+#récupère le tableau complet avec l'ensemble de nos données, full info + tags avec géométries + mouvements solaires
+#full_data = full_info %>% inner_join(time_after_sunrise)
+#data_map <- full_data %>% st_drop_geometry()
+
+pal <- colorNumeric(palette = "YlOrRd", domain = data_map$noise_level)
+
+ui = fluidPage(
+  sidebarPanel(sliderInput(inputId = "local_hour", "Local Hour", 0, 23, value = 12, animate = TRUE),
+  animationOptions(interval = 1, loop = FALSE, playButton = "z", pauseButton = NULL)),
+  leafletOutput(outputId = "map", height = 600, width = 800)
+  )
+server = function(input, output) {
+  output$map = renderLeaflet({
+    leaflet(data = data_map[floor(data_map$local_time) == input$local_hour, ] %>% filter(admin == "France" & tag_name == "chatting")) %>%
+      setView(lat = 46.62, lng = 2.55, zoom = 6) %>% #To focus on France on opening, can be changed or disabled
+      addTiles() %>% addProviderTiles(providers$CartoDB.Positron) %>%
+      addCircleMarkers(lng = ~lon, lat = ~lat, stroke = FALSE, fillOpacity = 0.8, color = ~pal(noise_level),
+                   radius = 6, 
+                   clusterOptions = markerClusterOptions(spiderfyOnMaxZoom = FALSE, maxClusterRadius = 60, disableClusteringAtZoom = 12),
+                   popup = ~leafpop::popupTable(data_map,
+                                       zcol = c("pk_track", "noise_level", "pleasantness"),
+                                       row.numbers = FALSE, feature.id = FALSE)) %>%
+      addLegend(position = "bottomright",
+            pal = pal, values = ~noise_level, opacity = 1)})
+  
+}
+shinyApp(ui, server)
+
+
+
+ui2 = fluidPage(
+  sliderInput(inputId = "local_hour", "Local Hour", 0, 23, value = 12, animate = TRUE),
+      leafletOutput(outputId = "map", height = 1000)
+  )
+server2 = function(input, output) {
+  output$map = renderLeaflet({
+  leaflet(data = data_map[floor(data_map$local_time) == input$local_hour, ] %>% filter(admin == "France" & tag_name == "chatting")) %>%
+    addTiles() %>% addProviderTiles(providers$CartoDB.Positron) %>%
+    addCircleMarkers(lng = ~lon, lat = ~lat, stroke = FALSE, fillOpacity = 0.8, color = ~pal(noise_level),
+                   radius = 6, 
+                   clusterOptions = markerClusterOptions(spiderfyOnMaxZoom = FALSE, maxClusterRadius = 60, disableClusteringAtZoom = 12),
+                   popup = ~leafpop::popupTable(data_map,
+                                       zcol = c("pk_track", "noise_level", "pleasantness"),
+                                       row.numbers = FALSE, feature.id = FALSE)) %>%
+    addLegend(position = "bottomright",
+            pal = pal, values = ~noise_level, opacity = 1)})
+    
+    
+}
+shinyApp(ui2, server2)
+
+```
+
+addTerminator( resolution=10, time = "2013-06-20T21:00:00Z", group = "daylight") %\>% addLayersControl( overlayGroups = "daylight", options = layersControlOptions(collapsed = FALSE))
+
+```{r mapping}
+#install the osmdata, sf, tidyverse and ggmap package
+if(!require("osmdata")) install.packages("osmdata")
+if(!require("tidyverse")) install.packages("tidyverse")
+if(!require("sf")) install.packages("sf")
+if(!require("ggmap")) install.packages("ggmap")
+
+#load packages
+library(tidyverse)
+library(osmdata)
+library(sf)
+library(ggmap)
+
+#Nous allons ici récupérer les centroids des tracks avec tags "chatting" et calculer leur distance avec les bars ou autres "amenities" récupérables avec openstreetmap
+#Dans le but de chercher une corrélation entre la présence de ces tags, leur niveau sonore et/ou pleasantness, et leur proximité avec des lieux de sorties
+
+track_infos_geo <- st_as_sf(tag_info %>% 
+  dplyr::inner_join(
+    full_data %>% filter(!is.na(tz_name1st))))
+#Chatting en France
+chat_france <- track_infos_geo %>% st_drop_geometry() %>% dplyr::filter(admin == "France") %>% dplyr::filter(tag_name == "chatting")
+tracks_france <- track_infos_geo %>% st_drop_geometry() %>% dplyr::filter(admin == "France")
+
+#Method to get POIs (Points Of Interests) - here bars - within radius around a precise point (lon, lat)
+#x <- opq_around (lon, lat, radius, key, value) %>% osmdata_sf()
+
+datalist = list()
+for(i in (1:nrow(tracks_france))){
+#Give bar coordinates in radius of x meters around each track
+x <- opq_around(tracks_france[[i,"lon"]], tracks_france[[i,"lat"]], 300, "amenity", "bar", timeout = 45) %>% osmdata_sf()
+#Retrieve only geometry (coordinates in POINT) from osm object
+dat <- x$osm_points$geometry
+#add identifiers
+dat$i = i
+dat$pk_track = tracks_france[[i,1]]
+datalist[[i]] <- dat
+
+print(i) #Only to check where the calculation is at, since it's a pretty long process
+}
+Sys.time()
+#saveRDS(datalist, file = "datalist_bar_tracks.rds")
+#datalist <- readRDS(file = "datalist_bar_tracks.rds")
+
+#Calculate distance between track centroid and POIs . distance in meters
+#For a first test, calculating distance between first amenity in list with the corresponding track centroid
+#library(geosphere)
+
+#distm(c(lon1, lat1), c(lon2, lat2), fun = distHaversine)
+#distm(c(x$osm_points$geometry[[1]][1], x$osm_points$geometry[[1]][2]), c(chat_france[[1,14]], chat_france[[1,13]]), fun = distGeo)
+#385m which match with google map result, so method seems to be good
+#Next step is to apply this measure to all the data
+
+```
+
+```{r followup}
+
+#str pour lire la structure de la liste 
+#on voit que certaines sous listes sont de tailles 2 ! 
+str(datalist)
+# on prend un élément et on regarde le nom  des éléments
+un_element <-  datalist[[1]] 
+#on constate que les deux derniers élements sont l'index i et la pktrack
+names(un_element)
+#donc les liste de taille 2 ne contiennent pas de points 
+# ce que confirme str(datalist)
+# et cet exemple
+un_autre_element <-  datalist[[55]] 
+names(un_autre_element)
+# je suppose que je n'ai pas besoin des listes qui ne contiennent pas de points (donc de taille 2)
+# on filtre la grosse liste pour ne garder que les listes qui sont de taille > 2 
+# je fais une fonction très simple pour tester si la liste est de taille 2  :
+egale_deux <-  function(i) {length(i) > 2}
+#j'utilise sapply pour appliquer ma fonction à tous les elements de la liste avoir le resultat sous forme de vecteur 
+vecbool <- sapply(datalist, egale_deux) # j'obtiens un vecteur de booleens 
+vecbool 
+# je me sers du vecteur de booléen pour indexer ma liste i.e. ne garder que les TRUE
+newlist <-  datalist[vecbool]
+# on a bien que des listes avec au moins un point 
+str(newlist)
+# on reprend un élement de cette liste 
+un_element <-  newlist[[1]]
+names(un_element)
+#on observe que les deux dernières entités ne sont pas des points : c'est i et pk_track 
+# on fait une fonction pour les couper et les mettre en attribut 
+transform_track <-  function(elem){
+  id <-  elem$i
+  pk_track <- elem$pk_track
+  elem <-  st_as_sf(head(elem,-2))
+  elem$id <-  id
+  elem$pk_track <-  pk_track
+    return(elem)
+}
+transform_track(un_element)
+#on a une fonction qui fonctionne sur un élément de la liste , il suffit maintenant de l'appeler sur la liste
+#on applique la fonction de transformation à la liste 
+resultat_final <- lapply(newlist, transform_track)
+# transformation en dataframe 
+resultat_final_final  <- bind_rows(resultat_final)
+
+resultat_final_final %>% head()
+
+```
+
+```{r distance-bars}
+
+liste_tracks_bar <- list()
+liste_no_bar <- list()
+nb_bars <- list()
+
+#Code python en dessous à transposer en R
+
+
+```
+
+```{python distance-bars, eval=False}
+import pandas as pd
+import numpy as np
+import collections
+
+df_chat = r.chat_france
+dict_arround = r.datalist
+
+import geopy.distance
+
+#Loops to only keep tracks where there are POIs associated
+liste_tracks_bar = []
+liste_no_bar = []
+nb_bars = []
+for dict in dict_arround :
+  if len(dict) > 2 :
+    nb_bars.append(len(dict)-2)
+    liste_tracks_bar.append(dict)
+  else :
+    liste_no_bar.append(dict)
+;
+
+liste_pk_tracks_bar = []
+
+for dict in liste_tracks_bar :*
+  for key, value in dict.items():
+    if key == "pk_track" :
+      liste_pk_tracks_bar.append(value)
+;
+
+df_chat_bar = df_chat[df_chat['pk_track'].isin(liste_pk_tracks_bar)]
+
+coords_point = list(zip(df_chat_bar["lon"], df_chat_bar["lat"]))
+
+dist_bar = collections.defaultdict(list)
+for i in range(len(coords_point)):
+  for j in range(len(liste_tracks_bar[i].values())-2):
+    dist_bar[liste_tracks_bar[i]["pk_track"]].append(geopy.distance.distance(tuple(list(liste_tracks_bar[i].values())[j]), coords_point[i]).m)
+;
+
+df_chat_bar['dist_bar'] = None
+df_chat_bar['dist_bar'] = df_chat_bar.astype({'dist_bar': 'object'}).dtypes
+
+for key, value in dist_bar.items():
+  df_chat_bar.at[df_chat_bar.index[df_chat_bar['pk_track'] == key].tolist()[0], 'dist_bar'] = value
+;
+
+df_chat_bar['nb_bar'] = nb_bars
+
+
+df_chat_bar['min_dist_bar'] = 0
+list_bar_min = []
+dist_min_bar = sys.maxsize
+for i in range(len(coords_point)):
+  for j in range(len(liste_tracks_bar[i].values())-2):
+    if (geopy.distance.distance(tuple(list(liste_tracks_bar[i].values())[j]), coords_point[i]).m) < dist_min_bar :
+      #We're rounding the minimal distance to its nearest 10 for easier visualizations
+      dist_min_bar = round((int(geopy.distance.distance(tuple(list(liste_tracks_bar[i].values())[j]), coords_point[i]).m))/10)*10
+  list_bar_min.append(dist_min_bar)
+  dist_min_bar = sys.maxsize
+;
+df_chat_bar['min_dist_bar'] = list_bar_min
+
+#the r function opq_around was supposed to filter bars out of a 500m range, while we find bars going up to 771m away from the point 
+>>> max(dist_bar)
+#771.5880870484272
+>>> min(dist_bar)
+#2.304924542575358
+
+
+```
+
+```{python bars-df-prep}
+import matplotlib.pyplot as plt
+plt.rcParams.update(plt.rcParamsDefault)
+import matplotlib.ticker as ticker
+from scipy.interpolate import make_interp_spline
+import numpy as np
+import seaborn as sns
+from scipy import signal
+
+df_chat_bar_night = df_chat_bar[(df_chat_bar['local_time'] < 5) | (df_chat_bar['local_time'] > 18)]
+df_chat_plot = df_chat_bar[['pk_track', 'pleasantness', 'noise_level', 'local_time', 'after_sunrise', 'dist_bar', 'nb_bar', 'min_dist_bar']]
+df_chat_plot["round_local_time"]=df_chat_plot["local_time"].round()
+
+```
+
+```{python graph-bar}
+
+plt.clf()
+
+fig, axes = plt.subplots(24, 1, figsize=(24,240), sharex= True)
+fig.suptitle("Count of bars by distance and hour of day")
+
+for i in range(0,24):  
+  sns.countplot(ax = axes[i] , x = 'min_dist_bar', data = df_chat_plot.loc[(df_chat_plot["round_local_time"]) == i])
+  axes[i].set_title(i)
+
+
+#plt.scatter( 'min_dist_bar','noise_level',  data=df_chat_plot, marker = "x")
+#loc = ticker.MultipleLocator(base=4) # this locator puts ticks at regular intervals
+#ax_countplot.xaxis.set_major_locator(loc)
+
+plt.show()
+
+```
+
+```{python graph-suite}
+
+
+
+```
+
+
+
+#Machine Learning - Prediction
+```{r predict_machine_learning}
+
+
+total_info_learning <- time_after_sunrise %>% select(pk_track,tag_name,admin,local_time,local_sunrise,local_sunset,after_sunrise,after_sunset,season,week_end,ferie,groups_rain,beaufort,groups_temp)
+
+total_info_learning <- total_info_learning %>% mutate(close_sunrise = case_when(
+  after_sunrise >= -2 & after_sunrise <= 2 ~ TRUE,
+  TRUE ~ FALSE
+))
+
+total_info_learning <- total_info_learning %>% mutate(
+  spring = case_when(
+  season == "spring" ~ TRUE,
+  TRUE ~ FALSE),
+  summer = case_when(
+  season == "summer" ~ TRUE,
+  TRUE ~ FALSE),
+  autumn = case_when(
+  season == "autumn" ~ TRUE,
+  TRUE ~ FALSE),
+  winter = case_when(
+  season == "winter" ~ TRUE,
+  TRUE ~ FALSE),
+  equator = case_when(
+  season == "equator" ~ TRUE,
+  TRUE ~ FALSE),
+  pole = case_when(
+  season == "pole" ~ TRUE,
+  TRUE ~ FALSE))
+
+#Découpage des colonnes catégorielles en plusieurs colonnes booléennes
+
+lst <- (time_after_sunrise %>% drop_na(groups_rain))$groups_rain
+lvl <- unique(unlist(lst))      
+res <- data.frame(pk_track = (time_after_sunrise %>% drop_na(groups_rain))$pk_track, tag_name = (time_after_sunrise %>% drop_na(groups_rain))$tag_name,
+                   do.call(rbind,lapply(lst, function(x) table(factor(x, levels=lvl)))), 
+                   stringsAsFactors=FALSE)
+for(i in 3:(length(lvl)+2)){
+res[,i] <- as.logical(res[,i])
+}
+colnames(res) <- c("pk_track","tag_name","no/light_rain","medium_rain","heavy_rain")
+
+total_info_learning <- left_join(total_info_learning, res)
+#-----
+
+lst_temp <- (time_after_sunrise %>% drop_na(groups_temp))$groups_temp
+lvl_temp <- sort(unique(unlist(lst_temp)))      
+res_temp <- data.frame(pk_track = (time_after_sunrise %>% drop_na(groups_temp))$pk_track, tag_name = (time_after_sunrise %>% drop_na(groups_temp))$tag_name,
+                   do.call(rbind,lapply(lst_temp, function(x) table(factor(x, levels=lvl_temp)))), 
+                   stringsAsFactors=FALSE)
+for(i in 3:(length(lvl_temp)+2)){
+res_temp[,i] <- as.logical(res_temp[,i])
+}
+colnames(res_temp) <- c("pk_track","tag_name",as.character(lvl_temp))
+
+total_info_learning <- left_join(total_info_learning, res_temp)
+#-----
+
+lst <- (time_after_sunrise %>% drop_na(beaufort))$beaufort
+lvl <- sort(unique(unlist(lst)))      
+res <- data.frame(pk_track = (time_after_sunrise %>% drop_na(beaufort))$pk_track, tag_name = (time_after_sunrise %>% drop_na(beaufort))$tag_name,
+                   do.call(rbind,lapply(lst, function(x) table(factor(x, levels=lvl)))), 
+                   stringsAsFactors=FALSE)
+for(i in 3:(length(lvl)+2)){
+res[,i] <- as.logical(res[,i])
+}
+colnames(res) <- c("pk_track","tag_name",paste("beaufort",as.character(lvl),sep = "_"))
+
+total_info_learning <- left_join(total_info_learning, res)
+#-----
+
+``` 
+
+```{r density maps}
+library(data.table)
+#https://data.opendatasoft.com/explore/dataset/osm-fr-bars%40babel/export/?timezone=&location=5,46.31658,3.09814&basemap=jawg.streets&dataChart=eyJxdWVyaWVzIjpbeyJjb25maWciOnsiZGF0YXNldCI6Im9zbS1mci1iYXJzQGJhYmVsIiwib3B0aW9ucyI6eyJ0aW1lem9uZSI6IiJ9fSwiY2hhcnRzIjpbeyJhbGlnbk1vbnRoIjp0cnVlLCJ0eXBlIjoiY29sdW1uIiwiZnVuYyI6IkNPVU5UIiwic2NpZW50aWZpY0Rpc3BsYXkiOnRydWUsImNvbG9yIjoiIzE0MkU3QiJ9XSwieEF4aXMiOiJicmV3ZXJ5IiwibWF4cG9pbnRzIjoxMCwic29ydCI6IiJ9XSwidGltZXNjYWxlIjoiIiwiZGlzcGxheUxlZ2VuZCI6dHJ1ZSwiYWxpZ25Nb250aCI6dHJ1ZX0%3D
+
+bars_fr <- fread(file = "raw_data/osm-fr-bars.csv", header = TRUE)
+coord_bars_fr <- bars_fr %>% select("Geo Point") %>% separate(col = "Geo Point", sep = ",", into = c("lat","lon"))
+coord_bars_fr$lat <- round(as.numeric(coord_bars_fr$lat),6)
+coord_bars_fr$lon <- round(as.numeric(coord_bars_fr$lon),6)
+
+plot_bars <- ggplot() +
+  stat_density2d(data = coord_bars_fr, aes(x = lon, y = lat, fill = ..density..), geom = 'tile', contour = F, n = 400)
+
+density_bars <- ggplot_build(plot_bars)
+
+dat <- density_bars$data[[1]]
+
+pos <- dat %>% select(x,y)
+
+nearest_density <- function(data,coord){
+  #data is a df with columns x,y [lon,lat]
+  #coord is a vector c(x,y) [lon,lat]
+  nearest.idx <- which.min(colSums((t(data) - coord)^2))
+  return(dat[nearest.idx,]$ndensity)
+}
+
+coords_fr <- all_info %>% filter(admin=="France") %>% select(pk_track,tag_name,lon,lat)
+
+temp <- c()
+for(row in 1:nrow(coords_fr)){
+  temp <- append(nearest_density(pos,as.numeric(coords_fr[row,])[3:4]),temp)
+} 
+
+density_bars_fr <- data.frame(pk_track = coords_fr$pk_track, tag_name = coords_fr$tag_name, density_bars = temp)
+
+total_info_learning <- left_join(total_info_learning,density_bars_fr)
+
+total_info_learning$groups_density_bars <- cut(total_info_learning$density_bars, 
+                      seq(0,1,by=0.1),
+                      include.lowest = TRUE, labels = FALSE)
+
+info_learning_fr <- total_info_learning %>% filter(admin=="France")
+
+bars_prop <- c()
+for(i in 1:length(unique(info_learning_fr$groups_density_bars))){
+  print(i)
+  bars_prop <- append(bars_prop,
+                      (length(unique((info_learning_fr %>% filter(groups_density_bars == i))$pk_track))/
+                                   length(unique((info_learning_fr)$pk_track)))*100)
+}
+
+ggplot() +
+  geom_col(aes(x = c(paste(seq(0,90,by=10),seq(10,100,by=10),sep = "-")), y = bars_prop)) +
+  labs(
+    x = "Density of bars % (no unit)",
+    y = "Proportion of tracks (%)",
+    title = "Repartition of tracks by density of surrounding bars",
+    subtitle = "Noisecapture's tags in France,
+      2017-2020")
+
+chat_bar_prop <- c()
+for(i in 1:length(unique(info_learning_fr$groups_density_bars))){
+  print(i)
+  chat_bar_prop <- append(
+    chat_bar_prop,
+    (length(unique((info_learning_fr %>% filter(groups_density_bars == i & tag_name == "music"))$pk_track)))/
+       length(unique((info_learning_fr %>% filter(groups_density_bars == i))$pk_track))*100)
+}
+
+ggplot() +
+  geom_col(aes(x = c(sort(unique(info_learning_fr$groups_density_bars))), y = chat_bar_prop)) +
+  labs(
+    x = "Groups of density of bars (no unit)",
+    y = "Proportion of music tag (%)",
+    title = "Repartition of music tags by density of surrounding bars",
+    subtitle = "Noisecapture's tags in France,
+      2017-2020")+
+  scale_x_continuous(breaks = c(sort(unique(info_learning_fr$groups_density_bars))))
+
+
+#mettre en colonnes true/false et machine learning / cluster analysis
+
+lst <- (total_info_learning %>% drop_na(groups_density_bars))$groups_density_bars
+lvl <- sort(unique(unlist(lst)))      
+res <- data.frame(pk_track = (total_info_learning %>% drop_na(groups_density_bars))$pk_track, tag_name = (total_info_learning %>% drop_na(groups_density_bars))$tag_name,
+                   do.call(rbind,lapply(lst, function(x) table(factor(x, levels=lvl)))), 
+                   stringsAsFactors=FALSE)
+for(i in 3:(length(lvl)+2)){
+res[,i] <- as.logical(res[,i])
+}
+colnames(res) <- c("pk_track","tag_name",paste("group_bar_density",as.character(lvl),sep = "_"))
+
+total_info_learning <- left_join(total_info_learning, res)
+
+#saveRDS(total_info_learning, file = "vignettes/total_info_learning.rds")
+#total_info_learning <- readRDS("vignettes/total_info_learning.rds")
+
+info_learning_fr <- total_info_learning %>% filter(admin=="France")
+
+#La découpe des jours en périodes (matin,soir,etc.) ne se fait que sur la France dans un premier temps
+#Certains pays ou territoires nordiques vivent sans tenir compte des mouvements du soleil
+#Tandis que les habitudes de mouvement et d'activité en France s'en rapprochent plus ou moins de façon constante
+info_learning_fr <- info_learning_fr %>% mutate(
+  morning = case_when(
+    local_time >= local_sunrise & local_time < 11 ~ TRUE,
+  TRUE ~ FALSE),
+  midday = case_when(
+    local_time >= 11 & local_time <= 13 ~ TRUE,
+  TRUE ~ FALSE),
+  afternoon = case_when(
+    local_time > 13 & local_time <= local_sunset ~ TRUE,
+    TRUE ~ FALSE),
+  evening = case_when(
+    local_time > local_sunset & local_time <= 24 ~TRUE,
+    TRUE ~FALSE),
+  night = case_when(
+    local_time >= 0 & local_time < local_sunrise ~TRUE,
+    TRUE ~FALSE
+  ))
+
+test_bool <- subset(info_learning_fr, select = -c(admin,local_time,local_sunrise,local_sunset,after_sunrise,season,groups_rain,beaufort,groups_temp,equator,pole,density_bars,groups_density_bars))
+
+#After some tries, temperature is not really important in our data, or it could be in terms of hours analysis, but it has not be done yet
+cols_remove <- as.character(lvl_temp)
+test_bool <- test_bool[, !(colnames(test_bool) %in% cols_remove)]
+
+test_num <- subset(info_learning_fr, select = c(pk_track,tag_name,local_time,after_sunrise,after_sunset,season,groups_rain,beaufort,density_bars,week_end,ferie))
+
+test_num <- test_num %>% mutate(day = case_when(
+  ferie == TRUE ~ "ferie",
+  week_end == TRUE ~ "week_end",
+  TRUE ~ "normal"
+)) %>% select(-c("week_end","ferie"))
+
+test_num$local_time <- round(as.numeric(test_num$local_time),1)
+test_num$local_sunrise <- round(as.numeric(test_num$local_sunrise),1)
+test_num$local_sunset <- round(as.numeric(test_num$local_sunset),1)
+test_num$after_sunrise <- round(as.numeric(test_num$after_sunrise),1)
+test_num$after_sunset <- round(as.numeric(test_num$after_sunset),1)
+test_num$density_bars <- round(as.numeric(test_num$density_bars),2)
+
+test_bool_chatting <- test_bool %>% mutate(tag_name = case_when(
+  tag_name == "chatting" ~ "chatting",
+  TRUE ~ "other"
+))
+
+test_num_chatting <- test_num %>% mutate(tag_name = case_when(
+  tag_name == "chatting" ~ "chatting",
+  TRUE ~ "other"
+))
+
+library(FactoMineR)
+
+pca_mix <- FAMD(na.omit(test_num[,c(3:10)]))
+
+library(explore)
+
+explore(test_num[,c(2:10)])
+
+```
+
+```{r anova}
+
+library(tidyverse)
+library(ggpubr)
+library(rstatix)
+
+full_data <- left_join(time_after_sunrise,total_info_learning)
+
+data_test <- full_data %>% filter(admin == "France") %>% select(c(tag_name,local_time,after_sunrise,after_sunset,season,rain_mm,wind,celsius,week_end,ferie,density_bars)) %>% mutate(local_time = abs(round(as.numeric(local_time),2)), after_sunrise = abs(round(as.numeric(after_sunrise),2)), after_sunset = abs(round(as.numeric(after_sunset),2))) %>% rename(distance_sunrise = after_sunrise, distance_sunset = after_sunset) %>% na.omit()
+
+data_test_chat <- data_test %>% mutate(tag_name = case_when(
+  tag_name == "chatting" ~ "chatting",
+  TRUE ~ "other"
+)) %>% rename(tag = tag_name) %>% mutate(tag = as.factor(tag), season = as.factor(season))
+
+data_test_chat <- data_test_chat %>% mutate(week_end = case_when(
+  week_end == TRUE ~ 1,
+  TRUE ~ 0
+),ferie = case_when(
+  ferie == TRUE ~ 1,
+  TRUE ~ 0
+),winter = case_when(
+  season == "winter" ~ 1,
+  TRUE ~ 0
+),autumn = case_when(
+  season == "autumn" ~ 1,
+  TRUE ~ 0
+),spring = case_when(
+  season == "spring" ~ 1,
+  TRUE ~ 0
+),summer = case_when(
+  season == "summer" ~ 1,
+  TRUE ~ 0
+)) %>% mutate(tag = as.factor(tag)) %>% select(-season)
+
+
+generate_anovas <- function(df, vars, var_test){
+  #class(df) = dataframe ; class(vars) = list/vector ; var_test = character
+  res_anova <- ""
+  for(var in vars){
+    if(lapply(data_test_chat[var],class) == "numeric") {
+      print(var)
+      formula = as.formula(paste0(var,"~", var_test))
+      var.aov <- df %>% anova_test(formula = formula)
+      print(var.aov)
+      var.pwc <- df %>% tukey_hsd(formula = formula)
+      print(var.pwc)
+      res_anova <- paste0(res_anova,var," ",var.pwc$p.adj.signif,"\n")
+      var.pwc <- var.pwc %>% add_xy_position(x = "tag")
+      
+      print(
+      ggboxplot(df, x = "tag", y = var) +
+        stat_pvalue_manual(var.pwc, hide.ns = TRUE) +
+        labs(
+          subtitle = get_test_label(var.aov, detailed = TRUE),
+          caption = get_pwc_label(var.pwc),
+          y = (var)
+          )
+      )
+    }
+    else{
+      print(paste0("The variable ",var," is not numeric, moving on to next variable."))
+    }
+  }
+  return(res_anova)
+}
+
+res_anova <- generate_anovas(data_test_chat, colnames(data_test_chat)[-1], "tag")
+cat(res_anova)
+
+```
+
+`cat(res_anova)`
+Selon nos tests anova :
+  La pluie ne semble pas influencer la présence du tag "chatting"
+  La densité des bars ne semble pas être un critère primordial pour la présence du tag "chatting", bien qu'une corrélation légère ait été detectée par anova
+  
+Ces tests statistiques ne tiennent pas en compte des possibles relations entre plusieurs variables et ne permettent simplement que de rendre état d'une corrélation existante ou non entre une variable et notre catégorie de sortie.
+
+
+```{r tree class}
+
+library(party)
+
+set.seed(42)
+
+data_chat_full <- data_test_chat %>% select(-c(rain_mm))
+data_chat <- upSample(x = data_chat_full[, -ncol(data_chat_full)],
+                     y = data_chat_full$tag) %>% select(-"Class")
+
+dt<-sample(2, nrow(data_chat), replace = TRUE, prob=c (0.8,0.2))
+train_chat <- data_chat[dt==1,]
+validate_chat <- data_chat[dt==2,]
+
+randomtree <- cforest(tag~.,data = train_chat, controls = cforest_unbiased())
+tree <- ctree(tag~.,data = train_chat, controls = ctree_control(savesplitstats = TRUE, mtry = 8))
+
+randomtree
+tree
+plot(tree)
+
+cforest_pred <- predict(object = randomtree, newdata= validate_chat[-1])
+confusionMatrix(cforest_pred, as.factor(validate_chat$tag))
+
+ctree_pred <- predict(object = tree, newdata= validate_chat[-1])
+confusionMatrix(ctree_pred, as.factor(validate_chat$tag))
+
+```
+
+
+```{r model training}
+
+create_train_test <- function(data, size = 0.8, train = TRUE) {
+    n_row = nrow(data)
+    total_row = size * n_row
+    train_sample <- 1: total_row
+    #ID has to be in first column of data
+    if (train == TRUE) {
+        return (data[train_sample, ][2:ncol(data)])
+    } else {
+        return (data[-train_sample, ][2:ncol(data)])
+    }
+}
+#----
+
+set.seed(42)
+data_train <- create_train_test(test_num_chatting, 0.8, train = TRUE)
+data_test <- create_train_test(test_num_chatting, 0.8, train = FALSE)
+dim(data_train)
+dim(data_test)
+
+#Check if the probabilities for tags are similar in both datasets
+prop.table(table(data_train$tag))
+prop.table(table(data_test$tag))
+
+library(rpart.plot)
+
+fit <- rpart(tag_name~., data = data_train, method = "class", control = rpart.control(minsplit = 20))
+rpart.plot(fit, extra = 106)
+
+#----
+
+df_predict_bool <- create_train_test(na.omit(test_bool), train = TRUE)
+predict_bool_test <- create_train_test(na.omit(test_bool), train = FALSE)
+
+df_predict_num <- create_train_test(na.omit(test_num), train = TRUE)
+predict_num_test <- create_train_test(na.omit(test_num), train = FALSE)
+
+df_predict_bool$tag_name <- as.factor(df_predict_bool$tag_name)
+df_predict_num$tag_name <- as.factor(df_predict_num$tag_name)
+predict_bool_test$tag_name <- as.factor(predict_bool_test$tag_name)
+predict_num_test$tag_name <- as.factor(predict_num_test$tag_name)
+
+df_predict_bool_chat <- create_train_test(na.omit(test_bool_chatting), train = TRUE)
+predict_bool_chat_test <- create_train_test(na.omit(test_bool_chatting), train = FALSE)
+
+df_predict_num_chat <- create_train_test(na.omit(test_num_chatting), train = TRUE)
+predict_num_chat_test <- create_train_test(na.omit(test_num_chatting), train = FALSE)
+
+df_predict_bool_chat$tag_name <- as.factor(df_predict_bool_chat$tag)
+df_predict_num_chat$tag_name <- as.factor(df_predict_num_chat$tag)
+predict_bool_chat_test$tag_name <- as.factor(predict_bool_chat_test$tag)
+predict_num_chat_test$tag_name <- as.factor(predict_num_chat_test$tag)
+
+median(abs(prop.table(table(df_predict_bool$tag_name)) - prop.table(table(predict_bool_test$tag_name))))
+
+library(caret)
+
+control <- trainControl(method="cv", number=10)
+metric <- "Accuracy"
+
+# a) linear algorithms
+set.seed(7)
+fit.lda <- train(tag_name~., data=df_predict_bool, method="lda", metric=metric, trControl=control)
+# b) nonlinear algorithms
+set.seed(7)
+fit.cart <- train(tag_name~., data=df_predict_bool, method="rpart", metric=metric, trControl=control)
+# kNN
+set.seed(7)
+fit.knn <- train(tag_name~., data=df_predict_bool, method="knn", metric=metric, trControl=control)
+# c) advanced algorithms
+set.seed(7)
+fit.svm <- train(tag_name~., data=df_predict_bool, method="svmRadial", metric=metric, trControl=control)
+# Random Forest
+set.seed(7)
+fit.rf <- train(tag_name~., data=df_predict_bool, method="rf", metric=metric, trControl=control)
+
+results <- resamples(list(lda=fit.lda, knn=fit.knn, svm=fit.svm, rf=fit.rf))
+summary(results)
+dotplot(results)
+
+# a) linear algorithms
+set.seed(7)
+fit.lda_chat <- train(tag~., data=df_predict_bool_chat, method="lda", metric=metric, trControl=control)
+# b) nonlinear algorithms
+# CART DOES NOT WORK ON THIS DATA
+set.seed(7)
+fit.cart_chat <- train(tag~., data=df_predict_bool_chat, method="rpart", metric=metric, trControl=control)
+# kNN
+set.seed(7)
+fit.knn_chat <- train(tag~., data=df_predict_bool_chat, method="knn", metric=metric, trControl=control)
+# c) advanced algorithms
+# SVM TOO LONG AND RESULT IS SIMILAR IF NOT WORSE THAN LDA
+set.seed(7)
+fit.svm_chat <- train(tag~., data=df_predict_bool_chat, method="svmRadial", metric=metric, trControl=control)
+# Random Forest
+set.seed(7)
+fit.rf_chat <- train(tag~., data=df_predict_bool_chat, method="rf", metric=metric, trControl=control)
+
+results_chat <- resamples(list(lda=fit.lda_chat, knn=fit.knn_chat, svm=fit.svm_chat, rf=fit.rf_chat))
+summary(results)
+dotplot(results)
+
+# a) linear algorithms
+set.seed(7)
+fit.lda_num <- train(tag_name~., data=df_predict_num_chat, method="lda", metric=metric, trControl=control)
+# b) nonlinear algorithms
+# CART DOES NOT WORK ON OUR DATA
+set.seed(7)
+fit.cart_num <- train(tag_name~., data=df_predict_num_chat, method="rpart", metric=metric, trControl=control)
+# kNN
+set.seed(7)
+fit.knn_num <- train(tag_name~., data=df_predict_num_chat, method="knn", metric=metric, trControl=control)
+# c) advanced algorithms
+# SVM
+set.seed(7)
+fit.svm_num <- train(tag~., data=df_predict_num_chat, method="svmRadial", metric=metric, trControl=control)
+# Random Forest
+set.seed(7)
+fit.rf_num <- train(tag~., data=df_predict_num_chat, method="rf", metric=metric, trControl=control)
+
+results_num <- resamples(list(lda = fit.lda_num, knn=fit.knn_num, cart=fit.cart_num))
+summary(results_num)
+dotplot(results_num)
+
+
+print(fit.lda)
+predictions <- predict(fit.lda, predict_bool_test)
+confusionMatrix(predictions, predict_bool_test$tag)
+
+print(fit.cart_num)
+predictions <- predict(fit.cart_num, predict_num_chat_test)
+confusionMatrix(predictions, predict_bool_chat_test$tag)
+
+
+#----
+
+
+test_num_chatting <- test_num_chatting %>% select(-c("pk_track"))
+
+test_num_chatting$tag <- as.factor(test_num_chatting$tag)
+test_num_chatting$season <- as.factor(test_num_chatting$season)
+test_num_chatting$day <- as.factor(test_num_chatting$day)
+test_num_chatting$groups_rain <- as.factor(test_num_chatting$groups_rain)
+
+
+
+data_train <- create_train_test(test_num_chatting)
+data_test <- create_train_test(test_num_chatting, train = FALSE)
+
+
+set.seed (4)
+dt<-sample(2, nrow(test_num_chatting), replace = TRUE, prob=c (0.8,0.2))
+train <- test_num_chatting[dt==1,]
+validate<-test_num_chatting[dt==2,]
+
+prop.table(table(train$tag))
+prop.table(table(validate$tag))
+
+library(party)
+tree<-ctree(tag~.,data = up_train, controls = ctree_control(maxdepth = 4))
+tree
+
+plot(tree)
+
+plot(ctree(tag ~ ., data = test_num_chatting))
+
+# upsample training data for equal proportions
+up_train <- upSample(x = train[, -ncol(train)],
+                     y = train$groups_rain)
+
+prop.table(table(train$tag))
+prop.table(table(up_train$tag))
+
+## Fit Decision Tree
+# grow tree out completely
+fit <-rpart(tag~.,                         
+            data = up_train,                   
+            method = "class",                     
+            parms = list(split = 'information'),
+            maxsurrogate = 0,                     
+            cp = 0,                              
+            minsplit = 5,                                                             
+            minbucket = 2,
+            xval = 10,
+            control = rpart.control(maxdepth = 8))
+
+rpart.plot(fit, extra = 106)
+
+test <- ranger(formula = tag ~. ,na.omit(up_train), probability = TRUE, classification = TRUE)
+test <- rusranger(na.omit(up_train),na.omit(up_train)$tag, probability = TRUE, classification = TRUE)
+
+test
+
+library(ROSE)
+
+data.rose <- ROSE(groups_rain~., data=train, seed=3)$data
+table(data.rose$groups_rain)
+
+#seulement numérique pas class ?
+newData <- smote(as.matrix.data.frame(train),train$tag)
+
+#-------------------
+
+data_train_num <- create_train_test(na.omit(test_num), train = TRUE)
+data_train_num <- data_train_num %>% select(-c("season","day"))
+z <- data_train_num[,-c(1,1)] 
+means <- apply(z,2,mean)
+sds <- apply(z,2,sd)
+nor <- scale(z,center=means,scale=sds)
+
+distance = dist(nor)
+
+data_train_num.hclust = hclust(distance)
+plot(data_train_num.hclust)
+plot(data_train_num.hclust,labels=data_train_num$tag_name,main='Default from hclust')
+plot(data_train_num.hclust,hang=-1, labels=data_train_num$tag_name,main='Default from hclust')
+
+member = cutree(data_train_num.hclust,3)
+table(member)
+
+aggregate(nor,list(member),mean)
+
+library(cluster)
+plot(silhouette(cutree(data_train_num.hclust,3), distance))
+
+set.seed(123)
+kc<-kmeans(nor,3)
+kc
+
+ot<-nor
+datadistshortset<-dist(ot,method = "euclidean")
+hc1 <- hclust(datadistshortset, method = "complete" )
+rect.hclust(hc1, k=12, border="red")# choose k, number of clusters 
+cluster<-cutree(hc1, k=12)# add cluster to original data 
+df<-cbind(df,as.factor(cluster))
+
+
+#----
+library(cluster)
+
+test_num_chatting <- test_num %>% mutate(tag_name = case_when(
+  tag_name == "chatting" ~ 1,
+  TRUE ~ 0
+)) %>% rename(tag = tag_name)
+
+data_cluster_num <- create_train_test(test_num_chatting, 0.2, train = TRUE) %>% select(-c("season","day"))
+
+pamvshortset_3 <- pam(data_cluster_num,3, diss = FALSE)
+
+clusplot(pamvshortset_3, shade = FALSE, labels=2, col.clus="blue",col.p="red",span=FALSE,main="Cluster Mapping",cex=1.2)
+
+#----
+
+
+library(cluster)
+#df<-na.omit(test_num_chatting %>% select(-c("tag")))
+df<-na.omit(test_num_chatting)# calculate distance %>% select(-c("tag"))
+
+d_dist<-daisy(df, metric = "gower")# hierarchical clustering
+hc<-hclust(d_dist, method = "complete")# dendrogram 
+plot(hc, labels=FALSE)
+rect.hclust(hc, k=20, border="red")# choose k, number of clusters 
+cluster<-cutree(hc, k=20)# add cluster to original data 
+df<-cbind(df_full,cluster = as.factor(cluster))
+
+ggplot(df) + geom_histogram(aes(x=tag),stat = "count") + facet_wrap(facets = vars(cluster))
+
+set.seed(7)
+
+library(class)
+
+dt<-sample (2, nrow(df), replace = TRUE, prob=c (0.8,0.2))
+train <- df[dt==1,]
+validate <- df[dt==2,]
+
+train_cluster <- train$cluster
+validate_cluster <- validate$cluster
+  
+train <- train %>% select(-c("tag","cluster"))
+validate <- validate %>% select(-c("tag","cluster"))
+
+new_data <- (c(23,-9,4.5,"spring","1",2,0.97,"ferie"))
+data_to_predict <- train[1,]
+data_to_predict[1,] <- new_data
+data_to_predict <- as.matrix(data_to_predict, stringsAsFactors = TRUE)
+
+control <- trainControl(method="cv", number=10)
+metric <- "Accuracy"
+fit.lda_cluster <- train(cluster~., data=train, method="lda", metric=metric, trControl=control)
+
+print(fit.lda_cluster)
+x <- as.matrix(validate)
+predictions <- predict(fit.lda_cluster, x)
+confusionMatrix(predictions, validate$cluster)
+
+predict(fit.lda_cluster, as.matrix(data_to_predict))
+
+#----
+
+library(party)
+data <- na.omit(train)
+datact <- ctree(tag ~ ., data = data,
+               controls = ctree_control(maxsurrogate = 3))
+plot(datact)  #default plot, some crowding with N hidden on leafs
+
+
+#----
+
+set.seed(16)
+
+#Cluster optionnel, à voir si pertinent et efficace dans les mesures, mais il ne s'agit pas d'une valeur
+#que l'on peut donner dans un nouvel imput de data pour la prédiction, donc à éviter peut-être
+library(cluster)
+df<-na.omit(test_num_chatting %>% select(-c("tag")))
+#df<-na.omit(test_num_chatting)# calculate distance %>% select(-c("tag"))
+
+d_dist<-daisy(df, metric = "gower")# hierarchical clustering
+hc<-hclust(d_dist, method = "complete")# dendrogram 
+plot(hc, labels=FALSE)
+rect.hclust(hc, k=20, border="red")# choose k, number of clusters 
+cluster<-cutree(hc, k=20)# add cluster to original data 
+df<-cbind(df,cluster = as.factor(cluster))
+
+df <- cbind(df,na.omit(test_num_chatting %>% select(c("tag"))))
+
+#df <- na.omit(test_num_chatting)
+up_df <- downSample(x = df[, -ncol(df)],
+                     y = df$tag)
+
+dt<-sample (2, nrow(df), replace = TRUE, prob=c (0.8,0.2))
+train_df <- df[dt==1,]
+validate_df <- df[dt==2,]
+
+library(randomForest)
+fit <- randomForest(cluster ~ ., data = train_df, na.action = na.omit, ntree = 800, mtry = 2)
+
+print(fit)
+varImpPlot(fit)
+fit$importance
+
+plot(fit$err.rate[, 1], type = "l", xlab = "nombre d'arbres", ylab = "erreur OOB")
+
+
+predictions <- predict(fit, validate_df)
+confusionMatrix(predictions, validate_df$cluster)
+
+
+#autre librairie pour random forest pour comparer
+library(caret)
+mod <- caret::train(tag~., data = train_df, method = "rf")
+print(mod)
+print(mod$finalModel)
+varImpPlot(mod$finalModel)
+
+
+#----
+#Test de réseau de neurones - tensorflow / keras
+
+
+
+
+
+```
+
+```{r kohonen}
+library(kohonen)
+
+data <- test_num %>% select(-c("pk_track","tag_name"))
+
+training_indices <- sample(nrow(data),nrow(data)*80/100)
+
+training <- (data[training_indices,])
+testing <- data[-training_indices,]
+training.matrix <- as.matrix.data.frame(training)
+
+som3 <- xyf(training.matrix, classvec2classmat(as.factor(test_num$tag_name[training_indices])), 
+    grid = somgrid(13, 13, "hexagonal"), rlen = 100)
+
+```
+
+
+# TODO
+
+-   investigate why there is doubles in tags_monthly_dynamic graph in Road March and industrial June (data related ? Agregation ?)
+
+
+# Packages citations
+
+```{r}
+citation("tidyverse")
+```
+
+```{r}
+citation("sf")
+```
+
+```{r}
+citation("hydroTSM")
+```
+
+```{r}
+citation("suncalc")
+```
+
+# Reproductibility
+
+## Data sources
+
+Most of the treatment has been made within the PostGIS database. The scripts folder contains several scripts to execute to prepare the dataset.
+
+## Session informations
+
+```{r session-info, echo=FALSE}
+extract_loaded_package <- function(packages_info) {
+  return(packages_info$Package) 
+}
+
+xfun::session_info(sapply(sessionInfo()$otherPkgs, extract_loaded_package), dependencies = FALSE)
+```
+
+## Database information
+
+```{r pg-version}
+# Check database connection and software versions
+RPostgreSQL::dbGetQuery(con,statement = paste("SELECT version();")) # should return PostgreSQL 10.15 or higher
+```
+
+```{r postgis-version}
+RPostgreSQL::dbGetQuery(con,statement = paste("SELECT postgis_full_version();")) # should return PostGIS 2.5 or higher
+```
+
+```{r close-connection, echo=FALSE}
+RPostgreSQL::dbDisconnect(con)
+```
