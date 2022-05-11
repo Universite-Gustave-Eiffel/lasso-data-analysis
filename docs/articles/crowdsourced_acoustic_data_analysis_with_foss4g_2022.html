@@ -72,53 +72,44 @@
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Crowdsourced acoustic open data analysis with FOSS4G tools</h1>
-                        <h4 data-toc-skip class="author">Nicolas Roelandt</h4>
-            <address class="author_afil">
-      AME, Univ. Gustave Eiffel, IFSTTAR, F-69675 Bron, France<br><h4 data-toc-skip class="author">Pierre Aumond</h4>
-            <address class="author_afil">
-      UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France<br><h4 data-toc-skip class="author">Ludovic Moisan</h4>
-            <address class="author_afil">
-      UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France<br><h4 data-toc-skip class="date">2022-05-02</h4>
+                        <h4 data-toc-skip class="author">Nicolas Roelandt<sup>1</sup>, Pierre Aumond<sup>2</sup>, Ludovic Moisan<sup>2</sup>
+</h4>
+            
+            <h4 data-toc-skip class="date">2022-05-11</h4>
       
       
       <div class="hidden name"><code>crowdsourced_acoustic_data_analysis_with_foss4g_2022.Rmd</code></div>
 
-    </address>
-</address>
-</address>
-</div>
+    </div>
 
+        <div class="author-afil">
+        <p class="author-afil"><sup>1</sup>AME, Univ. Gustave Eiffel, IFSTTAR, F-69675 Bron, France<br><sup>2</sup>UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France</p>
+        </div>
+
+        <div class="comment">
+        <p class="comment"><strong>pre-print version</strong></p>
+        </div>
     
+        <div class="abstract">
+      <p class="abstract">Abstract</p>
+      <p>NoiseCapture is an Android application developed by the Gustave Eiffel University
+      and the French National Centre for Scientific Research
+      as central element of a participatory approach to environmental noise mapping.
+      The application is open-source, and all its data are available freely.
+      This study presents the results of the first exploratory analysis of 3 years of
+      data collection through the lens of sound sources.
+      Sound dynamics of roads related to commuting or bird songs have been observed.
+      The first results are therefore encouraging.
+      This analysis is based only on the tags given by the users and not on the sound
+      spectrum of the measurement, which will be studied at a later stage.
+      As this preparatory work will be consolidated and extended later, and with the will
+      to register this study in the framework of the Open Science, we paid attention
+      to its reproducibility.
+      The context of the study, the tools and techniques used and the first results
+      obtained will be presented as well as the benefits of using literate programming
+      in this type of preparatory work.</p>
+    </div>
     
-<div class="section level2">
-<h2 id="keywords">Keywords<a class="anchor" aria-label="anchor" href="#keywords"></a>
-</h2>
-<p>Environmental acoustics, crowdsourced open data, FOSS4G, reproducibility,
-literate programming, Open Science,
-Open Geospatial Software, Open GIScience, Open Geospatial Data</p>
-</div>
-<div class="section level2">
-<h2 id="abstract">Abstract<a class="anchor" aria-label="anchor" href="#abstract"></a>
-</h2>
-<!--TODO modifier l'abstract en évitant de copier coller l'intro -->
-<p><a href="https://noise-planet.org/noisecapture.html" class="external-link">NoiseCapture</a> is a Android application
-developed by the <a href="https://www.univ-gustave-eiffel.fr/" class="external-link">Gustave Eiffel University</a>
-and the <a href="https://www.cnrs.fr/en/cnrs" class="external-link">French National Centre for Scientific Research</a>
-as central element of a participatory approach to environmental noise mapping.
-The application is open-source, and all its data are available freely.</p>
-<p>This study presents the results of the first exploratory analysis of 3 years of
-data collection through the lens of sound sources.</p>
-<p>Sound dynamics of roads related to commuting or bird songs have been observed.
-The first results are therefore encouraging.
-This analysis is based only on the tags given by the users and not on the sound
-spectrum of the measurement, which will be studied at a later stage.</p>
-<p>As this preparatory work will be consolidated and extended later, and with the will
-to register this study in the framework of the Open Science, we paid attention
-to its reproducibility.</p>
-<p>The context of the study, the tools and techniques used and the first results
-obtained will be presented as well as the benefits of using literate programming
-in this type of preparatory work.</p>
-</div>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
@@ -195,20 +186,11 @@ analysed using a statistical analysis language.</p>
 we decided a FOSS toolset: PostGreSQL/Postgis to store the data and the R language
 to analyse and produce knowledge from it.
 We also used Git as it is a great tool to facilitate remote collaboration.</p>
-<div class="section level5" number="1.1.2.1">
-<h5 id="postgis">
-<span class="header-section-number">1.1.2.1</span> PostGIS<a class="anchor" aria-label="anchor" href="#postgis"></a>
-</h5>
-<p>The data are provided as a dump from a PostGreSQL/PostGIS database <span class="citation">(<a href="#ref-paulramseyPostGIS2001" role="doc-biblioref">Ramsey and Blasby 2001</a>)</span>.
+<p><strong>PostGIS</strong>: the data are provided as a dump from a PostGreSQL/PostGIS database <span class="citation">(<a href="#ref-paulramseyPostGIS2001" role="doc-biblioref">Ramsey and Blasby 2001</a>)</span>.
 Several scripts perform much of the attribute and spatial filtering.
 These filterings are saved in a materialized view.
 This view is the entry point for the R language.</p>
-</div>
-<div class="section level5" number="1.1.2.2">
-<h5 id="r">
-<span class="header-section-number">1.1.2.2</span> R<a class="anchor" aria-label="anchor" href="#r"></a>
-</h5>
-<p>The R language <span class="citation">(<a href="#ref-rcoreteamRLanguageStatistical2021" role="doc-biblioref">R Core Team 2021</a>)</span>
+<p><strong>R</strong>: the R language <span class="citation">(<a href="#ref-rcoreteamRLanguageStatistical2021" role="doc-biblioref">R Core Team 2021</a>)</span>
 is a programming language for data processing and statistics with many libraries
 dedicated to geospatial data.</p>
 <p>The use of Rmarkdown is one of the recommended means for literate programming (along with Jupyter Notebooks and Emacs Org-Mode <span class="citation">(<a href="#ref-desquilbet2019ReproducibleResearch" role="doc-biblioref">Desquilbet et al. 2019</a>)</span>)</p>
@@ -219,18 +201,12 @@ graphs, tables and documents.
 So it is a great tool to either communicate inside our team and publish our results.</p>
 <p>Rmarkdown, as any markdown file, is a plain text file that can be easily versionned
 with any version control system.
-As our team is scaterred in several places in France, we needed a tool to
+As our team is scattered in several places in France, we needed a tool to
 facilitate code sources communication, for this purpose, we used git.</p>
-</div>
-<div class="section level5" number="1.1.2.3">
-<h5 id="git">
-<span class="header-section-number">1.1.2.3</span> Git<a class="anchor" aria-label="anchor" href="#git"></a>
-</h5>
-<p>Git is a Distributed Version Control System (DVCS) <span class="citation">(<a href="#ref-chacon2014pro" role="doc-biblioref">Chacon and Straub 2014</a>)</span>.
+<p><strong>Git</strong>: Git is a Distributed Version Control System (DVCS) <span class="citation">(<a href="#ref-chacon2014pro" role="doc-biblioref">Chacon and Straub 2014</a>)</span>.
 It enables collaborative and decentralized work.
 The choice of Git was natural as different collaborators are present on several
 sites (Nantes, Lyon, Paris) and Git is already used within the UMRAE laboratory.</p>
-</div>
 </div>
 <div class="section level4" number="1.1.3">
 <h4 id="implementation">
@@ -295,42 +271,37 @@ crowdsourced acoustic data and if tags are sufficients to describe user environm
 It focuses on the proportion of a certain tag in relation to all the tags for a
 given period (time of day, season, etc.).
 In the sample studied, it is possible to note a large prevalence of the <em>road</em>
-tag as shown in Figure <a href="#fig:tag-representation">2.1</a>.
+tag as shown in Figure 1.
 <em>chatting</em>, <em>animals</em> and <em>wind</em> tags are also well represented.</p>
-<div class="figure">
-<span style="display:block;" id="fig:tag-representation"></span>
-<img src="plots/tags_repartition.png" alt="Tag representation in mainland France" width="1050"><p class="caption">
-Figure 2.1: Tag representation in mainland France
+<p><img src="plots/tags_repartition.png" width="1050"></p>
+<p class="caption">
+<strong>Figure 1: </strong>Tag representation in mainland France.
 </p>
-</div>
 <p>Noise pollution due to road noise is a major concern in France.</p>
 <div class="section level4" number="2.1.1">
 <h4 id="acoustic-dynamics-of-bird-song-and-commutes">
 <span class="header-section-number">2.1.1</span> Acoustic dynamics of bird song and commutes<a class="anchor" aria-label="anchor" href="#acoustic-dynamics-of-bird-song-and-commutes"></a>
 </h4>
 <p>A first axis of analysis concerns the time distribution of the tags.
-Figure <a href="#fig:animals-sunrise">2.2</a> shows that animal noises (tag <em>animals</em>) are more frequent in the morning and especially
+Figure 2 shows that animal noises
+(tag <em>animals</em>) are more frequent in the morning and especially
 one hour after sunrise.
 This is a well known dynamic for bird song <span class="citation">(<a href="#ref-robbins1981effect" role="doc-biblioref">Robbins 1981</a>)</span>
 and our data shows a similar effect.</p>
 <!--TODO: Remplacer par le graphique de Ludovic -->
-<div class="figure">
-<span style="display:block;" id="fig:animals-sunrise"></span>
-<img src="plots/Repartition_of_animals_sounds_in_local_time.png" alt="Animals dynamics" width="1050"><p class="caption">
-Figure 2.2: Animals dynamics
+<p><img src="plots/Repartition_of_animals_sounds_in_local_time.png" width="1050"></p>
+<p class="caption">
+<strong>Figure 2: </strong>Animals acoustic dynamics.
 </p>
-</div>
-<p>We also observed peaks in human activity, especially commuting (see Figure
-<a href="#fig:road-dynamics">2.3</a>.
+<p>We also observed peaks in human activity, especially commuting (see
+Figure 3.
 Although we find a difference from commuting times shown by <span class="citation"><a href="#ref-MA2017135" role="doc-biblioref">Ma et al.</a> (<a href="#ref-MA2017135" role="doc-biblioref">2017</a>)</span>, with a
 rise from 8 am and a peak around 2 pm.</p>
 <!--TODO: Remplacer par le graphique de Ludovic -->
-<div class="figure">
-<span style="display:block;" id="fig:road-dynamics"></span>
-<img src="plots/Repartition_of_road_sounds_in_local_time.png" alt="Road dynamics" width="1050"><p class="caption">
-Figure 2.3: Road dynamics
+<p><img src="plots/Repartition_of_road_sounds_in_local_time.png" width="1050"></p>
+<p class="caption">
+<strong>Figure 3: </strong>Road acoustic dynamics.
 </p>
-</div>
 <p>Seeing those dynamics was a good sign regarding the validity of crowdsourced
 environmental acoustic data.
 However, we wanted more precise quality indicators so we looked if we were able
@@ -454,7 +425,12 @@ For the more technical parts, such as the implementation of database servers,
 the presence of a research software engineer is a real plus.</p>
 </div>
 <div class="section level2">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+<h2 id="acknowledgements">ACKNOWLEDGEMENTS<a class="anchor" aria-label="anchor" href="#acknowledgements"></a>
+</h2>
+<p>The authors would like to thank …</p>
+</div>
+<div class="section level2">
+<h2 id="references">REFERENCES<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-chacon2014pro" class="csl-entry">
@@ -507,6 +483,17 @@ Wickham, Hadley, Mara Averick, Jennifer Bryan, Winston Chang, Lucy D’Agostino 
 </div>
 </div>
 </div>
+<div class="section level2">
+<h2 id="appendix-optional">APPENDIX (Optional)<a class="anchor" aria-label="anchor" href="#appendix-optional"></a>
+</h2>
+<p>Any additional supporting data may be appended, provided the paper does
+not exceed the limits given above.</p>
+<script type="text/javascript">
+// insert a soft break to avoid an infinite loop with FF
+// this is because FF handles lists differently
+document.querySelector('#TOC h1').insertAdjacentHTML('afterend', '<wbr>');
+</script>
+</div>
 <div class="footnotes">
 <hr>
 <ol>
@@ -521,9 +508,7 @@ Wickham, Hadley, Mara Averick, Jennifer Bryan, Winston Chang, Lucy D’Agostino 
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
 
-        <nav id="toc" data-toggle="toc"><h2 data-toc-skip>Contents</h2>
-    </nav>
-</div>
+      </div>
 
 </div>
 

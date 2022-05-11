@@ -26,8 +26,13 @@ abstract : |
  The context of the study, the tools and techniques used and the first results 
  obtained will be presented as well as the benefits of using literate programming 
  in this type of preparatory work.
+pkgdown:
+  as_is: true
 output:
-  isprspaged::article
+  bookdown::html_document2: # vignette output
+    includes:
+      before_body: header.html
+  #isprspaged::article # pdf output
 #knit: pagedown::chrome_print
 ---
 
