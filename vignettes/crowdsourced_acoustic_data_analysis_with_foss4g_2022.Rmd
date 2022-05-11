@@ -1,36 +1,43 @@
 ---
 title: "Crowdsourced acoustic open data analysis with FOSS4G tools"
-pkgdown:
-  as_is: true
-output:
-  bookdown::html_document2:
-    toc: true
-    number_sections: true
-vignette: >
-  %\VignetteIndexEntry{Crowdsourced acoustic open data analysis with FOSS4G tools}
-  %\VignetteEngine{rmarkdown::render}
-  %\VignetteEncoding{UTF-8}
-author:
-- name: Nicolas Roelandt
-  affiliation: AME, Univ. Gustave Eiffel, IFSTTAR, F-69675 Bron, France
-- name: Pierre Aumond
-  affiliation: UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France
-- name: Ludovic Moisan
-  affiliation: UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France
+author: "Nicolas Roelandt<sup>1</sup>, Pierre Aumond<sup>2</sup>, Ludovic Moisan<sup>2</sup>"
+affiliation: "<sup>1</sup>AME, Univ. Gustave Eiffel, IFSTTAR, F-69675 Bron, France<br /><sup>2</sup>UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France"
+keywords : 'Environmental acoustics, crowdsourced open data, FOSS4G, reproducibility, literate programming, Open Science, Open Geospatial Software, Open GIScience, Open Geospatial Data'
 bibliography: bibliography.bib
 biblio-style: "apalike"
 link-citations: true
+links-to-footnotes: true
+paged-footnotes: true
 date: "`r Sys.Date()`"
-figures:
-  dpi: 72
+abstract : |
+ NoiseCapture is an Android application  developed by the Gustave Eiffel University
+ and the French National Centre for Scientific Research
+ as central element of a participatory approach to environmental noise mapping.
+ The application is open-source, and all its data are available freely.
+ This study presents the results of the first exploratory analysis of 3 years of 
+ data collection through the lens of sound sources.
+ Sound dynamics of roads related to commuting or bird songs have been observed. 
+ The first results are therefore encouraging. 
+ This analysis is based only on the tags given by the users and not on the sound 
+ spectrum of the measurement, which will be studied at a later stage. 
+ As this preparatory work will be consolidated and extended later, and with the will
+ to register this study in the framework of the Open Science, we paid attention 
+ to its reproducibility. 
+ The context of the study, the tools and techniques used and the first results 
+ obtained will be presented as well as the benefits of using literate programming 
+ in this type of preparatory work.
+output:
+  isprspaged::article
+#knit: pagedown::chrome_print
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  echo = FALSE
-)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(captioner) # handle figures and tables numbering
+
+# Declare variables for figures and table counting
+fig_nums <- captioner::captioner(style_prefix = TRUE, style= "b")
+table_nums <- captioner::captioner(prefix = "Table", style_prefix = TRUE, style= "b")
 ```
 
 ```{r comments, include=FALSE}
@@ -39,38 +46,6 @@ knitr::opts_chunk$set(
 #' Announcement of accepted abstracts 		01/04/2022
 #' Submission of full academic papers 		01/06/2022
 ```
-
-# Keywords {-}
-Environmental acoustics, crowdsourced open data, FOSS4G, reproducibility,
-literate programming, Open Science, 
-Open Geospatial Software, Open GIScience, Open Geospatial Data 
-
-# Abstract {-}
-<!--TODO modifier l'abstract en évitant de copier coller l'intro -->
-
-[NoiseCapture](https://noise-planet.org/noisecapture.html) is a Android application 
-developed by the [Gustave Eiffel University](https://www.univ-gustave-eiffel.fr/)
-and the [French National Centre for Scientific Research](https://www.cnrs.fr/en/cnrs) 
-as central element of a participatory approach to environmental noise mapping.
-The application is open-source, and all its data are available freely.
-
-This study presents the results of the first exploratory analysis of 3 years of 
-data collection through the lens of sound sources.
-
-Sound dynamics of roads related to commuting or bird songs have been observed. 
-The first results are therefore encouraging. 
-This analysis is based only on the tags given by the users and not on the sound 
-spectrum of the measurement, which will be studied at a later stage. 
-
-As this preparatory work will be consolidated and extended later, and with the will
-to register this study in the framework of the Open Science, we paid attention 
-to its reproducibility. 
-
-The context of the study, the tools and techniques used and the first results 
-obtained will be presented as well as the benefits of using literate programming 
-in this type of preparatory work.
-
-
 # Introduction {-}
 
 NoiseCapture[^1] is an Android application developed by the Gustave Eiffel University[^2] 
@@ -160,16 +135,12 @@ we decided a FOSS toolset: PostGreSQL/Postgis to store the data and the R langua
 to analyse and produce knowledge from it.
 We also used Git as it is a great tool to facilitate remote collaboration.
 
-#### PostGIS
-
-The data are provided as a dump from a PostGreSQL/PostGIS database [@paulramseyPostGIS2001].
+**PostGIS**: the data are provided as a dump from a PostGreSQL/PostGIS database [@paulramseyPostGIS2001].
 Several scripts perform much of the attribute and spatial filtering. 
 These filterings are saved in a materialized view.
 This view is the entry point for the R language.
 
-#### R
-
-The R language [@rcoreteamRLanguageStatistical2021]
+**R**: the R language [@rcoreteamRLanguageStatistical2021]
 is a programming language for data processing and statistics with many libraries 
 dedicated to geospatial data. 
  
@@ -184,12 +155,10 @@ So it is a great tool to either communicate inside our team and publish our resu
 
 Rmarkdown, as any markdown file, is a plain text file that can be easily versionned
 with any version control system.
-As our team is scaterred in several places in France, we needed a tool to 
+As our team is scattered in several places in France, we needed a tool to 
 facilitate code sources communication, for this purpose, we used git.
 
-#### Git
-
-Git is a Distributed Version Control System (DVCS) [@chacon2014pro]. 
+**Git**: Git is a Distributed Version Control System (DVCS) [@chacon2014pro]. 
 It enables collaborative and decentralized work.
 The choice of Git was natural as different collaborators are present on several
 sites (Nantes, Lyon, Paris) and Git is already used within the UMRAE laboratory.
@@ -259,37 +228,60 @@ The study concerns tracks bearing a tag, recorded in metropolitan France.
 It focuses on the proportion of a certain tag in relation to all the tags for a 
 given period (time of day, season, etc.). 
 In the sample studied, it is possible to note a large prevalence of the  *road* 
-tag as shown in Figure \@ref(fig:tag-representation). 
+tag as shown in `r fig_nums("tag-representation", display = "cite")`. 
 *chatting*, *animals* and *wind* tags are also well represented.
 
-```{r tag-representation, fig.cap="Tag representation in mainland France"}
+```{r, results='hide'}
+caption <- "Tag representation in mainland France."
+fig_nums(name = "tag-representation", caption = caption)
+```
+
+```{r tag-representation, eval=TRUE}
 knitr::include_graphics("plots/tags_repartition.png")
 ```
+
+`r paste0('<p class="caption">',fig_nums("tag-representation"), '</p>')`
+
 
 Noise pollution due to road noise is a major concern in France.
 
 ### Acoustic dynamics of bird song and commutes
 
 A first axis of analysis concerns the time distribution of the tags. 
-Figure  \@ref(fig:animals-sunrise) shows that animal noises (tag *animals*) are more frequent in the morning and especially 
+`r fig_nums("animals-sunrise", display = "cite")` shows that animal noises 
+(tag *animals*) are more frequent in the morning and especially 
 one hour after sunrise.
 This is a well known dynamic for bird song [@robbins1981effect]
 and our data shows a similar effect.
 
 <!--TODO: Remplacer par le graphique de Ludovic -->
-```{r animals-sunrise, fig.cap="Animals dynamics"}
+```{r animals-sunrise-caption, results='hide'}
+caption <- "Animals acoustic dynamics."
+fig_nums(name = "animals-sunrise", caption = caption)
+```
+
+```{r animals-sunrise, eval=TRUE}
 knitr::include_graphics("plots/Repartition_of_animals_sounds_in_local_time.png")
 ```
 
-We also observed peaks in human activity, especially commuting (see Figure 
-\@ref(fig:road-dynamics).
+`r paste0('<p class="caption">',fig_nums("animals-sunrise"), '</p>')`
+
+We also observed peaks in human activity, especially commuting (see
+`r fig_nums("road-dynamics", display = "cite")`.
 Although we find a difference from commuting times shown by @MA2017135, with a 
 rise from 8 am and a peak around 2 pm.
 
 <!--TODO: Remplacer par le graphique de Ludovic -->
-```{r road-dynamics, fig.cap="Road dynamics"}
+```{r road-dynamics-caption, results='hide'}
+caption <- "Road acoustic dynamics."
+fig_nums(name = "road-dynamics", caption = caption)
+```
+
+```{r road-dynamics, eval=TRUE}
 knitr::include_graphics("plots/Repartition_of_road_sounds_in_local_time.png")
 ```
+
+`r paste0('<p class="caption">',fig_nums("road-dynamics"), '</p>')`
 
 Seeing those dynamics was a good sign regarding the validity of crowdsourced 
 environmental acoustic data. 
@@ -306,8 +298,6 @@ of Météo-France, the French national meteorological service.
 <!--TODO: Introduire les graphes et le texte de Ludovic -->
 
 ## Benefits of OpenScience and literate programming
-
-
 
 Intrinsically, Free and Open Source Software (FOSS) brings many benefits to a 
 project, whether it is a scientific one or not.
@@ -424,4 +414,21 @@ is not easy but we believe that the gain is much higher than the cost.
 For the more technical parts, such as the implementation of database servers, 
 the presence of a research software engineer is a real plus.
 
-# References {-}
+# ACKNOWLEDGEMENTS {-}
+
+The authors would like to thank ...
+
+# REFERENCES {-}
+::: {#refs}
+:::
+
+# APPENDIX (Optional) {-}
+
+Any additional supporting data may be appended, provided the paper does
+not exceed the limits given above.
+
+```{js, echo=FALSE}
+// insert a soft break to avoid an infinite loop with FF
+// this is because FF handles lists differently
+document.querySelector('#TOC h1').insertAdjacentHTML('afterend', '<wbr>');
+```
