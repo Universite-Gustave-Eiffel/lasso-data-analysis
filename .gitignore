@@ -1,11 +1,11 @@
 .Rproj.user
 .Rhistory
+.RData
 .Rdata
 .httr-oauth
 .DS_Store
-documentation/ #local documentation
-documentation
-inst/doc
-cache
-
-vignettes/*.rds
+*.html
+*_cache
+synop.*.gz
+*.rds
+raw_data/*.csv

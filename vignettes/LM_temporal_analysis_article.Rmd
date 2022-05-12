@@ -1,8 +1,8 @@
 ---
 title: "Rapport de stage"
 subtitle: "Analyse de la base de données NoiseCapture"
-author: "Ludovic Moisan from Nicolas Roelandt"
-supervisors: "Pierre aumond, Paul Chapron"
+author: "Ludovic Moisan"
+supervisors: "Pierre aumond, Paul Chapron, Nicolas Roelandt"
 date: "`r Sys.Date()`"
 output: html_document
 toc: True
@@ -11,31 +11,38 @@ editor_options:
 ---
 
 ```{r setup}
-setwd("~/Stage/Scripts/lasso-data-analysis-main")
+library(sys)
 
 # Database connection
 library(RPostgreSQL)
 library(DBI)
 drv <- DBI::dbDriver("PostgreSQL")
-#library(sys)
 
 # Data handling
+library(tidyverse)
 library(sf)
+library(plyr)
 library(dplyr)
 library(purrr)
 library(tidyr)
 
+library(RCurl)
+library(data.table)
+
 # Graphes
 library(ggplot2)
-
 library(ggpubr)
-
 library(scales)
+library(gridExtra)
+library(shiny)
+library(htmlwidgets)
+library(rsconnect)
 
 # time / date handling
 library(lubridate)
-library(hydroTSM)
+library(chron)
 
+library(hydroTSM)
 library(rmarkdown)
 
 #Geo
@@ -44,24 +51,53 @@ library(leaflet)
 library(osmdata)
 library(geosphere)
 library(sp)
+library(ggmap)
+library(s2)
+library(leafpop)
 
+#geographical outliers manager
+library(CoordinateCleaner)
+
+#Stats and machine learning
+library(FactoMineR)
+library(rstatix)
+library(party)
+library(caret)
+library(kohonen)
+library(randomForest)
+library(class)
+library(cluster)
+library(rpart.plot)
+library(ROSE)
 
 # Get sun rise time
-## install.packages("suncalc")
 library(suncalc)
 
+#Python integration
 library(reticulate)
 
 ```
 
-```{r con-parameters, include = False}
+```{r load saved rds, include = FALSE}
+
+here::i_am("LM_temporal_analysis_article.Rmd")
+
+all_info <- readRDS("all_info.rds")
+time_after_sunrise <- readRDS("time_after_sunrise.rds")
+df_meteo <- readRDS("df_meteo.rds")
+total_info_learning <- readRDS("total_info_learning.rds")
+
+
+```
+
+```{r con-parameters, include = FALSE}
 con <- DBI::dbConnect(
 drv,
 dbname ="noisecapture",
 host = "lassopg.ifsttar.fr", #server IP or hostname
 port = 5432, #Port on which we ran the proxy
 user="noisecapture",
-password= "yvbxGBQqcATg75Yzea" #Sys.getenv('noisecapture_password') # password stored in .Renviron. Use this to edit it : usethis::edit_r_environ()
+password= Sys.getenv('noisecapture_password') # password stored in .Renviron. Use this to edit it : usethis::edit_r_environ()
 )
 ```
 
@@ -79,16 +115,13 @@ Les vues ont été créé sur la base de données (POSTGRE) grâce aux scripts S
 
 La première étude à réaliser dans le cadre de ce stage est l'analyse de la répartition temporelle des données d'utilisateurs. Seule l'heure UTC est récupérée lors de la mesure par l'application, nous avons donc besoin de convertir cette heure UTC en heure locale en se basant sur la zone géographique de la mesure afin de réaliser nos analyses. En considérant cela, seules les traces ayant une mesure géographique ont pu être pris en compte dans cette étude. Une perte d'environ 36% des données est donc à prendre en compte (localisation non activée par l'utilisateur par exemple).
 
-```{r analysis-sql1}
+```{r analysis-sql1, echo = FALSE}
 
 #Get all tracks and classify them by local_hour. Are considered only tracks with geographical data (around 64% of tracks only [100 - 94938 / 260422 * 100])
 
 query <- "SELECT local_hour, COUNT(*) as Count_hour FROM tracks_countries GROUP BY local_hour ORDER BY local_hour"
 
 count_tracks <- RPostgreSQL::dbGetQuery(con,statement = query)
-
-sum(count_tracks$count_hour)
-count_tracks
 
 ggplot(count_tracks) +
   aes(x = local_hour, y = count_hour) +
@@ -109,7 +142,7 @@ Le graphique ci-dessus nous montre la répartition temporelle des données sur u
 
 Les mesures effectuées peuvent se diviser en 2 catégories, les traces possédants des tags signalant la nature du bruit enregistré (animaux, routes etc.) et celles sans tags. Nous voulons connaitre la répartition d'utilisation de cette fonctionnalité.
 
-```{r analysis-sql2}
+```{r analysis-sql2, echo = FALSE}
 
 query <- "SELECT  local_hour, COUNT(*) as count_hour_tag FROM unique_tagged_tracks GROUP BY local_hour ORDER BY local_hour"
 
@@ -169,11 +202,11 @@ Il apparait sur ce graphique que les données taggées sont réparties plutôt r
 
 Ce graphique tend à démontrer que l'utilisation des tags ne dépend que peu des heures locales, et peut donc être considérée comme indépendante de l'utilisation horaire globale de l'application pour nos futures analyses. Concrètement, Il apparait que nous pouvons à la fois diviser le nombre de tags par heure soit par le nombre total de traces, soit par le nombre total de traces taggées, sans que cela n'apporte de grandes différence lors de nos visualisations et analyses.
 
-#Pré-traitement des données
+# Pré-traitement des données
 
-Les données de la base ne sont pas exploitables telles quelles. Beaucoup de traces possèdent des données géographiques incohérentes, voir manquantes, tandis que d'autres ne possèdent pas de tags Certaines informations nécessaires à nos analyses sont également manquantes, telles que le pays dans lequel la trace se situe, son heure locale etc.
+Les données de la base ne sont pas exploitables telles quelles. Beaucoup de traces possèdent des données géographiques incohérentes, voir manquantes, tandis que d'autres ne possèdent pas de tags. Certaines informations nécessaires à nos analyses sont également manquantes, telles que le pays dans lequel la trace se situe, son heure locale etc.
 
-##Nettoyage des données
+## Nettoyage des données
 
 Il est donc essentiel de commencer par un nettoyage des données.
 
@@ -199,7 +232,7 @@ countries$iso_a2_eh[countries$iso_a2_eh=="-99"] <- NA
 
 sf_use_s2(TRUE)
 
-filtered_track_info <- st_join(filtered_track_info, countries, largest = TRUE)
+filtered_track_info <- st_join(filtered_track_info, countries, largest = FALSE)
 
 st_crs(filtered_track_info) <- 4326
 
@@ -207,44 +240,6 @@ st_crs(filtered_track_info) <- 4326
 
 #saveRDS(filtered_track_info, file = "vignettes/filtered_track_info.rds")
 #filtered_track_info <- readRDS("vignettes/filtered_track_info.rds")
-
-```
-
-```{r}
-
-query <- "SELECT pk_track, measure_count FROM noisecapture_track_frame"
-
-measures <- RPostgreSQL::dbGetQuery(con,statement = query)
-
-measures
-
-```
-
-
-```{r join-track-info}
-
-query <- "SELECT  ct.pk_track, record_utc, time_length, pleasantness, noise_level, track_uuid, geog FROM clean_tracks as ct ;"
-
-test <- sf::st_read(con,query = query)
-
-test <- filtered_track_info %>% left_join(tags, by = "pk_track")
-
-test %>% filter(measure_count > 5 )
-
-length(unique(test$pk_track))
-
-test
-```
-
-```{r df-geo-points, include=FALSE}
-
-sf_use_s2(FALSE)
-
-filtered_track_info <- st_join(filtered_track_info, countries)
-
-filtered_track_info <- left_join(filtered_track_info, measures)
-
-(filtered_track_info)
 
 ```
 
@@ -263,16 +258,12 @@ st_crs(track_points) <- 4326
 #saveRDS(track_points, file = "track_points.rds")
 #track_points <- readRDS("track_points.rds")
 
-str(track_points)
 
 ```
-
-`length(unique(track_points\$pk_track))`
 
 
 
 ```{r clear-outliers }
-library(CoordinateCleaner)
 
 coord_points <- track_points %>% dplyr::bind_cols(
   track_points %>% st_centroid() %>% st_coordinates() %>% as_tibble() %>% dplyr::select(lon = X, lat = Y))
@@ -319,7 +310,7 @@ Sys.time()
 filtered_points = do.call(rbind, datalist_pts)
 filtered_coord_points = do.call(rbind, datalist)
 
-saveRDS(filtered_points, file = "filtered_points_clean.rds")
+#saveRDS(filtered_points, file = "filtered_points_clean.rds")
 #saveRDS(filtered_coord_points, file = "filtered_coord_points_clean.rds")
 #saveRDS(filtered_coord_points, file = "filtered_coord_points_clean_tempo2_eightm.rds")
 #saveRDS(filtered_coord_points, file = "filtered_coord_points_clean_tempo_eightm.rds")
@@ -355,7 +346,6 @@ xypoly$area <- st_area(xypoly)
 #xypoly <- subset(xypoly, as.double(area) < 625)
 
 
-
 plot((xypoly %>% filter(pk_track == 2275))$geometry)
 hist(xypoly$area, labels = TRUE)
 
@@ -385,7 +375,6 @@ clean_track_info$lat <- list_lat
 #clean_track_info <- clean_track_info %>% dplyr::bind_cols(
 #  clean_track_info %>% geosphere::centroid() %>% st_coordinates() %>% as_tibble() %>% dplyr::select(lon = X, lat = Y))
 
-str(clean_track_info)
 
 #saveRDS(clean_track_info, file = "vignettes/clean_track_info_tempo_8m.rds")
 #clean_track_info <- readRDS(file = "vignettes/clean_track_info.rds")
@@ -426,7 +415,7 @@ timezones_clean <- timezones[!(is.na(timezones$tz_name1st) | timezones$tz_name1s
 ```
 
 ```{r intersect geo timezones}
-library(s2)
+
 
 st_crs(clean_track_info) #to check norm id <- 4326 (world default)
 
@@ -555,7 +544,7 @@ all_info <- all_info %>%
     TRUE ~ admin
   ))
 
-library(chron)
+
 all_info <- all_info %>% mutate(week_end = case_when(
   chron::is.weekend(local_date) ~ TRUE,
   TRUE ~ FALSE
@@ -680,19 +669,15 @@ La température pourrait également être un facteur
 
 
 ```{r meteo-get-data}
-#library(rnoaa)
 
 #Meteo
 #https://donneespubliques.meteofrance.fr/?fond=produit&id_produit=90&id_rubrique=32
 #Documentation: https://donneespubliques.meteofrance.fr/client/document/parametres-inclus-dans-les-fichiers-de-donnees-synop_283.pdf
-library(RCurl)
-library(data.table)
-library(lubridate)
+
 
 #Stations list
-setwd("~/Stage/Scripts/lasso-data-analysis-main/raw_data")
 
-filename <- "postesSynop.csv"
+filename <- here("raw_data","postesSynop.csv")
 
 if(!file.exists(filename)){
   f = CFILE(filename, mode="wb")
@@ -871,17 +856,6 @@ ggplot(tags_sunrise_repartition) +
 
 
 ```{r mapping}
-#install the osmdata, sf, tidyverse and ggmap package
-if(!require("osmdata")) install.packages("osmdata")
-if(!require("tidyverse")) install.packages("tidyverse")
-if(!require("sf")) install.packages("sf")
-if(!require("ggmap")) install.packages("ggmap")
-
-#load packages
-library(tidyverse)
-library(osmdata)
-library(sf)
-library(ggmap)
 
 #Nous allons ici récupérer les centroids des tracks avec tags "chatting" et calculer leur distance avec les bars ou autres "amenities" récupérables avec openstreetmap
 #Dans le but de chercher une corrélation entre la présence de ces tags, leur niveau sonore et/ou pleasantness, et leur proximité avec des lieux de sorties
@@ -917,7 +891,7 @@ print(i) #Only to check where the calculation is at, since it's a pretty long pr
 
 #Calculate distance between track centroid and POIs . distance in meters
 #For a first test, calculating distance between first amenity in list with the corresponding track centroid
-library(geosphere)
+
 
 #distm(c(lon1, lat1), c(lon2, lat2), fun = distHaversine)
 distm(c(x$osm_points$geometry[[1]][1], x$osm_points$geometry[[1]][2]), c(chat_france[[1,14]], chat_france[[1,13]]), fun = distGeo)
@@ -938,10 +912,10 @@ meteo_france_clean <- meteo_france %>% drop_na()
 #http://pluiesextremes.meteo.fr/france-metropole/Intensite-de-precipitations.html
 
 brks = 
-  c(min(meteo_france_clean$rain_mm),0,0.2,0.4,0.6,1.4,2,7,max(meteo_france_clean$rain_mm))
-  #c(min(meteo_france_clean$rain_mm),0,0.2,0.4,0.55,0.6,0.8,1.4,1.6,2.57,3.6,60),
+  #c(min(meteo_france_clean$rain_mm),0,0.2,0.4,0.6,1.4,2,7,max(meteo_france_clean$rain_mm))
+  c(min(meteo_france_clean$rain_mm),0,0.2,0.4,0.55,0.6,0.8,1.4,1.6,2.57,3.6,60)
   #c(min(meteo_france_clean$rain_mm),0,0.5,3,5,8,max(meteo_france_clean$rain_mm)),
-  #c(0,2,4,6,8,1000),
+  #c(min(meteo_france_clean$rain_mm),0,3,6,9,1000)
   #c(0,0.5,3,7,1000),
 meteo_france_clean$groups_rain <- cut(meteo_france_clean$rain_mm, 
                       breaks = brks,
@@ -988,7 +962,7 @@ for(i in 1:length(unique(meteo_france_clean$groups_rain))){
 #c("-no rain-", "1-3mm/h", "4-7mm/h", "8+mm/h")
 
 ggplot() +
-  geom_col(aes(x = c("-no rain-","(0,0.2]","(0.2,0.4]","(0.4,0.6]","(0.6,1.4]","(1.4,2]","(2,7]","(7,+)"), y = rain_prop)) +
+  geom_col(aes(x = med_raingroup, y = rain_prop)) +
   labs(
     x = "Precipitation (mm/h)",
     y = "Proportion of tracks with rain tag (%)",
@@ -1349,7 +1323,7 @@ plot_france_days <- ggplot(df_tags_day_type_fr, aes(fill=day_type, y=proportion,
     subtitle = "Noisecapture's tags in France,
       2017-2020")
 
-library(gridExtra)
+
 grid.arrange(plot_world_days,plot_france_days)
 
 #Covid
@@ -1538,13 +1512,11 @@ ggplot(tags_sunrise_repartition %>% filter(admin=="France") ) +
 occurences_sunrise <- time_after_sunrise %>% dplyr::group_by(tag_name, admin, season,  after_sunrise = as.numeric(round(after_sunrise))) %>% dplyr::count(name = "track_occurence")
 
 occurences_sunrise["after_sunrise"][occurences_sunrise["after_sunrise"] == -13] <- 12
-#occurences_sunrise["after_sunrise"][occurences_sunrise["after_sunrise"] == -12] <- 12
 
 occurences_sunrise_full_tag <- occurences_sunrise %>% group_by(after_sunrise, admin, season) %>% dplyr::summarise(total = sum(track_occurence))
 
 tags_sunrise_repartition <- occurences_sunrise %>% 
   left_join(occurences_sunrise_full_tag)%>% dplyr::filter(track_occurence>0)  %>% mutate(percentage = track_occurence * 100 / total)
-
 
 ggplot(tags_sunrise_repartition %>% filter(admin=="France") ) +
   aes(x = tag_name, y = after_sunrise, fill = tag_name, weight = percentage)+
@@ -1605,8 +1577,6 @@ ggplot(tags_sunrise_repartition_world) +
 ```
 
 ```{r sunrise-tempo-only-predict, echo = FALSE}
-library(plyr)
-
 div = 0.5
 
 time_after_sunrise_france <- time_after_sunrise %>% filter(admin=="France")
@@ -1696,9 +1666,6 @@ df_max_val$max_from_sunrise <- as.integer(df_max_val$max_from_sunrise)
 
 ```{r sunrise-tempo-only-predict-local_time, echo = FALSE}
 
-library(plyr)
-
-
 
 time_after_sunrise_france <- time_after_sunrise %>% filter(admin=="France")
 # get categories
@@ -1782,8 +1749,6 @@ ggplot(data = df_max_val,aes(x = group_sunrise, y = max_from_sunrise))+
 
 
 ```{r testd-hist}
-
-library(plyr)
 
 
 # Only use France's Data
@@ -1884,7 +1849,7 @@ ggplot(tags_sunset_repartition %>% dplyr::filter(admin =="France")) +
     title = "Repartition of tags from local sunset",
     subtitle = "Noisecapture's tags in France,
       2017-2020") +
-  scale_x_continuous(breaks = c(-11,-6,0,6,12))+
+  scale_x_continuous(breaks = c(-12,-6,0,6,12))+
   facet_wrap(vars(tag_name), scales = "free_y")
 
 ```
@@ -2035,18 +2000,14 @@ ggplot() +
 # ggsave("plots/tags_monthly_dynamics.png") 
 ```
 
-#Spatial analysis
+# Spatial analysis
 
 ```{r maps}
-library(shiny)    # for shiny apps
-library(leaflet)  # renderLeaflet function
-library(leafpop)
-library(htmlwidgets)
-library(rsconnect)
 
 #récupère le tableau complet avec l'ensemble de nos données, full info + tags avec géométries + mouvements solaires
-#full_data = full_info %>% inner_join(time_after_sunrise)
-#data_map <- full_data %>% st_drop_geometry()
+full_info <- readRDS(full_info.rds)
+full_data = full_info %>% inner_join(time_after_sunrise)
+data_map <- full_data %>% st_drop_geometry()
 
 pal <- colorNumeric(palette = "YlOrRd", domain = data_map$noise_level)
 
@@ -2100,17 +2061,7 @@ shinyApp(ui2, server2)
 addTerminator( resolution=10, time = "2013-06-20T21:00:00Z", group = "daylight") %\>% addLayersControl( overlayGroups = "daylight", options = layersControlOptions(collapsed = FALSE))
 
 ```{r mapping}
-#install the osmdata, sf, tidyverse and ggmap package
-if(!require("osmdata")) install.packages("osmdata")
-if(!require("tidyverse")) install.packages("tidyverse")
-if(!require("sf")) install.packages("sf")
-if(!require("ggmap")) install.packages("ggmap")
 
-#load packages
-library(tidyverse)
-library(osmdata)
-library(sf)
-library(ggmap)
 
 #Nous allons ici récupérer les centroids des tracks avec tags "chatting" et calculer leur distance avec les bars ou autres "amenities" récupérables avec openstreetmap
 #Dans le but de chercher une corrélation entre la présence de ces tags, leur niveau sonore et/ou pleasantness, et leur proximité avec des lieux de sorties
@@ -2144,7 +2095,6 @@ Sys.time()
 
 #Calculate distance between track centroid and POIs . distance in meters
 #For a first test, calculating distance between first amenity in list with the corresponding track centroid
-#library(geosphere)
 
 #distm(c(lon1, lat1), c(lon2, lat2), fun = distHaversine)
 #distm(c(x$osm_points$geometry[[1]][1], x$osm_points$geometry[[1]][2]), c(chat_france[[1,14]], chat_france[[1,13]]), fun = distGeo)
@@ -2403,8 +2353,8 @@ total_info_learning <- left_join(total_info_learning, res)
 ``` 
 
 ```{r density maps}
-library(data.table)
 #https://data.opendatasoft.com/explore/dataset/osm-fr-bars%40babel/export/?timezone=&location=5,46.31658,3.09814&basemap=jawg.streets&dataChart=eyJxdWVyaWVzIjpbeyJjb25maWciOnsiZGF0YXNldCI6Im9zbS1mci1iYXJzQGJhYmVsIiwib3B0aW9ucyI6eyJ0aW1lem9uZSI6IiJ9fSwiY2hhcnRzIjpbeyJhbGlnbk1vbnRoIjp0cnVlLCJ0eXBlIjoiY29sdW1uIiwiZnVuYyI6IkNPVU5UIiwic2NpZW50aWZpY0Rpc3BsYXkiOnRydWUsImNvbG9yIjoiIzE0MkU3QiJ9XSwieEF4aXMiOiJicmV3ZXJ5IiwibWF4cG9pbnRzIjoxMCwic29ydCI6IiJ9XSwidGltZXNjYWxlIjoiIiwiZGlzcGxheUxlZ2VuZCI6dHJ1ZSwiYWxpZ25Nb250aCI6dHJ1ZX0%3D
+total_info_learning <- test
 
 bars_fr <- fread(file = "raw_data/osm-fr-bars.csv", header = TRUE)
 coord_bars_fr <- bars_fr %>% select("Geo Point") %>% separate(col = "Geo Point", sep = ",", into = c("lat","lon"))
@@ -2415,6 +2365,8 @@ plot_bars <- ggplot() +
   stat_density2d(data = coord_bars_fr, aes(x = lon, y = lat, fill = ..density..), geom = 'tile', contour = F, n = 400)
 
 density_bars <- ggplot_build(plot_bars)
+
+plot_bars
 
 dat <- density_bars$data[[1]]
 
@@ -2552,21 +2504,15 @@ test_num_chatting <- test_num %>% mutate(tag_name = case_when(
   TRUE ~ "other"
 ))
 
-library(FactoMineR)
 
 pca_mix <- FAMD(na.omit(test_num[,c(3:10)]))
 
-library(explore)
-
-explore(test_num[,c(2:10)])
 
 ```
 
 ```{r anova}
 
-library(tidyverse)
-library(ggpubr)
-library(rstatix)
+time_after_sunrise <- readRDS("time_after_sunrise.rds")
 
 full_data <- left_join(time_after_sunrise,total_info_learning)
 
@@ -2644,8 +2590,6 @@ Ces tests statistiques ne tiennent pas en compte des possibles relations entre p
 
 ```{r tree class}
 
-library(party)
-
 set.seed(42)
 
 data_chat_full <- data_test_chat %>% select(-c(rain_mm))
@@ -2697,7 +2641,7 @@ dim(data_test)
 prop.table(table(data_train$tag))
 prop.table(table(data_test$tag))
 
-library(rpart.plot)
+
 
 fit <- rpart(tag_name~., data = data_train, method = "class", control = rpart.control(minsplit = 20))
 rpart.plot(fit, extra = 106)
@@ -2728,7 +2672,7 @@ predict_num_chat_test$tag_name <- as.factor(predict_num_chat_test$tag)
 
 median(abs(prop.table(table(df_predict_bool$tag_name)) - prop.table(table(predict_bool_test$tag_name))))
 
-library(caret)
+
 
 control <- trainControl(method="cv", number=10)
 metric <- "Accuracy"
@@ -2831,7 +2775,7 @@ validate<-test_num_chatting[dt==2,]
 prop.table(table(train$tag))
 prop.table(table(validate$tag))
 
-library(party)
+
 tree<-ctree(tag~.,data = up_train, controls = ctree_control(maxdepth = 4))
 tree
 
@@ -2866,7 +2810,7 @@ test <- rusranger(na.omit(up_train),na.omit(up_train)$tag, probability = TRUE, c
 
 test
 
-library(ROSE)
+
 
 data.rose <- ROSE(groups_rain~., data=train, seed=3)$data
 table(data.rose$groups_rain)
@@ -2895,7 +2839,7 @@ table(member)
 
 aggregate(nor,list(member),mean)
 
-library(cluster)
+
 plot(silhouette(cutree(data_train_num.hclust,3), distance))
 
 set.seed(123)
@@ -2911,7 +2855,7 @@ df<-cbind(df,as.factor(cluster))
 
 
 #----
-library(cluster)
+
 
 test_num_chatting <- test_num %>% mutate(tag_name = case_when(
   tag_name == "chatting" ~ 1,
@@ -2927,7 +2871,7 @@ clusplot(pamvshortset_3, shade = FALSE, labels=2, col.clus="blue",col.p="red",sp
 #----
 
 
-library(cluster)
+
 #df<-na.omit(test_num_chatting %>% select(-c("tag")))
 df<-na.omit(test_num_chatting)# calculate distance %>% select(-c("tag"))
 
@@ -2942,7 +2886,7 @@ ggplot(df) + geom_histogram(aes(x=tag),stat = "count") + facet_wrap(facets = var
 
 set.seed(7)
 
-library(class)
+
 
 dt<-sample (2, nrow(df), replace = TRUE, prob=c (0.8,0.2))
 train <- df[dt==1,]
@@ -2972,7 +2916,7 @@ predict(fit.lda_cluster, as.matrix(data_to_predict))
 
 #----
 
-library(party)
+
 data <- na.omit(train)
 datact <- ctree(tag ~ ., data = data,
                controls = ctree_control(maxsurrogate = 3))
@@ -2985,7 +2929,7 @@ set.seed(16)
 
 #Cluster optionnel, à voir si pertinent et efficace dans les mesures, mais il ne s'agit pas d'une valeur
 #que l'on peut donner dans un nouvel imput de data pour la prédiction, donc à éviter peut-être
-library(cluster)
+
 df<-na.omit(test_num_chatting %>% select(-c("tag")))
 #df<-na.omit(test_num_chatting)# calculate distance %>% select(-c("tag"))
 
@@ -3006,7 +2950,7 @@ dt<-sample (2, nrow(df), replace = TRUE, prob=c (0.8,0.2))
 train_df <- df[dt==1,]
 validate_df <- df[dt==2,]
 
-library(randomForest)
+
 fit <- randomForest(cluster ~ ., data = train_df, na.action = na.omit, ntree = 800, mtry = 2)
 
 print(fit)
@@ -3021,7 +2965,7 @@ confusionMatrix(predictions, validate_df$cluster)
 
 
 #autre librairie pour random forest pour comparer
-library(caret)
+
 mod <- caret::train(tag~., data = train_df, method = "rf")
 print(mod)
 print(mod$finalModel)
@@ -3038,7 +2982,7 @@ varImpPlot(mod$finalModel)
 ```
 
 ```{r kohonen}
-library(kohonen)
+
 
 data <- test_num %>% select(-c("pk_track","tag_name"))
 
