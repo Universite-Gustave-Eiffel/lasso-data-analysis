@@ -252,21 +252,22 @@ Noise pollution due to road noise is a major concern in France.
 
 ### Acoustic dynamics of bird song and commutes
 
-A first axis of analysis concerns the time distribution of the tags. 
+A first axis of analysis concerns the time distribution of the tags.
+
 `r fig_nums("animals-sunrise", display = "cite")` shows that animal noises 
 (tag *animals*) are more frequent in the morning and especially 
-one hour after sunrise.
+at sunrise time.
 This is a well known dynamic for bird song [@robbins1981effect]
 and our data shows a similar effect.
 
-<!--TODO: Remplacer par le graphique de Ludovic -->
+
 ```{r animals-sunrise-caption, results='hide'}
 caption <- "Animals acoustic dynamics."
 fig_nums(name = "animals-sunrise", caption = caption)
 ```
 
 ```{r animals-sunrise, eval=TRUE}
-knitr::include_graphics("plots/Repartition_of_animals_sounds_in_local_time.png")
+knitr::include_graphics("https://user-images.githubusercontent.com/86657953/168254217-d18e7476-fa3c-48e8-9412-1886183ea98e.png")
 ```
 
 `r paste0('<p class="caption">',fig_nums("animals-sunrise"), '</p>')`
