@@ -112,7 +112,6 @@ the Gustave Eiffel university Dataverse[^4].
 
 [^4]: https://research-data.ifsttar.fr/dataset.xhtml?persistentId=doi:10.25578/J5DG3W
 
-
 This information can be enriched by the contributor with labels. 
 There are 18 predefined labels and the user can select one or more of them for each of the 
 traces made. The labels are detailed in [@picautSmartphoneBasedCrowdSourcedDatabase2021]. 
@@ -157,7 +156,6 @@ Rmarkdown allows to mix code in several programming languages and text in markdo
 graphs, tables and documents.
 So it is a great tool to either communicate inside our team and publish our results.
 
-
 Rmarkdown, as any markdown file, is a plain text file that can be easily versionned
 with any version control system.
 As our team is scattered in several places in France, we needed a tool to 
@@ -169,60 +167,81 @@ The choice of Git was natural as different collaborators are present on several
 sites (Nantes, Lyon, Paris) and Git is already used within the UMRAE laboratory.
 
 ### Implementation
-The data are provided in the form of a PostGreSQL/PostGIS dump. 
-A server has been set up accordingly to the documentation provided and the data loaded.  
-A materialized view was created in order to provide a stable access to the data 
-corresponding to the defined criteria. 
 
-These criteria are both attributive and spatial. 
-We removed from the analysis the tracks taggued *test* or *indoor* as we wanted outdoor recording. 
-Short tracks (duration less than 5 seconds) and long tracks (duration longer than 15 minutes)
-have been removed. 
-We kept the tracks where the GPS median accuracy was less than 20 meters. 
+The data are provided in the form of a PostGreSQL/PostGIS dump. 
+A server has been set up accordingly to the documentation provided to store the data.  
+Several materialized views were created in order to provide stable access to data 
+corresponding to defined criteria.
+A materialized view is a good compromise between a table and a view because it
+has similar response time to a table and also allows us to recompute 
+values easily if the threshold values changed.
+
+The analyses were carried out in two stages: a first exploratory analysis aimed 
+at verifying whether certain known environmental dynamics could be visible in the 
+data set, on the territory of metropolitan France. 
+This first analysis having brought encouraging results, we took it again in order 
+to refine it and to extend the field of research.
+Asking new question or extanding the analysis worldwide.
+We will present some of this results here.
+
+The code producing the analysis and graphics are separated in 
+several complementary documents[^5].
+
+[^5]: https://nicolas-roelandt.github.io/lasso-data-analysis/articles/
+
+The selection criteria for the data we were going to use for our analyses were 
+both attributive and spatial.
+We removed from the analysis the tracks tagged *test* or *indoor* as we wanted 
+only outdoor recording. 
+Short tracks (duration less than 5 seconds) were discarded.
+Long tracks (duration longer than 15 minutes) have been removed from the exploratory analysis.
+They were kept in the extended analysis.
+
+In the exploratory analysis, we kept the tracks where the GPS median accuracy was 
+less than 20 meters.
+In the extended analysis, we kept the tracks but discarded points with a GPS median 
+accuracy greater than 20 meters from the tracks.
+
+<!-- NOTE: toujours d'actualité dans l'analyse de Ludovic ?-->
 We decided to keep tracks that are comprised in a rather small area, 
 the bounding box area of the track should be less than 625 square meters which 
-corresponds to a square of 25 by 25 meters.
+corresponds to a square of 25 by 25 meters. 
 
-To extract data regarding France area, we pre-filtered the data
+To extract data regarding France metropolitan area, we pre-filtered the data
 using the NaturalEarth dataset to keep tracks that are within the France country.
 This spatial filtering was implemented by creating a materialized view within the 
 PostGIS database.
-The materialized view is a good compromise between a table and a view because it
-has similar response time to a table and also allows us to recompute 
-values easily if the threshold values changed.
 
 NaturalEarth is a great dataset and is well known worldwide however it does not
 distinguish France metropolitan area from overseas areas.
 This could have introduce complications with timezone handling.
+We refined the spatial filtering to France's metropolitan area 
+using an authoritative dataset [@institutgeographiquenationalAdminExpress].
 
+<!--
 Plus we wanted to be able see if seasons have distinct dynamics.
 Metropolitan France has a temperate climate [@ClimatFranceMetropolitaine] 
 where the climate in the West Indies, Reunion, New Caledonia and Polynesia is of
 the tropical maritime type [@ClimatsOutremerMeteoFrance].
 That motivated our need to separate overseas records from metropolitan ones
+-->
 
 In order to facilitate the replication of the study on areas without this kind 
 of issues, this as not been done within the database but at the beginning of the 
-Rmarkdown document where analysis is conducted.
-
-The code producing the analysis and the graphics presented here are separated in 
-several complementary documents[^5].
-
-[^5]: https://nicolas-roelandt.github.io/lasso-data-analysis/articles/temporal_exploratory_analysis.html
+Rmarkdown document where the exploratory analysis is conducted.
 
 The Rmarkdown document establishes the connection with the materialized view and then 
 performs the operations allowing to finalize data preparation and analyze the data.
-It is a document mixing narrative, figures and code (in R but also several programming languages).
+It is a document mixing narrative, figures and code (mostly in R but also several programming languages).
 
-In this document, we refine the spatial filtering to France's metropolitan area 
-using an authoritative dataset [@institutgeographiquenationalAdminExpress].
+<!-- Package list is much more longer than that with the extended analysis
 We also transform the track timestamp to local time and compute seasons using the R packages 
 `lubridate` from the `tidyverse` metapackage [@wickhamWelcomeTidyverse2019] and 
 `hydroTSM` [@mauriciozambrano-bigiariniHydroTSMTimeSeries2020].
 
 We also used the `suncalc` package (@thieurmelSuncalcComputeSun2019) to compute 
 the sunrise time of the day of the track at its location.
-
+--> 
 # Results
 ## Environmental acoustics results 
 
