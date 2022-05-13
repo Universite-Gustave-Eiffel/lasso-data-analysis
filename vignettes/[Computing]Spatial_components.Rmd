@@ -1,0 +1,88 @@
+---
+title: "Internship report"
+subtitle: "Spatial components"
+author: "Ludovic Moisan"
+supervisors: "Pierre aumond, Paul Chapron, Nicolas Roelandt"
+date: "`r Sys.Date()`"
+output: 
+  html_document :
+    theme: united
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r library-sunrise, include=FALSE}
+
+library(here)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(rgdal)
+library(geojsonsf)
+library(sf)
+
+```
+
+```{r setup-data-spatial, include = FALSE}
+
+here::i_am("vignettes/[Computing]Spatial_components.Rmd")
+
+if(!exists("all_info_sun")){
+  if(!file.exists(here::here("data","all_info_sun.rds"))){
+    URL2 <- "https://zenodo.org/record/6536129/files/time_after_sunrise.rds?download=1"
+    all_info_sun <- readRDS(url(URL2))
+    saveRDS(all_info_sun,here::here("data","all_info_sun.rds"))
+  }
+  else{
+  all_info_sun <- readRDS(here::here("data","all_info_sun.rds"))
+  }
+}
+
+france_info <- all_info_sun %>% filter(admin=="France")
+
+```
+
+```{r download-data-spatial, include = FALSE}
+
+if(!exists("bars_fr")){
+  if(!file.exists(here::here("raw_data","osm-fr-bars.geojson"))){
+    URL_bar <- "https://babel.opendatasoft.com/explore/dataset/osm-fr-bars/download/?format=geojson&timezone=Europe/Berlin&lang=fr"
+    bars_fr = geojson_sf(URL_bar)
+    st_write(bars_fr,here::here("raw_data","osm-fr-bars.geojson"))
+  }
+  else{
+  bars_fr <- geojson_sf(here::here("raw_data","osm-fr-bars.geojson"))
+  }
+}
+
+if(!exists("rest_fr")){
+  if(!file.exists(here::here("raw_data","osm-restaurant-fr.geojson"))){
+    URL_rest <- "https://babel.opendatasoft.com/explore/dataset/osm-restaurant-fr/download/?format=geojson&timezone=Europe/Berlin&lang=fr"
+    rest_fr = geojson_sf(URL_rest)
+    st_write(rest_fr,here::here("raw_data","osm-restaurant-fr.geojson"))
+  }
+  else{
+  rest_fr <- geojson_sf(here::here("raw_data","osm-restaurant-fr.geojson"))
+  }
+}
+
+if(!exists("school_fr")){
+  if(!file.exists(here::here("raw_data","osm-fr-ecoles.geojson"))){
+    URL_school <- "https://babel.opendatasoft.com/explore/dataset/osm-fr-ecoles/download/?format=geojson&timezone=Europe/Berlin&lang=fr"
+    school_fr = geojson_sf(URL_school)
+    st_write(school_fr,here::here("raw_data","osm-fr-ecoles.geojson"))
+  }
+  else{
+  school_fr <- geojson_sf(here::here("raw_data","osm-fr-ecoles.geojson"))
+  }
+}
+
+```
+
+```{r density-map, include = FALSE}
+
+
+
+```
+
+

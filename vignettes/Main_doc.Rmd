@@ -2,7 +2,7 @@
 title: "Intership report"
 subtitle: "NoiseCapture's database analysis"
 author: "Ludovic Moisan"
-supervisors: "Pierre aumond, Paul Chapron, Nicolas Roelandt"
+supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
 date: "`r Sys.Date()`"
 output: 
   html_document :
@@ -13,55 +13,10 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r setup library, include= FALSE}
-# Data handling
-library(sf)
-library(dplyr)
-library(purrr)
-
-library(RCurl)
-library(data.table)
-
-# System and paths gestion
-library(sys)
-library(here)
-
-# Database connection
-library(RPostgreSQL)
-library(DBI)
-
-here::i_am("vignettes/Main_doc.Rmd")
-
-# Graphes
-library(ggplot2)
-library(ggpubr)
-library(scales)
-library(gridExtra)
-
-# time / date handling
-library(lubridate)
-library(chron)
-
-library(hydroTSM)
-library(rmarkdown)
-
-#Geo
-library(lwgeom)
-library(leaflet)
-library(osmdata)
-library(geosphere)
-library(sp)
-library(ggmap)
-library(s2)
-library(leafpop)
-
-#geographical outliers manager
-library(CoordinateCleaner)
-
-# Get sun rise time
-library(suncalc)
-
-```
+<style>
+body {
+text-align: justify}
+</style>
 
 ```{r document-generation, include = FALSE}
 
@@ -70,9 +25,36 @@ library(suncalc)
 #> which will accurately produce the same results we have.
 #> If fast == False, generating every data frame and downloading weather info takes about 2h-3h on a laptop with 12Go ram I5 8th gen and a good internet connection
 
-fast <- FALSE
+fast <- TRUE
 
 ```
+
+```{r setup-library, include= FALSE}
+
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+# Data handling
+library(sf)
+library(dplyr)
+library(RCurl)
+library(data.table)
+
+# Paths gestion
+library(here)
+
+# Database connection
+library(RPostgreSQL)
+library(DBI)
+
+# Graphes
+library(ggplot2)
+
+library(rmarkdown)
+
+here::i_am("vignettes/Main_doc.Rmd")
+
+```
+
 
 # Introduction
 
@@ -82,7 +64,7 @@ The entirety of the SQL scripts, the RMarkdown documents and their resulting plo
 
 
 <!-- Knit child document for database analysis using SQL -->
-```{r database-overview, child="Database_overview.Rmd", echo=FALSE, fig.align='center', out.width="80%", message = FALSE}
+```{r database-overview, child="[Analysis]Database_overview.Rmd", echo=FALSE, fig.align='center', out.width="80%", message = FALSE}
 ```
 
 # Pre-processing of data
@@ -98,7 +80,7 @@ From the *tracks_view* materialized view in our database, we are filtering track
 ## Data cleaning
 
 <!-- Knit child document for data cleaning -->
-```{r data-cleaning, child="Data_cleaning.Rmd", eval = !fast, echo=FALSE, fig.align='center', out.width="80%", message = FALSE, error = TRUE}
+```{r data-cleaning, child="[Computing]Data_cleaning.Rmd", eval = !fast, echo=FALSE, fig.align='center', out.width="80%", message = FALSE, error = TRUE}
 ```
 
 <!-- Write some things and show some results of the cleaning -->
@@ -109,23 +91,58 @@ From the *tracks_view* materialized view in our database, we are filtering track
 
 <!-- Knit child document to add components in our dataset -->
 <!-- CHECK TIME AROUND SUNSET METHOD ~ WEIRD RESULTS -->
-```{r calculate-comp, child=if (!fast) "Calculate_components.Rmd" else "Load_main_components.Rmd", include = FALSE}
+```{r calculate-comp, child=if (!fast) "[Computing]Calculate_components.Rmd", include = FALSE}
 ```
 
 <!-- Knit child document to add weather in our dataset -->
-```{r adding-weather, child=if (!fast) "Adding_weather.Rmd" else "Load_weather.Rmd", include = FALSE}
+```{r adding-weather, child=if (!fast) "[Computing]Adding_weather.Rmd", include = FALSE}
 ```
 
 <!-- Knit child document to analyse weather -->
-```{r weather-analysis, child= "Weather_analysis.Rmd", echo=FALSE, fig.align='center', out.width="80%", message=FALSE}
+```{r weather-analysis, child= "[Analysis]Weather_analysis.Rmd", echo=FALSE, fig.align='center', out.width="80%", message=FALSE}
 ```
 
 <!-- Knit child document to analyse hourly tag repartition -->
-```{r hourly-tag-repartition, child= "Hourly_tag_repartition.Rmd", echo=FALSE, fig.align='center', out.width="80%",message=FALSE}
+```{r hourly-tag-repartition, child= "[Analysis]Hourly_tag_repartition.Rmd", echo=FALSE, fig.align='center', out.width="80%",message=FALSE}
 ```
 
 <!-- Knit child document to analyse repartition of tags around sunrise -->
-```{r tags-sunrise, child= "Tags_around_sunrise.Rmd" , echo=FALSE, fig.align='center', out.width="80%",message=FALSE}
+```{r tags-sunrise, child= "[Analysis]Tags_around_sunrise.Rmd" , echo=FALSE, fig.align='center', out.width="80%",message=FALSE}
 ```
 
 
+# Reproductibility
+
+## Data sources
+
+Most of the treatment has been made within the PostGIS database. The scripts folder contains several scripts to execute to prepare the dataset.
+
+```{r spatial-data-info, echo = FALSE}
+
+
+```
+
+## Session informations
+
+```{r session-info, echo=FALSE}
+extract_loaded_package <- function(packages_info) {
+  return(packages_info$Package) 
+}
+
+xfun::session_info(sapply(sessionInfo()$otherPkgs, extract_loaded_package), dependencies = FALSE)
+```
+
+## Database information
+
+```{r pg-version}
+# Check database connection and software versions
+RPostgreSQL::dbGetQuery(con,statement = paste("SELECT version();")) # should return PostgreSQL 10.15 or higher
+```
+
+```{r postgis-version}
+RPostgreSQL::dbGetQuery(con,statement = paste("SELECT postgis_full_version();")) # should return PostGIS 2.5 or higher
+```
+
+```{r close-connection, echo=FALSE}
+RPostgreSQL::dbDisconnect(con)
+```

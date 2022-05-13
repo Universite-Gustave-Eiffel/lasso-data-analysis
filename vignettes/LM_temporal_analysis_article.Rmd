@@ -2354,7 +2354,6 @@ total_info_learning <- left_join(total_info_learning, res)
 
 ```{r density maps}
 #https://data.opendatasoft.com/explore/dataset/osm-fr-bars%40babel/export/?timezone=&location=5,46.31658,3.09814&basemap=jawg.streets&dataChart=eyJxdWVyaWVzIjpbeyJjb25maWciOnsiZGF0YXNldCI6Im9zbS1mci1iYXJzQGJhYmVsIiwib3B0aW9ucyI6eyJ0aW1lem9uZSI6IiJ9fSwiY2hhcnRzIjpbeyJhbGlnbk1vbnRoIjp0cnVlLCJ0eXBlIjoiY29sdW1uIiwiZnVuYyI6IkNPVU5UIiwic2NpZW50aWZpY0Rpc3BsYXkiOnRydWUsImNvbG9yIjoiIzE0MkU3QiJ9XSwieEF4aXMiOiJicmV3ZXJ5IiwibWF4cG9pbnRzIjoxMCwic29ydCI6IiJ9XSwidGltZXNjYWxlIjoiIiwiZGlzcGxheUxlZ2VuZCI6dHJ1ZSwiYWxpZ25Nb250aCI6dHJ1ZX0%3D
-total_info_learning <- test
 
 bars_fr <- fread(file = "raw_data/osm-fr-bars.csv", header = TRUE)
 coord_bars_fr <- bars_fr %>% select("Geo Point") %>% separate(col = "Geo Point", sep = ",", into = c("lat","lon"))

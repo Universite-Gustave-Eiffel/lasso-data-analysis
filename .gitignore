@@ -9,3 +9,4 @@
 synop.*.gz
 *.rds
 raw_data/*.csv
+raw_data/*.geojson
