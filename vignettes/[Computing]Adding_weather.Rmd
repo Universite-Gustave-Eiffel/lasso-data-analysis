@@ -18,8 +18,10 @@ library(dplyr)
 library(tidyr)
 library(lubridate)
 library(chron)
+library(geosphere)
+library(data.table)
 
-here::i_am("vignettes/Adding_weather.Rmd")
+here::i_am("vignettes/[Computing]Adding_weather.Rmd")
 
 if(!dir.exists(here("raw_data"))){
   dir.create(here("raw_data"))
@@ -29,7 +31,7 @@ if(!dir.exists(here("raw_data"))){
 
 ```{r meteo-get-data, echo = FALSE, include = FALSE, cache= TRUE}
 
-#Meteo
+#Weather
 #https://donneespubliques.meteofrance.fr/?fond=produit&id_produit=90&id_rubrique=32
 #Documentation: https://donneespubliques.meteofrance.fr/client/document/parametres-inclus-dans-les-fichiers-de-donnees-synop_283.pdf
 
@@ -108,6 +110,8 @@ for (name in names(meteoData)) {
 }
 
 synopStations <- read.csv(here::here('raw_data','postesSynop.csv'), sep=";", header = TRUE)
+
+#Function to determine the nearest station given any coordinate
 get_nearest_station <- function(long,lat){
   if(!exists("synopStations")){
   synopStations <- read.csv(here::here('raw_data','postesSynop.csv'), sep=";", header = TRUE)
@@ -121,6 +125,7 @@ get_nearest_station <- function(long,lat){
   synopStations[which(synopStations$distance==min(synopStations$distance, na.rm = TRUE)), ]
 }
 
+#Read the stations' data
 stations <- fread(here::here('raw_data','synop.csv'), sep=";", header = TRUE, 
                        select = c("numer_sta"="numeric","date_r"="character",
                                   "rr3"="character","ff"="character","t"="character",

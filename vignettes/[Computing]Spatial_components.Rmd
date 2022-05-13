@@ -47,7 +47,7 @@ france_info <- all_info_sun %>% filter(admin=="France")
 if(!exists("bars_fr")){
   if(!file.exists(here::here("raw_data","osm-fr-bars.geojson"))){
     URL_bar <- "https://babel.opendatasoft.com/explore/dataset/osm-fr-bars/download/?format=geojson&timezone=Europe/Berlin&lang=fr"
-    bars_fr = geojson_sf(URL_bar)
+    bars_fr <- geojson_sf(URL_bar)
     st_write(bars_fr,here::here("raw_data","osm-fr-bars.geojson"))
   }
   else{

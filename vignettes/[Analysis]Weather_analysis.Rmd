@@ -71,16 +71,19 @@ meteo_france_clean <- meteo_france %>% drop_na()
 
 #> The météo-france's dataset has (-0.1) values for precipitation. 
 #> Without any documentation regarding this value, we will consider it as 0
+#> We create groups of rainfall of approximately equivalent data amount based on quantiles for rain
+
 brks = 
   c(min(meteo_france_clean$rain_mm),0,0.2,0.4,0.6,1.4,2,7,max(meteo_france_clean$rain_mm))
-  #c(min(meteo_france_clean$rain_mm),0,3,6,9,1000)
 meteo_france_clean$groups_rain <- cut(meteo_france_clean$rain_mm, 
                       breaks = brks,
                       include.lowest = TRUE, labels = FALSE)
 
-med_raingroup <- c()
-for(i in 1:(length(brks)-1)){med_raingroup <- append(med_raingroup,(median((meteo_france_clean %>% filter(groups_rain == i))$rain_mm)))}
+# Calculate median of values inside each group of rainfall, not used right now in this paper, but useful for other graphs
+# med_raingroup <- c()
+# for(i in 1:(length(brks)-1)){med_raingroup <- append(med_raingroup,(median((meteo_france_clean %>% filter(groups_rain == i))$rain_mm)))}
 
+#The wind is categorized following the Beaufort scale
 meteo_france_clean$beaufort <- cut(meteo_france_clean$wind,
                       breaks = c(0,1,5,11,19,28,38,49,61,74,88,102,117),
                       include.lowest = TRUE, labels = FALSE)-1
@@ -90,22 +93,21 @@ meteo_france_tag_rain <- meteo_france_clean %>% filter(tag_name == "rain") %>% d
 meteo_france_tag_wind <- meteo_france_clean %>% filter(tag_name =="wind") %>% drop_na(wind)
 
 #rain
-#quantile(meteo_france_tag_rain$dist_station, seq(0,1,by=0.05))
-
+#Calculate proportion of rain tags in each group of rainfall
 group_rain_prop <- c()
 for(i in 1:length(unique(meteo_france_clean$groups_rain))){
   group_rain_prop <- append(group_rain_prop,(nrow(meteo_france_tag_rain %>% filter(groups_rain == i))/ length(unique((meteo_france_clean %>% filter(groups_rain == i))$pk_track)))*100)
 }
 
 #wind
-#quantile(meteo_france_tag_wind$dist_station, seq(0,1,by=0.05))
-
+#Calculate proportion of wind tags in each scale of Beaufort
 group_wind_prop <- c()
 len <- (length(unique(meteo_france_clean$beaufort)))-1
 for(i in 0:len){
   group_wind_prop <- append(group_wind_prop,(nrow(meteo_france_tag_wind %>% filter(beaufort == i))/length(unique((meteo_france_clean %>% filter(beaufort == i))$pk_track)))*100)
 }
 
+#Gives correlation between the rain/wind measures and their tag's group proportion
 cor.gwind <- cor.test(group_wind_prop,sort(unique(meteo_france_clean$beaufort)))
 cor.grain <- cor.test(group_rain_prop,sort(unique(meteo_france_clean$groups_rain)))
 
@@ -128,7 +130,6 @@ It is to keep in mind that the weather data available to us via this method is l
 
 ggplot() +
   geom_col(aes(x = c("-no rain-","(0,0.2]","(0.2,0.4]","(0.4,0.6]","(0.6,1.4]","(1.4,2]","(2,7]","(7,+)"), y = group_rain_prop)) + 
-  #geom_point(aes(x = med_raingroup, y = rain_prop))+
   labs(
     x = "Precipitation (mm/h)",
     y = "Proportion of tracks with rain tag (%)",
@@ -142,7 +143,6 @@ ggplot() +
 
 ggplot() +
   geom_col(aes(x = seq(from = 0, to =len), y = group_wind_prop)) +
-#  geom_density_2d(aes(x = seq(from = 0, to =len), y = group_wind_prop), contour_var = "count")+
   labs(
     x = "Beaufort Scale",
     y = "Proportion of tracks with wind tag (%)",

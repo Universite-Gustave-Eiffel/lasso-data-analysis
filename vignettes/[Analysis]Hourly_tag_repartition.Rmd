@@ -57,7 +57,8 @@ if(!exists("all_info")){
 ```
 
 ```{r compute-tags-occurrences-for-countries, include =FALSE, fig.align='center', out.width="80%", message = FALSE}
-#Hours are rounded via floor() function (4.6 = 4)
+#Calculate proportion of tags per country and per hour
+#Hours are rounded via round() function
 
 occurences <- all_info %>% dplyr::group_by(tag_name, admin, local_time = as.numeric(round(local_time))) %>% dplyr::count(name = "track_occurences")
 

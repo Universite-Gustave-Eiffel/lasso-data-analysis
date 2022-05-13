@@ -17,10 +17,36 @@ editor_options:
 library(dplyr)
 library(purrr)
 library(suncalc)
+library(here)
+library(sf)
+library(geojsonsf)
+
+here::i_am("vignettes/[Computing]Adding_weather.Rmd")
+
+if(!dir.exists(here("raw_data"))){
+  dir.create(here("raw_data"))
+}
 
 ```
 
-```{r countries-timezones, include = FALSE, cache = TRUE}
+```{r setup-calculate-component, include = FALSE}
+#Download Metropolitain France's geometry
+if(!exists("france_metro")){
+  if(!file.exists(here::here("raw_data","2020_France_metro_WGS84.geojson"))){
+    URLfr <- "https://github.com/nicolas-roelandt/lasso-data-analysis/raw/main/raw_data/2020_France_metro_WGS84.geojson"
+    france_metro <- geojson_sf(URLfr)
+    st_write(france_metro,here::here("raw_data","2020_France_metro_WGS84.geojson"))
+  }
+  else{
+  france_metro <- geojson_sf(here::here("raw_data","2020_France_metro_WGS84.geojson"))
+  }
+}
+
+```
+
+
+```{r adding-countries, include = FALSE, cache = TRUE}
+#Adding countries
 query <- "SELECT admin, iso_a2_eh, geog FROM countries;"
 
 countries <- sf::st_read(con,query = query)
@@ -32,14 +58,26 @@ clean_track_info <- st_join(clean_track_info, countries, largest = FALSE)
 
 st_crs(clean_track_info) <- 4326
 
-query <- "SELECT fid as timezone_id, geom, utc_format, tz_name1st FROM timezones;"
+```
 
-timezones <- sf::st_read(con,query = query)
-#timezones_clean <- timezones[!(is.na(timezones$tz_name1st) | timezones$tz_name1st==""), ] #Dropping rows with NA values to prevent future mistakes
+
+```{r metropolitain_france, include = FALSE}
+#We want to separate Metropolitain France and overseas french territories for further analysis (typically because of climate and sunrises/sunsets differences under some latitude)
+
+clean_track_info <- clean_track_info %>% 
+  mutate(admin = case_when(
+    admin == "France" & !sf::st_intersects(., france_metro, sparse = FALSE) ~ "Dromcom",
+    TRUE ~ admin
+  ))
 
 ```
 
-```{r intersect geo timezones, include = FALSE, cache = TRUE}
+
+```{r intersect-geo-timezones, include = FALSE, cache = TRUE}
+#Adding timezones
+query <- "SELECT fid as timezone_id, geom, utc_format, tz_name1st FROM timezones;"
+
+timezones <- sf::st_read(con,query = query)
 
 st_crs(clean_track_info) #to check norm id <- 4326 (world default)
 
@@ -49,7 +87,6 @@ st_transform(timezones, crs = 4326)
 sf_use_s2(FALSE) #disable spherical geometry use
 
 full_info <- sf::st_join(clean_track_info, timezones) #intersect tracks geog with timezones geom
-full_info
 
 #saveRDS(full_info, here("data","full_info.rds"))
 
@@ -61,16 +98,22 @@ INNER JOIN noisecapture_track_tag ntt ON tv.pk_track = ntt.pk_track /* Add track
 INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/;"
 
 tag_info <- RPostgreSQL::dbGetQuery(con,statement = query) %>% dplyr::filter(pk_track %in% clean_track_info$pk_track)
-(tag_info)
 
 ```
 
 ```{r time-processing-hour-season, include = FALSE}
+#We add tags infos and calculate local time based on timezones previously added
+
 all_info <- tag_info %>% 
   dplyr::inner_join(
     full_info %>% filter(!is.na(tz_name1st)) %>% sf::st_drop_geometry()) %>%
-  # add local date
-  dplyr::mutate(local_time = (lubridate::local_time(lubridate::ymd_hms(record_utc, tz = "UTC"),tz_name1st,   units="hours"))) # target timezone
+  # add local time
+  dplyr::mutate(local_time = (lubridate::local_time(lubridate::ymd_hms(record_utc, tz = "UTC"),tz_name1st, units="hours"))) # target timezone
+
+#> Based on the local hour calculated and the UTC time given by the application's data, 
+#> we can determine the real date of the record. 
+#> For instance, a record located in New-York with UTC at 01:00 on tuesday 02/05,
+#> would actually have taken place at a local date of 21:00 monday 01/05
 
 all_info <- all_info %>% mutate(local_date = case_when(
   ymd(substr(ymd_hms(record_utc) + hm(utc_format),1,10)) == ymd(substr(record_utc,1,10)) ~ ymd_hms((paste(substr(record_utc,1,10),"00:00:00"))) + local_time,
@@ -81,11 +124,12 @@ all_info <- all_info %>% mutate(local_date = case_when(
 all_info$lon <- as.numeric(all_info$lon)
 all_info$lat <- as.numeric(all_info$lat)
 
-#>Les saisons doivent être calculées selon la date ET la latitude.
-#>Le calcul de la librairie hydroTSM ne fonctionne que pour la france métropolitaine ou la polynésie française (à spécifier dans "type=")
-#>Les dates des débuts de saisons ci-dessous sont génériques, la précision de la date à l'heure près n'est pas nécessaire ici.
-#>Les saisons ne sont présentes qu'entres les latitudes (-)23.5 et (-)66.5.
-#>L'équateur et les pôles, ne possédant pas vraiment des saisons, sont notées à part, dans la colonne "season" et "hemisphere"
+#>Seasons must be calculated according to the date AND the latitude.
+#>The calculation of the hydroTSM library works only for metropolitan France or French Polynesia (specify in "type=")
+#>The dates of the beginning of seasons below are generic, the precision of the date to the hour is not necessary here.
+#>Seasons are only present between latitudes (-)23.5 and (-)66.5.
+#>The equator and the poles, not really having seasons, are noted separately, in both "season" and "hemisphere" columns.
+
 
 y_m <- format(all_info$record_utc, format ="%m-%d")
 all_info$ym <- y_m
@@ -127,23 +171,6 @@ all_info <- all_info %>%
     lat >= 66.5 | lat <= -66.5 ~ "pole"
   ))
 
-#>La France possède de nombreux territoires d'outre mer qui sont considérés dans nos données sous le même nom "France"
-#>Le territoire est renommé "France_dromcom" si sa position ne fait pas partie d'une bounding box lat(40;55) lon(-6;10) 
-#>(approximation large autour de la France)
-#>Ce processus pourrait être remplacé par une meilleure définition des pays dès le départ, mais je n'ai pas eu le  temps de proposer une nouvelle création de tables de données POSTGRE pertinentes pour le projet
-
-
-#MODIFIER avec france metro
-all_info <- all_info %>% 
-  mutate(admin = case_when(
-    admin == "France" & ((lat < 40 | lat > 55) & (lon < -6 | lon > 10)) ~ "Dromcom",
-    TRUE ~ admin
-  ))
-
-all_info <- all_info %>% mutate(week_end = case_when(
-  chron::is.weekend(local_date) ~ TRUE,
-  TRUE ~ FALSE
-))
 
 #saveRDS(all_info, here("data","all_info.rds"))
 ```
@@ -193,8 +220,8 @@ get_sunset <- function(pk_track, date, lat, lon, tz= "UTC") {
 
 
 # Compute sunrise hours for each track in a new dataframe
-# Impossible de calculer directement pour la timezone définie avec la local_date, le package suncalc ayant un bug
-# Plus de détail : https://github.com/datastorm-open/suncalc/issues/2
+# Impossible to calculate directly for the timezone defined with the local_date, the suncalc package glitches
+# More detail : https://github.com/datastorm-open/suncalc/issues/2
 
 sunrises <- purrr::pmap_dfr(all_info[!duplicated(all_info$pk_track),] %>% select(pk_track, date = record_utc, lat, lon), get_sunrise)
 sunsets <- purrr::pmap_dfr(all_info[!duplicated(all_info$pk_track),] %>% select(pk_track, date = record_utc, lat, lon), get_sunset)
@@ -212,7 +239,7 @@ sun_info <- inner_join(sunrises,sunsets)
 ```
 
 ```{r time-after-sunrise, include = FALSE}
-# join sunrises to study data
+# join sun_info to study data
 
 all_info_sun <- left_join(all_info,sun_info)
 
@@ -224,8 +251,8 @@ all_info_sun <-
 
 all_info_sun <- 
   all_info_sun %>% mutate(after_sunset = case_when(
-  local_time - local_sunset > 12 ~ -(24 - local_time - local_sunset),
-  local_time - local_sunset < -12 ~ 24 - abs(local_time - local_sunset),
+  local_time - local_sunset >= 12 ~ -(24 - local_time - local_sunset),
+  local_time - local_sunset <= -12 ~ 24 - abs(local_time - local_sunset),
   TRUE ~ local_time - local_sunset
 ))
 

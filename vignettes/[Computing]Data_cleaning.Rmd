@@ -26,6 +26,7 @@ query <- "SELECT  tv.pk_track, record_utc, time_length, pleasantness, noise_leve
 
 filtered_track_info <- sf::st_read(con, query = query)
 
+
 query <- "SELECT np.pk_point, np.pk_track, np.the_geom, np.accuracy FROM noisecapture_point as np
 INNER JOIN tracks_view tv ON np.pk_track = tv.pk_track
 WHERE np.accuracy > 0"
@@ -99,8 +100,6 @@ sf_use_s2(FALSE)
 xypoly = st_cast(tempo, 'POLYGON')
 
 xypoly$area <- st_area(xypoly)
-
-#filtered_points <- rename(filtered_points,geometry = geog)
 
 clean_track_info <- filtered_track_info %>% st_drop_geometry() 
 temp <- full_join(xypoly, filtered_points %>% as.data.frame())

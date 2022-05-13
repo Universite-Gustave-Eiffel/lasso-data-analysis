@@ -90,7 +90,6 @@ From the *tracks_view* materialized view in our database, we are filtering track
 <!-- Write some stuff to introduce -->
 
 <!-- Knit child document to add components in our dataset -->
-<!-- CHECK TIME AROUND SUNSET METHOD ~ WEIRD RESULTS -->
 ```{r calculate-comp, child=if (!fast) "[Computing]Calculate_components.Rmd", include = FALSE}
 ```
 

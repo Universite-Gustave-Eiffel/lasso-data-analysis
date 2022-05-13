@@ -56,6 +56,8 @@ if(!exists("all_info_sun")){
 ```
 
 ```{r tracks-to-sunset, include = FALSE}
+#Calculate proportion of tags per country and per hour
+#Hours are rounded via round() function
 
 occurences_sunset <- all_info_sun %>% dplyr::group_by(tag_name, admin, after_sunset = as.numeric(round(after_sunset))) %>% dplyr::count(name = "track_occurence")
 occurences_sunset_full_tag <- occurences_sunset %>% group_by(after_sunset, admin) %>% dplyr::summarise(total = sum(track_occurence))
