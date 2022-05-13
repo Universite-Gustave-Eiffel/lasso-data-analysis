@@ -271,22 +271,25 @@ knitr::include_graphics("plots/Repartition_of_animals_sounds_in_local_time.png")
 
 `r paste0('<p class="caption">',fig_nums("animals-sunrise"), '</p>')`
 
-We also observed peaks in human activity, especially commuting (see
-`r fig_nums("road-dynamics", display = "cite")`.
-Although we find a difference from commuting times shown by @MA2017135, with a 
-rise from 8 am and a peak around 2 pm.
+We also observed peaks in human activity, especially the commuting (see
+`r fig_nums("road-dynamics", display = "cite")`).
 
-<!--TODO: Remplacer par le graphique de Ludovic -->
 ```{r road-dynamics-caption, results='hide'}
-caption <- "Road acoustic dynamics."
+caption <- "Road dynamics."
 fig_nums(name = "road-dynamics", caption = caption)
 ```
 
 ```{r road-dynamics, eval=TRUE}
-knitr::include_graphics("plots/Repartition_of_road_sounds_in_local_time.png")
+knitr::include_graphics("https://user-images.githubusercontent.com/86657953/168244734-cda47fea-a43d-48e3-9b74-816f438ac276.png")
 ```
 
 `r paste0('<p class="caption">',fig_nums("road-dynamics"), '</p>')`
+
+We observe a two-hour difference from commuting times shown by @MA2017135.
+
+`r fig_nums("road-dynamics", display = "cite")` peak times are 9:00 AM–10:00 AM 
+and 8:00 PM–9:00 PM where @MA2017135 peak times are 7:00 AM–9:00 AM and 5:00 PM–7:00 PM.
+This time lag may be due to several reasons that we did not explore: cultural difference between China and France, different mobility practices (smart card for public transportation data versus road noise data), different types of study area (Beijing metropolis and metropolitan France).
 
 Seeing those dynamics was a good sign regarding the validity of crowdsourced 
 environmental acoustic data. 
@@ -388,8 +391,9 @@ It is possible to restart the calculations by trying to
 to reproduce the software environment (the versions of the software and packages used are provided),
 but there is no guarantee that the result will be exactly the same.
 
-The package R [renv](https://rstudio.github.io/renv/index.html) can help to reproduce an R environment and 
-environment by providing functions for saving and restoring dependencies at the project level.
+The package R [renv](https://rstudio.github.io/renv/index.html) can help to 
+reproduce an R environment and environment by providing functions for saving and 
+restoring dependencies at the project level.
 In some cases, if this is not enough, it will be necessary to turn to higher-level
 solutions such as [Docker](https://www.docker.com/) and [Guix](https://guix.gnu.org/).
 
