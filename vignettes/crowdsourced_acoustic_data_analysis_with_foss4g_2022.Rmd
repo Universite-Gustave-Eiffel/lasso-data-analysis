@@ -29,10 +29,10 @@ abstract : |
 pkgdown:
   as_is: true
 output:
-  bookdown::html_document2: # vignette output
-    includes:
-      before_body: header.html
-  #isprspaged::article # pdf output
+  #bookdown::html_document2: # vignette output
+  #  includes:
+  #    before_body: header.html
+  isprspaged::article # pdf output
 #knit: pagedown::chrome_print
 ---
 
@@ -291,8 +291,15 @@ knitr::include_graphics("https://user-images.githubusercontent.com/86657953/1682
 
 `r paste0('<p class="caption">',fig_nums("animals-sunrise"), '</p>')`
 
-We also observed peaks in human activity, especially the commuting (see
-`r fig_nums("road-dynamics", display = "cite")`).
+We also observed peaks in human activity, especially the commuting morning and evening peak times.
+`r fig_nums("road-dynamics", display = "cite")` shows peak times ate 9:00 AM–10:00 AM 
+and 8:00 PM–9:00 PM.
+On a previous study on commuting patterns from smart card data in Beijing (China), 
+@MA2017135 found peak times at 7:00 AM–9:00 AM and 5:00 PM–7:00 PM.
+This time lag might be due to several reasons that we did not explore: cultural 
+difference between China and France, different mobility practices (smart card 
+for public transportation data versus road noise data), different types of study area 
+(Beijing metropolis and metropolitan France).
 
 ```{r road-dynamics-caption, results='hide'}
 caption <- "Road dynamics."
@@ -307,10 +314,6 @@ knitr::include_graphics("https://user-images.githubusercontent.com/86657953/1682
 `r paste0('<p class="caption">',fig_nums("road-dynamics"), '</p>')`
 
 We observe a two-hour difference from commuting times shown by @MA2017135.
-
-`r fig_nums("road-dynamics", display = "cite")` peak times are 9:00 AM–10:00 AM 
-and 8:00 PM–9:00 PM where @MA2017135 peak times are 7:00 AM–9:00 AM and 5:00 PM–7:00 PM.
-This time lag may be due to several reasons that we did not explore: cultural difference between China and France, different mobility practices (smart card for public transportation data versus road noise data), different types of study area (Beijing metropolis and metropolitan France).
 
 Seeing those dynamics was a good sign regarding the validity of crowdsourced 
 environmental acoustic data. 
