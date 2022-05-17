@@ -313,8 +313,6 @@ knitr::include_graphics("https://user-images.githubusercontent.com/86657953/1682
 
 `r paste0('<p class="caption">',fig_nums("road-dynamics"), '</p>')`
 
-We observe a two-hour difference from commuting times shown by @MA2017135.
-
 Seeing those dynamics was a good sign regarding the validity of crowdsourced 
 environmental acoustic data. 
 However, we wanted more precise quality indicators so we looked if we were able 
@@ -327,29 +325,56 @@ As we know the user position and we have the time stamp of the recording, we are
 able to determine the weather conditions at that time and place using the services
 of Météo-France, the French national meteorological service.
 
-In order to determine the accuracy of the manually selected tags by the users of the NoiseCapture app, we want to proceed simple investigations concerning some tags that concern physical events, such as the weather related ones (rain,wind), which can be verified later on.
+In order to determine the accuracy of the manually selected tags by the users of 
+the NoiseCapture app, we want to proceed simple investigations concerning some 
+tags that concern physical events, such as the weather related ones (rain,wind),
+which can be verified later on.
 
-The weather data used is from France's national weather organisation Météo-France, available along with its full documentation from their website :
-  [French weather data](https://donneespubliques.meteofrance.fr/?fond=produit&id_produit=90&id_rubrique=32)
+The weather data used is from France's national weather organisation Météo-France, 
+available along with its full documentation from their website :
+[French weather data](https://donneespubliques.meteofrance.fr/?fond=produit&id_produit=90&id_rubrique=32)
 
-It is to keep in mind that the weather data available to us via this method is limited to the one measured at weather stations. We coded a function getting the weather observed at the closest station. The median distance between stations and our tracks is **16.1 kilometers**, resulting in a small margin of error, the weather being susceptible to change on such a distance.  
+It is to keep in mind that the weather data available to us via this method is 
+limited to the one measured at weather stations. 
+We coded a function getting the weather observed at the closest station. 
+The median distance between stations and our tracks is **16.1 kilometers**, resulting 
+in a small margin of error, the weather being less susceptible to change on such a distance.
 
-```{r rain-tag-use, fig.cap="Rain tag use"}
-knitr::include_graphics("plots/rain_repartition.png")
+```{r rain-tag-use-caption, results='hide'}
+caption <- "Rain tag use."
+fig_nums(name = "rain-tag-use", caption = caption)
 ```
 
-```{r wind-tag-use, fig.cap="Wind tag use"}
-knitr::include_graphics("plots/wind_repartition.png")
+
+```{r rain-tag-use}
+knitr::include_graphics("https://github.com/nicolas-roelandt/lasso-data-analysis/raw/8f9d0d04e3ccd3dc98f26aa216c79b8a972b56e8/vignettes/plots/Repartition%20rain%20tags.png")
 ```
+
+`r paste0('<p class="caption">',fig_nums("rain-tag-use"), '</p>')`
+
+
+```{r wind-tag-use-caption, results='hide'}
+caption <- "Wind tag use."
+fig_nums(name = "wind-tag-use", caption = caption)
+```
+
+```{r wind-tag-use}
+knitr::include_graphics("https://github.com/nicolas-roelandt/lasso-data-analysis/raw/8f9d0d04e3ccd3dc98f26aa216c79b8a972b56e8/vignettes/plots/Repartition%20wind%20tags.png")
+```
+
+`r paste0('<p class="caption">',fig_nums("wind-tag-use"), '</p>')`
 
 The proportion of "wind" and "rain" tags seem to correlate with their corresponding physical events.
-In order to create those graphs, we selected scales to group our data (wind force and precipitation) and calculate the proportion of tags present in those groups. We tried to create groups of equal representation for our data, but our data being non-uniform and disparate, some of our groups of data are much less populated than others, creating a potential bias that could only be corrected by the aggregation of more participator's data. This issue also explains why there is such a large confidence zone of potential linear regression on figure \@ref(fig:rain-tag-use).
+In order to create those graphs, we selected scales to group our data 
+(wind force and precipitation) and calculate the proportion of tags present in those groups.
+We tried to create groups of equal representation for our data, but our data being 
+non-uniform and disparate, some of our groups of data are much less populated than others, 
+creating a potential bias that could only be corrected by the aggregation of more participator's data.
 
-**The correlation coefficient between rain tags and the amount of rain is estimated at 0.5 with a p-value of 0.391.**
-
-**The correlation coefficient between wind tags and the strength of rain is estimated at 0.93 with a p-value close to zero.**
-
-
+There is a strong correlation between wind tags and the strength of wind (cor = 0.932623, *p < 0.01*).
+The correlation between rain tags and the amount of rain is less significative (cor = 0.6815522, *p < 0.1*). However, this might be a perception bias or because of too small groups.
+The `r fig_nums("rain-tag-use", display = "cite")` shows that there is very few `rain`
+tags when the weather services does not record rain.
   
 ## Benefits of OpenScience and literate programming
 
