@@ -1,0 +1,101 @@
+---
+title: "Internship report"
+subtitle: "Tags around sunset"
+author: "Ludovic Moisan"
+supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
+date: "`r Sys.Date()`"
+output: 
+  html_document :
+    theme: united
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r library-sunset, include=FALSE}
+
+library(here)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+```
+
+```{r figures-caption-databases, include=FALSE}
+
+# Declare variables for figures and figures captions
+
+#Check first if figure numeration is already established by another child document to keep tracks of precedent numerations
+if(!exists("fig_nums")){
+fig_nums <- captioner::captioner(prefix = "Figure")
+}
+
+fig_nums("sunset-fr", "Tags hourly proportions around sunset", display = FALSE)
+fig_nums("sunset-fr-chatting", "Chatting tags hourly proportions around sunset", display = FALSE)
+
+```
+
+```{r setup-sunset, include = FALSE}
+
+here::i_am("vignettes/[Analysis]Tags_around_sunset.Rmd")
+
+if(!dir.exists(here("data"))){
+  dir.create(here("data"))
+}
+
+if(!exists("all_info_sun")){
+  if(!file.exists(here("data","all_info_sun.rds"))){
+    URL2 <- "https://zenodo.org/record/6536129/files/time_after_sunrise.rds?download=1"
+    all_info_sun <- readRDS(url(URL2))
+    saveRDS(all_info_sun,here("data","all_info_sun.rds"))
+  }
+  else{
+  all_info_sun <- readRDS(here("data","all_info_sun.rds"))
+  }
+}
+
+```
+
+```{r tracks-to-sunset, include = FALSE}
+#Calculate proportion of tags per country and per hour
+#Hours are rounded via round() function
+
+occurences_sunset <- all_info_sun %>% dplyr::group_by(tag_name, admin, after_sunset = as.numeric(round(after_sunset))) %>% dplyr::count(name = "track_occurence")
+occurences_sunset_full_tag <- occurences_sunset %>% group_by(after_sunset, admin) %>% dplyr::summarise(total = sum(track_occurence))
+
+occurences_sunset["after_sunset"][occurences_sunset["after_sunset"] == -13] <- 12
+
+tags_sunset_repartition <- occurences_sunset %>% 
+  left_join(occurences_sunset_full_tag)%>% dplyr::filter(track_occurence>0)  %>% mutate(percentage = track_occurence * 100 / total)
+```
+
+```{r sunset-graphs-fr, echo = FALSE, fig.align='center', out.width="80%", message = FALSE, fig.cap= fig_nums("sunset-fr")}
+
+ggplot(tags_sunset_repartition %>% dplyr::filter(admin =="France")) +
+  aes(x = after_sunset, y = percentage)+ 
+  geom_col() + geom_smooth(method = "loess", se = FALSE, color = "blue")  +
+  labs(
+    x = "Time around sunset (hours)",
+    y = "Proportion of tag (%)",
+    title = "Repartition of tags from local sunset",
+    subtitle = "Noisecapture's tags in France,
+      2017-2020") +
+  scale_x_continuous(breaks = c(-12,-6,0,6,12))+
+  facet_wrap(vars(tag_name), scales = "free_y")
+
+```
+
+```{r sunset-graphs-fr-chat, echo = FALSE, fig.align='center', out.width="80%", message = FALSE, fig.cap= fig_nums("sunset-fr-chatting")}
+
+ggplot(tags_sunset_repartition %>% dplyr::filter(admin =="France" & tag_name == "chatting")) +
+  aes(x = after_sunset, y = percentage)+ 
+  geom_col() + geom_smooth(method = "loess", se = FALSE, color = "blue")  +
+  labs(
+    x = "Time around sunset (hours)",
+    y = "Proportion of tag (%)",
+    title = "Repartition of tags from local sunset",
+    subtitle = "Noisecapture's tags in France,
+      2017-2020") +
+  scale_x_continuous(breaks = c(-12,-6,0,6,12))+
+  facet_wrap(vars(tag_name), scales = "free_y")
+
+```

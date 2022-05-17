@@ -1,0 +1,123 @@
+---
+title: "Internship report"
+subtitle: "Data cleaning"
+author: "Ludovic Moisan"
+supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
+date: "`r Sys.Date()`"
+output: 
+  html_document :
+    theme: united
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r library-calculate-components, include=FALSE}
+
+#geographical outliers manager
+library(dplyr)
+library(sf)
+library(CoordinateCleaner)
+
+```
+
+
+```{r data-retrieving, include = FALSE, cache = TRUE}
+query <- "SELECT  tv.pk_track, record_utc, time_length, pleasantness, noise_level, geog FROM tracks_view as tv ;"
+
+filtered_track_info <- sf::st_read(con, query = query)
+
+
+query <- "SELECT np.pk_point, np.pk_track, np.the_geom, np.accuracy FROM noisecapture_point as np
+INNER JOIN tracks_view tv ON np.pk_track = tv.pk_track
+WHERE np.accuracy > 0"
+
+track_points <- sf::st_read(con,query = query)
+st_crs(track_points) <- 4326
+
+```
+
+```{r clear-tempo-outliers, include = FALSE, cache = TRUE}
+
+coord_points <- track_points %>% dplyr::bind_cols(
+  track_points %>% st_centroid() %>% st_coordinates() %>% as_tibble() %>% dplyr::select(lon = X, lat = Y))
+
+coord_points <- coord_points %>% sf::st_drop_geometry()
+
+filtered_coord_points <- base::data.frame(matrix(ncol = 3, nrow = 0))
+colnames(filtered_coord_points) <- c('pk_track', 'lon', 'lat')
+datalist = list()
+datalist_pts = list()
+n = 1
+#Loop to clean outliers points in tracks, does not consider tracks of 1
+for(pk in filtered_track_info$pk_track){
+  
+  if(typeof(filtered_track_info$geog[[n]]) == "double"){
+    track <- filtered_track_info %>% dplyr::filter(pk_track == pk)
+    datalist_pts[[n]] <- track
+    n = n+1
+    next
+  }
+  
+  track <- coord_points %>% dplyr::filter(pk_track == pk)
+  #Filter outliers based on the median distance between points
+  x <- cc_outl(track, lon = "lon", lat = "lat", species = "pk_track", method = "mad", min_occs = 2, verbose = FALSE)
+  #Check if any point is still very far after the filtering, can occur if the track is solely composed of points very far from each others
+  #In this case, the track is not usable and will not be kept (unit = m)
+  #Filtre distance à revoir entre pts conséq -> virer > 15km/h
+  x_coord <- x %>% select(lon,lat)
+  temp <- sapply(2:nrow(x_coord),function(i){distm(x_coord[i-1,],x_coord[i,])})
+  if(length(temp[temp > 8]) > 0){
+    n = n+1
+    next
+  }
+#  if(any(as.double(st_distance(st_as_sf(x, coords=c("lon","lat"), crs = st_crs(4326)))) > 500)){
+#    n = n+1
+#    next
+#  }
+  datalist[[n]] <- x
+  n = n+1
+}
+
+filtered_points = do.call(rbind, datalist_pts)
+filtered_coord_points = do.call(rbind, datalist)
+```
+
+```{r track-poly, include = FALSE, cache = TRUE}
+
+xys = st_as_sf(filtered_coord_points, coords=c("lon","lat"), crs = 4326)
+
+xymp  = st_sf(
+  aggregate(
+    xys,
+    by=list(xys$pk_track),
+    do_union=FALSE,
+    FUN=function(vals){vals[1]}))
+
+tempo <- st_transform(xymp, 4326)
+
+sf_use_s2(FALSE)
+
+xypoly = st_cast(tempo, 'POLYGON')
+
+xypoly$area <- st_area(xypoly)
+
+clean_track_info <- filtered_track_info %>% st_drop_geometry() 
+temp <- full_join(xypoly, filtered_points %>% as.data.frame())
+
+clean_track_info <- inner_join(clean_track_info, temp %>% dplyr::select(pk_track,geometry), by = "pk_track")
+clean_track_info <- st_as_sf(clean_track_info, crs = 4326)
+
+#Get centroid of bounding box coordinates for later uses
+list_lon = list()
+list_lat = list()
+for(i in 1:nrow(clean_track_info)){
+list_lon <- append(list_lon,
+  mean(c(st_bbox(clean_track_info$geometry[i])$xmax,st_bbox(clean_track_info$geometry[i])$xmin)))
+list_lat <- append(list_lat,
+    mean(c(st_bbox(clean_track_info$geometry[i])$ymax,st_bbox(clean_track_info$geometry[i])$ymin)))
+}
+
+clean_track_info$lon <- list_lon
+clean_track_info$lat <- list_lat
+```
+

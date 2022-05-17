@@ -1,0 +1,104 @@
+---
+title: "Internship report"
+subtitle: "Tags around sunrise"
+author: "Ludovic Moisan"
+supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
+date: "`r Sys.Date()`"
+output: 
+  html_document :
+    theme: united
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r library-sunrise, include=FALSE}
+
+library(here)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(captioner)
+
+```
+
+```{r figures-caption-sunrise, include=FALSE}
+
+# Declare variables for figures and figures captions
+
+#Check first if figure numeration is already established by another child document to keep tracks of precedent numerations
+if(!exists("fig_nums")){
+fig_nums <- captioner::captioner(prefix = "Figure")
+}
+
+fig_nums("sunrise-fr", "Tags hourly proportions around sunrise", display = FALSE)
+fig_nums("sunrise-fr-animals", "Animals tags hourly proportions around sunrise", display = FALSE)
+
+```
+
+```{r setup-sunrise, include = FALSE}
+
+here::i_am("vignettes/[Analysis]Tags_around_sunrise.Rmd")
+
+if(!dir.exists(here("data"))){
+  dir.create(here("data"))
+}
+
+if(!exists("all_info_sun")){
+  if(!file.exists(here("data","all_info_sun.rds"))){
+    URL2 <- "https://zenodo.org/record/6536129/files/time_after_sunrise.rds?download=1"
+    all_info_sun <- readRDS(url(URL2))
+    saveRDS(all_info_sun,here("data","all_info_sun.rds"))
+  }
+  else{
+  all_info_sun <- readRDS(here("data","all_info_sun.rds"))
+  }
+}
+
+```
+
+```{r track-to-sunrise, include = FALSE}
+#Calculate proportion of tags per country and per hour
+#Hours are rounded via round() function
+
+occurences_sunrise <- all_info_sun %>% dplyr::group_by(tag_name, admin,  after_sunrise = as.numeric(round(after_sunrise))) %>% dplyr::count(name = "track_occurence")
+
+occurences_sunrise["after_sunrise"][occurences_sunrise["after_sunrise"] == -13] <- 12
+
+occurences_sunrise_full_tag <- occurences_sunrise %>% group_by(after_sunrise, admin) %>% dplyr::summarise(total = sum(track_occurence))
+
+tags_sunrise_repartition <- occurences_sunrise %>% 
+  left_join(occurences_sunrise_full_tag)%>% dplyr::filter(track_occurence>0)  %>% mutate(percentage = track_occurence * 100 / total)
+    
+```
+
+```{r sunrise-graph-france, echo = FALSE, fig.align='center', out.width="80%", message = FALSE, fig.cap=fig_nums("sunrise-fr")}
+
+ggplot(tags_sunrise_repartition %>% dplyr::filter(admin=="France")) +
+  aes(x = after_sunrise, y = percentage)+
+  geom_col() + geom_smooth(method = "loess", se = FALSE, color = "blue")  +
+  labs(
+    x = "Time around sunrise (hours)",
+    y = "Proportion of tag (%)",
+    title = "Repartition of tags from local sunrise",
+    subtitle = "Noisecapture's tags in France,
+      2017-2020") +
+  scale_x_continuous(breaks = c(-12,-6,0,6,12))+
+   facet_wrap(vars(tag_name), scales = "free_y")
+
+```
+
+```{r sunrise-graph-animals, echo = FALSE, fig.align='center', out.width="80%", message = FALSE, fig.cap=fig_nums("sunrise-fr-animals")}
+
+ggplot(tags_sunrise_repartition %>% dplyr::filter(admin=="France" & tag_name =="animals")) +
+  aes(x = after_sunrise, y = percentage)+
+  geom_col() + geom_smooth(method = "loess", se = FALSE, color = "blue")  +
+  labs(
+    x = "Time around sunrise (hours)",
+    y = "Proportion of tag (%)",
+    title = "Repartition of tags from local sunrise",
+    subtitle = "Noisecapture's tags in France,
+      2017-2020") +
+  scale_x_continuous(breaks = c(-12,-6,0,6,12))+
+   facet_wrap(vars(tag_name), scales = "free_y")
+  
+```

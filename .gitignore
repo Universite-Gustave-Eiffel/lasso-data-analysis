@@ -1,11 +1,12 @@
 .Rproj.user
 .Rhistory
+.RData
 .Rdata
 .httr-oauth
 .DS_Store
-documentation/ #local documentation
-documentation
-inst/doc
-
-# ignore generated plots in vignettes folder
-vignettes/plots/*
+*.html
+*_cache
+synop.*.gz
+*.rds
+raw_data/*.csv
+raw_data/*.geojson
