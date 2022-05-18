@@ -66,8 +66,10 @@ collection, through the prism of noise sources. The analysis only focused on the
 labels filled in by the users and not on the sound spectrum of the recordings, 
 which will be studied later.
 
-The aim was to determine whether known dynamics in environmental acoustics could
-be recovered using collaborative data.
+The objective was to control the quality of a crowdsourced acoustic open dataset.
+Either by checking whether certain known environmental dynamics are present in 
+the dataset, or by checking whether certain labels related to climatic phenomena
+(presence of rain or wind) have corresponding records in the database of the national weather service.
 
 As these first exploratory works will be extended and consolidated thereafter, and with 
 the will to include this study within the framework of the Open Science, an 
@@ -140,20 +142,19 @@ to analyse and produce knowledge from it.
 We also used Git as it is a great tool to facilitate remote collaboration.
 
 **PostGIS**: the data are provided as a dump from a PostGreSQL/PostGIS database [@paulramseyPostGIS2001].
-Several scripts perform much of the attribute and spatial filtering. 
-These filterings are saved in a materialized view.
-This view is the entry point for the R language.
+Several scripts create materialized views that perform much of the attribute and spatial filtering. 
+Those views are the entry point for the R language to get data.
 
 **R**: the R language [@rcoreteamRLanguageStatistical2021]
 is a programming language for data processing and statistics with many libraries 
-dedicated to geospatial data. 
- 
-The use of Rmarkdown is one of the recommended means for literate programming (along with Jupyter Notebooks and Emacs Org-Mode [@desquilbet2019ReproducibleResearch])
-
+dedicated to geospatial data.
 R allowed us to query the database to get data, refine it to our needs, then produce
-data analysis and graphs.
-Rmarkdown allows to mix code in several programming languages and text in markdown for the dynamic production of 
-graphs, tables and documents.
+data analysis, graphs and reports using Rmarkdown.
+
+Rmarkdown, an R package, allows to mix code in several programming languages and
+text in markdown for the dynamic production of graphs, tables and documents.
+The use of Rmarkdown is one of the recommended means for literate
+programming (along with Jupyter Notebooks and Emacs Org-Mode [@desquilbet2019ReproducibleResearch])
 So it is a great tool to either communicate inside our team and publish our results.
 
 Rmarkdown, as any markdown file, is a plain text file that can be easily versionned
@@ -168,20 +169,22 @@ sites (Nantes, Lyon, Paris) and Git is already used within the UMRAE laboratory.
 
 ### Implementation
 
-The data are provided in the form of a PostGreSQL/PostGIS dump. 
+The raw data are provided in the form of a PostGreSQL/PostGIS dump. 
 A server has been set up accordingly to the documentation provided to store the data.  
 Several materialized views were created in order to provide stable access to data 
 corresponding to defined criteria.
 A materialized view is a good compromise between a table and a view because it
 has similar response time to a table and also allows us to recompute 
-values easily if the threshold values changed.
+values easily if threshold values changed.
 
 The analyses were carried out in two stages: a first exploratory analysis aimed 
 at verifying whether certain known environmental dynamics could be visible in the 
 data set, on the territory of metropolitan France. 
 This first analysis having brought encouraging results, we took it again in order 
 to refine it and to extend the field of research.
-Asking new question or extanding the analysis worldwide.
+In order to have a better qualification of the quality of the dataset, we look if
+there is a relation between meteorological events in the user environment and 
+the proportion of tags corresponding to those event.
 We will present some of this results here.
 
 The code producing the analysis and graphics are separated in 
@@ -199,8 +202,8 @@ They were kept in the extended analysis.
 
 In the exploratory analysis, we kept the tracks where the GPS median accuracy was 
 less than 20 meters.
-In the extended analysis, we kept the tracks but discarded points with a GPS median 
-accuracy greater than 20 meters from the tracks.
+In the extended analysis, we kept all the tracks in metropolitan France but 
+discarded points with a GPS accuracy greater than 20 meters from the tracks.
 
 <!-- NOTE: toujours d'actualité dans l'analyse de Ludovic ?-->
 We decided to keep tracks that are comprised in a rather small area, 
@@ -229,10 +232,10 @@ That motivated our need to separate overseas records from metropolitan ones
 In order to facilitate the replication of the study on areas without this kind 
 of issues, this as not been done within the database but at the beginning of the 
 Rmarkdown document where the exploratory analysis is conducted.
-
 The Rmarkdown document establishes the connection with the materialized view and then 
 performs the operations allowing to finalize data preparation and analyze the data.
-It is a document mixing narrative, figures and code (mostly in R but also several programming languages).
+
+<!--It is a document mixing narrative, figures and code (mostly in R but also several programming languages). -->
 
 <!-- Package list is much more longer than that with the extended analysis
 We also transform the track timestamp to local time and compute seasons using the R packages 
