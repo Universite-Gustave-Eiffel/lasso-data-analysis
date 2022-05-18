@@ -337,7 +337,7 @@ available along with its full documentation from their website :
 It is to keep in mind that the weather data available to us via this method is 
 limited to the one measured at weather stations. 
 We coded a function getting the weather observed at the closest station. 
-The median distance between stations and our tracks is **16.1 kilometers**, resulting 
+The median distance between weather stations and our tracks is **16.1 kilometers**, resulting 
 in a small margin of error, the weather being less susceptible to change on such a distance.
 
 ```{r rain-tag-use-caption, results='hide'}
@@ -371,10 +371,13 @@ We tried to create groups of equal representation for our data, but our data bei
 non-uniform and disparate, some of our groups of data are much less populated than others, 
 creating a potential bias that could only be corrected by the aggregation of more participator's data.
 
-There is a strong correlation between wind tags and the strength of wind (cor = 0.932623, *p < 0.01*).
-The correlation between rain tags and the amount of rain is less significative (cor = 0.6815522, *p < 0.1*). However, this might be a perception bias or because of too small groups.
+There is a strong correlation between the proportion of wind tags and the strength of wind, r(7) = .932623, *p < 0.01*.
+The correlation between the proportion of rain tags and the amount of rain is less significative, r(6) = 0.6815522, *p < 0.1*. 
+This might be a perception bias from the participant or because of too small groups.
 The `r fig_nums("rain-tag-use", display = "cite")` shows that there is very few `rain`
 tags when the weather services does not record rain.
+We believe that the dataset we have studied is not sufficient to characterize the 
+amount of rainfall but sufficient to qualify the presence or absence of it.
   
 ## Benefits of OpenScience and literate programming
 
