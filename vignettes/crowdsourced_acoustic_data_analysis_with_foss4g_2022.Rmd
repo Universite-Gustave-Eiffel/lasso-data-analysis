@@ -266,13 +266,13 @@ knitr::include_graphics("plots/tags_repartition.png")
 
 `r paste0('<p class="caption">',fig_nums("tag-representation"), '</p>')`
 
-Noise pollution from road traffic and its effects on health are a major concern 
+Noise annoyance from road traffic and its effects on health are a major concern 
 in France and are the subject of several studies (
 @meline2013TransportationNoiseAnnoyance, @grange2009PerceptionsBruitIledeFrance).
 
 We believe that a good quality collaborative dataset can provide an interesting 
 insight into the noise level and its perception by the user.
-In order to have a first idea of the quality of our dataset we tried to see if 
+In order to have a first idea of the quality of our dataset, we tried to see if 
 known phenomena in environmental acoustics appeared in the data.
 
 Subsequently, we seek to determine for physical phenomena such as rain and wind 
@@ -302,6 +302,7 @@ knitr::include_graphics("https://user-images.githubusercontent.com/86657953/1682
 
 `r paste0('<p class="caption">',fig_nums("animals-sunrise"), '</p>')`
 
+The second tag we studied was the `road` one.
 We also observed peaks in human activity, especially the commuting morning and evening peak times.
 `r fig_nums("road-dynamics", display = "cite")` shows peak times ate 9:00 AM–10:00 AM 
 and 8:00 PM–9:00 PM.
