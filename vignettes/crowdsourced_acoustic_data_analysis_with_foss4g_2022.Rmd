@@ -511,7 +511,8 @@ the presence of a research software engineer is a real plus.
 
 # ACKNOWLEDGEMENTS {-}
 
-The authors would like to thank ...
+The authors would like to thank the [I-SITE FUTURE](http://www.future-isite.fr/recherche/les-appels-a-projets-exploratoire/?L=1) 
+for the founding of this exploratory project.
 
 # REFERENCES {-}
 ::: {#refs}
