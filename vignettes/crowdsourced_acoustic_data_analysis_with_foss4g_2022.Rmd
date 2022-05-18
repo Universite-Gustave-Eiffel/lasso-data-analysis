@@ -266,19 +266,30 @@ knitr::include_graphics("plots/tags_repartition.png")
 
 `r paste0('<p class="caption">',fig_nums("tag-representation"), '</p>')`
 
+Noise pollution from road traffic and its effects on health are a major concern 
+in France and are the subject of several studies (
+@meline2013TransportationNoiseAnnoyance, @grange2009PerceptionsBruitIledeFrance).
 
-Noise pollution due to road noise is a major concern in France.
+We believe that a good quality collaborative dataset can provide an interesting 
+insight into the noise level and its perception by the user.
+In order to have a first idea of the quality of our dataset we tried to see if 
+known phenomena in environmental acoustics appeared in the data.
 
-### Acoustic dynamics of bird song and commutes
+Subsequently, we seek to determine for physical phenomena such as rain and wind 
+if the presence of tags related to them in our dataset corresponded to real 
+measurements of rain and wind of the national weather service.
 
-A first axis of analysis concerns the time distribution of the tags.
+### Known environmental acoustics phenomena 
+
+A first axis of analysis concerns the time distribution of certains tags.
+The first tag we studied was the `animals` tag. 
+We wanted to see if we wera able  to see a rise of this tag close to the sunrise.
+Indeed as shown by [@robbins1981effect], bird song activity is highest in the 
+morning, especially in the hour after sunrise.
 
 `r fig_nums("animals-sunrise", display = "cite")` shows that animal noises 
 (tag *animals*) are more frequent in the morning and especially 
 at sunrise time.
-This is a well known dynamic for bird song [@robbins1981effect]
-and our data shows a similar effect.
-
 
 ```{r animals-sunrise-caption, results='hide'}
 caption <- "Animals acoustic dynamics."
