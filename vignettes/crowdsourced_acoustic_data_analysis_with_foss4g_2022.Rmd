@@ -386,8 +386,8 @@ We tried to create groups of equal representation for our data, but our data bei
 non-uniform and disparate, some of our groups of data are much less populated than others, 
 creating a potential bias that could only be corrected by the aggregation of more participator's data.
 
-There is a strong correlation between the proportion of wind tags and the strength of wind, r(7) = .932623, *p < 0.01*.
-The correlation between the proportion of rain tags and the amount of rain is less significative, r(6) = 0.6815522, *p < 0.1*. 
+There is a strong correlation between the proportion of wind tags and the strength of wind, r(7) = .93, *p < 0.01*.
+The correlation between the proportion of rain tags and the amount of rain is less significative, r(6) = 0.68, *p < 0.1*. 
 This might be a perception bias from the participant or because of too small groups.
 The `r fig_nums("rain-tag-use", display = "cite")` shows that there is very few `rain`
 tags when the weather services does not record rain.
