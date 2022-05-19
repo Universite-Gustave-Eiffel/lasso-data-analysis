@@ -1,36 +1,48 @@
 ---
 title: "Crowdsourced acoustic open data analysis with FOSS4G tools"
-pkgdown:
-  as_is: true
-output:
-  bookdown::html_document2:
-    toc: true
-    number_sections: true
-vignette: >
-  %\VignetteIndexEntry{Crowdsourced acoustic open data analysis with FOSS4G tools}
-  %\VignetteEngine{rmarkdown::render}
-  %\VignetteEncoding{UTF-8}
-author:
-- name: Nicolas Roelandt
-  affiliation: AME, Univ. Gustave Eiffel, IFSTTAR, F-69675 Bron, France
-- name: Pierre Aumond
-  affiliation: UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France
-- name: Ludovic Moisan
-  affiliation: UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France
+author: "Nicolas Roelandt<sup>1</sup>, Pierre Aumond<sup>2</sup>, Ludovic Moisan<sup>2</sup>"
+affiliation: "<sup>1</sup>AME, Univ. Gustave Eiffel, IFSTTAR, F-69675 Bron, France<br /><sup>2</sup>UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France"
+keywords : 'Environmental acoustics, crowdsourced open data, FOSS4G, reproducibility, literate programming, Open Science, Open Geospatial Software, Open GIScience, Open Geospatial Data'
 bibliography: bibliography.bib
 biblio-style: "apalike"
 link-citations: true
+links-to-footnotes: true
+paged-footnotes: true
 date: "`r Sys.Date()`"
-figures:
-  dpi: 72
+abstract : |
+ NoiseCapture is an Android application  developed by the Gustave Eiffel University
+ and the French National Centre for Scientific Research
+ as central element of a participatory approach to environmental noise mapping.
+ The application is open-source, and all its data are available freely.
+ This study presents the results of the first exploratory analysis of 3 years of 
+ data collection through the lens of sound sources.
+ Sound dynamics of roads related to commuting or bird songs have been observed. 
+ The first results are therefore encouraging. 
+ This analysis is based only on the tags given by the users and not on the sound 
+ spectrum of the measurement, which will be studied at a later stage. 
+ As this preparatory work will be consolidated and extended later, and with the will
+ to register this study in the framework of the Open Science, we paid attention 
+ to its reproducibility. 
+ The context of the study, the tools and techniques used and the first results 
+ obtained will be presented as well as the benefits of using literate programming 
+ in this type of preparatory work.
+pkgdown:
+  as_is: true
+output:
+  bookdown::html_document2: # vignette output
+    includes:
+      before_body: header.html
+  #isprspaged::article # pdf output
+#knit: pagedown::chrome_print
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  echo = FALSE
-)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(captioner) # handle figures and tables numbering
+
+# Declare variables for figures and table counting
+fig_nums <- captioner::captioner(style_prefix = TRUE, style= "b")
+table_nums <- captioner::captioner(prefix = "Table", style_prefix = TRUE, style= "b")
 ```
 
 ```{r comments, include=FALSE}
@@ -39,38 +51,6 @@ knitr::opts_chunk$set(
 #' Announcement of accepted abstracts 		01/04/2022
 #' Submission of full academic papers 		01/06/2022
 ```
-
-# Keywords {-}
-Environmental acoustics, crowdsourced open data, FOSS4G, reproducibility,
-literate programming, Open Science, 
-Open Geospatial Software, Open GIScience, Open Geospatial Data 
-
-# Abstract {-}
-<!--TODO modifier l'abstract en évitant de copier coller l'intro -->
-
-[NoiseCapture](https://noise-planet.org/noisecapture.html) is a Android application 
-developed by the [Gustave Eiffel University](https://www.univ-gustave-eiffel.fr/)
-and the [French National Centre for Scientific Research](https://www.cnrs.fr/en/cnrs) 
-as central element of a participatory approach to environmental noise mapping.
-The application is open-source, and all its data are available freely.
-
-This study presents the results of the first exploratory analysis of 3 years of 
-data collection through the lens of sound sources.
-
-Sound dynamics of roads related to commuting or bird songs have been observed. 
-The first results are therefore encouraging. 
-This analysis is based only on the tags given by the users and not on the sound 
-spectrum of the measurement, which will be studied at a later stage. 
-
-As this preparatory work will be consolidated and extended later, and with the will
-to register this study in the framework of the Open Science, we paid attention 
-to its reproducibility. 
-
-The context of the study, the tools and techniques used and the first results 
-obtained will be presented as well as the benefits of using literate programming 
-in this type of preparatory work.
-
-
 # Introduction {-}
 
 NoiseCapture[^1] is an Android application developed by the Gustave Eiffel University[^2] 
@@ -132,7 +112,6 @@ the Gustave Eiffel university Dataverse[^4].
 
 [^4]: https://research-data.ifsttar.fr/dataset.xhtml?persistentId=doi:10.25578/J5DG3W
 
-
 This information can be enriched by the contributor with labels. 
 There are 18 predefined labels and the user can select one or more of them for each of the 
 traces made. The labels are detailed in [@picautSmartphoneBasedCrowdSourcedDatabase2021]. 
@@ -160,16 +139,12 @@ we decided a FOSS toolset: PostGreSQL/Postgis to store the data and the R langua
 to analyse and produce knowledge from it.
 We also used Git as it is a great tool to facilitate remote collaboration.
 
-#### PostGIS
-
-The data are provided as a dump from a PostGreSQL/PostGIS database [@paulramseyPostGIS2001].
+**PostGIS**: the data are provided as a dump from a PostGreSQL/PostGIS database [@paulramseyPostGIS2001].
 Several scripts perform much of the attribute and spatial filtering. 
 These filterings are saved in a materialized view.
 This view is the entry point for the R language.
 
-#### R
-
-The R language [@rcoreteamRLanguageStatistical2021]
+**R**: the R language [@rcoreteamRLanguageStatistical2021]
 is a programming language for data processing and statistics with many libraries 
 dedicated to geospatial data. 
  
@@ -181,74 +156,92 @@ Rmarkdown allows to mix code in several programming languages and text in markdo
 graphs, tables and documents.
 So it is a great tool to either communicate inside our team and publish our results.
 
-
 Rmarkdown, as any markdown file, is a plain text file that can be easily versionned
 with any version control system.
-As our team is scaterred in several places in France, we needed a tool to 
+As our team is scattered in several places in France, we needed a tool to 
 facilitate code sources communication, for this purpose, we used git.
 
-#### Git
-
-Git is a Distributed Version Control System (DVCS) [@chacon2014pro]. 
+**Git**: Git is a Distributed Version Control System (DVCS) [@chacon2014pro]. 
 It enables collaborative and decentralized work.
 The choice of Git was natural as different collaborators are present on several
 sites (Nantes, Lyon, Paris) and Git is already used within the UMRAE laboratory.
 
 ### Implementation
-The data are provided in the form of a PostGreSQL/PostGIS dump. 
-A server has been set up accordingly to the documentation provided and the data loaded.  
-A materialized view was created in order to provide a stable access to the data 
-corresponding to the defined criteria. 
 
-These criteria are both attributive and spatial. 
-We removed from the analysis the tracks taggued *test* or *indoor* as we wanted outdoor recording. 
-Short tracks (duration less than 5 seconds) and long tracks (duration longer than 15 minutes)
-have been removed. 
-We kept the tracks where the GPS median accuracy was less than 20 meters. 
+The data are provided in the form of a PostGreSQL/PostGIS dump. 
+A server has been set up accordingly to the documentation provided to store the data.  
+Several materialized views were created in order to provide stable access to data 
+corresponding to defined criteria.
+A materialized view is a good compromise between a table and a view because it
+has similar response time to a table and also allows us to recompute 
+values easily if the threshold values changed.
+
+The analyses were carried out in two stages: a first exploratory analysis aimed 
+at verifying whether certain known environmental dynamics could be visible in the 
+data set, on the territory of metropolitan France. 
+This first analysis having brought encouraging results, we took it again in order 
+to refine it and to extend the field of research.
+Asking new question or extanding the analysis worldwide.
+We will present some of this results here.
+
+The code producing the analysis and graphics are separated in 
+several complementary documents[^5].
+
+[^5]: https://nicolas-roelandt.github.io/lasso-data-analysis/articles/
+
+The selection criteria for the data we were going to use for our analyses were 
+both attributive and spatial.
+We removed from the analysis the tracks tagged *test* or *indoor* as we wanted 
+only outdoor recording. 
+Short tracks (duration less than 5 seconds) were discarded.
+Long tracks (duration longer than 15 minutes) have been removed from the exploratory analysis.
+They were kept in the extended analysis.
+
+In the exploratory analysis, we kept the tracks where the GPS median accuracy was 
+less than 20 meters.
+In the extended analysis, we kept the tracks but discarded points with a GPS median 
+accuracy greater than 20 meters from the tracks.
+
+<!-- NOTE: toujours d'actualité dans l'analyse de Ludovic ?-->
 We decided to keep tracks that are comprised in a rather small area, 
 the bounding box area of the track should be less than 625 square meters which 
-corresponds to a square of 25 by 25 meters.
+corresponds to a square of 25 by 25 meters. 
 
-To extract data regarding France area, we pre-filtered the data
+To extract data regarding France metropolitan area, we pre-filtered the data
 using the NaturalEarth dataset to keep tracks that are within the France country.
 This spatial filtering was implemented by creating a materialized view within the 
 PostGIS database.
-The materialized view is a good compromise between a table and a view because it
-has similar response time to a table and also allows us to recompute 
-values easily if the threshold values changed.
 
 NaturalEarth is a great dataset and is well known worldwide however it does not
 distinguish France metropolitan area from overseas areas.
 This could have introduce complications with timezone handling.
+We refined the spatial filtering to France's metropolitan area 
+using an authoritative dataset [@institutgeographiquenationalAdminExpress].
 
+<!--
 Plus we wanted to be able see if seasons have distinct dynamics.
 Metropolitan France has a temperate climate [@ClimatFranceMetropolitaine] 
 where the climate in the West Indies, Reunion, New Caledonia and Polynesia is of
 the tropical maritime type [@ClimatsOutremerMeteoFrance].
 That motivated our need to separate overseas records from metropolitan ones
+-->
 
 In order to facilitate the replication of the study on areas without this kind 
 of issues, this as not been done within the database but at the beginning of the 
-Rmarkdown document where analysis is conducted.
-
-The code producing the analysis and the graphics presented here are separated in 
-several complementary documents[^5].
-
-[^5]: https://nicolas-roelandt.github.io/lasso-data-analysis/articles/temporal_exploratory_analysis.html
+Rmarkdown document where the exploratory analysis is conducted.
 
 The Rmarkdown document establishes the connection with the materialized view and then 
 performs the operations allowing to finalize data preparation and analyze the data.
-It is a document mixing narrative, figures and code (in R but also several programming languages).
+It is a document mixing narrative, figures and code (mostly in R but also several programming languages).
 
-In this document, we refine the spatial filtering to France's metropolitan area 
-using an authoritative dataset [@institutgeographiquenationalAdminExpress].
+<!-- Package list is much more longer than that with the extended analysis
 We also transform the track timestamp to local time and compute seasons using the R packages 
 `lubridate` from the `tidyverse` metapackage [@wickhamWelcomeTidyverse2019] and 
 `hydroTSM` [@mauriciozambrano-bigiariniHydroTSMTimeSeries2020].
 
 We also used the `suncalc` package (@thieurmelSuncalcComputeSun2019) to compute 
 the sunrise time of the day of the track at its location.
-
+--> 
 # Results
 ## Environmental acoustics results 
 
@@ -259,37 +252,65 @@ The study concerns tracks bearing a tag, recorded in metropolitan France.
 It focuses on the proportion of a certain tag in relation to all the tags for a 
 given period (time of day, season, etc.). 
 In the sample studied, it is possible to note a large prevalence of the  *road* 
-tag as shown in Figure \@ref(fig:tag-representation). 
+tag as shown in `r fig_nums("tag-representation", display = "cite")`. 
 *chatting*, *animals* and *wind* tags are also well represented.
 
-```{r tag-representation, fig.cap="Tag representation in mainland France"}
+```{r, results='hide'}
+caption <- "Tag representation in mainland France."
+fig_nums(name = "tag-representation", caption = caption)
+```
+
+```{r tag-representation, eval=TRUE}
 knitr::include_graphics("plots/tags_repartition.png")
 ```
+
+`r paste0('<p class="caption">',fig_nums("tag-representation"), '</p>')`
+
 
 Noise pollution due to road noise is a major concern in France.
 
 ### Acoustic dynamics of bird song and commutes
 
-A first axis of analysis concerns the time distribution of the tags. 
-Figure  \@ref(fig:animals-sunrise) shows that animal noises (tag *animals*) are more frequent in the morning and especially 
-in the few hours after sunrise.
+A first axis of analysis concerns the time distribution of the tags.
+
+`r fig_nums("animals-sunrise", display = "cite")` shows that animal noises 
+(tag *animals*) are more frequent in the morning and especially 
+at sunrise time.
 This is a well known dynamic for bird song [@robbins1981effect]
 and our data shows a similar effect.
 
-<!--TODO: Remplacer par le graphique de Ludovic -->
-```{r animals-sunrise, fig.cap="Animals dynamics"}
-knitr::include_graphics("plots/animals_sunrise.png")
+
+```{r animals-sunrise-caption, results='hide'}
+caption <- "Animals acoustic dynamics."
+fig_nums(name = "animals-sunrise", caption = caption)
 ```
 
-We also observed peaks in human activity, especially commuting (see Figure 
-\@ref(fig:road-dynamics).
-Although we find a difference from commuting times shown by @MA2017135, with a 
-rise from 8 am and a peak around 2 pm.
-
-<!--TODO: Remplacer par le graphique de Ludovic -->
-```{r road-dynamics, fig.cap="Road dynamics"}
-knitr::include_graphics("plots/road_local_time")
+```{r animals-sunrise, eval=TRUE}
+knitr::include_graphics("https://user-images.githubusercontent.com/86657953/168254217-d18e7476-fa3c-48e8-9412-1886183ea98e.png")
 ```
+
+`r paste0('<p class="caption">',fig_nums("animals-sunrise"), '</p>')`
+
+We also observed peaks in human activity, especially the commuting (see
+`r fig_nums("road-dynamics", display = "cite")`).
+
+```{r road-dynamics-caption, results='hide'}
+caption <- "Road dynamics."
+fig_nums(name = "road-dynamics", caption = caption)
+```
+
+
+```{r road-dynamics, eval=TRUE}
+knitr::include_graphics("https://user-images.githubusercontent.com/86657953/168244734-cda47fea-a43d-48e3-9b74-816f438ac276.png")
+```
+
+`r paste0('<p class="caption">',fig_nums("road-dynamics"), '</p>')`
+
+We observe a two-hour difference from commuting times shown by @MA2017135.
+
+`r fig_nums("road-dynamics", display = "cite")` peak times are 9:00 AM–10:00 AM 
+and 8:00 PM–9:00 PM where @MA2017135 peak times are 7:00 AM–9:00 AM and 5:00 PM–7:00 PM.
+This time lag may be due to several reasons that we did not explore: cultural difference between China and France, different mobility practices (smart card for public transportation data versus road noise data), different types of study area (Beijing metropolis and metropolitan France).
 
 Seeing those dynamics was a good sign regarding the validity of crowdsourced 
 environmental acoustic data. 
@@ -328,8 +349,6 @@ In order to create those graphs, we selected scales to group our data (wind forc
 
   
 ## Benefits of OpenScience and literate programming
-
-
 
 Intrinsically, Free and Open Source Software (FOSS) brings many benefits to a 
 project, whether it is a scientific one or not.
@@ -415,8 +434,9 @@ It is possible to restart the calculations by trying to
 to reproduce the software environment (the versions of the software and packages used are provided),
 but there is no guarantee that the result will be exactly the same.
 
-The package R [renv](https://rstudio.github.io/renv/index.html) can help to reproduce an R environment and 
-environment by providing functions for saving and restoring dependencies at the project level.
+The package R [renv](https://rstudio.github.io/renv/index.html) can help to 
+reproduce an R environment and environment by providing functions for saving and 
+restoring dependencies at the project level.
 In some cases, if this is not enough, it will be necessary to turn to higher-level
 solutions such as [Docker](https://www.docker.com/) and [Guix](https://guix.gnu.org/).
 
@@ -446,4 +466,21 @@ is not easy but we believe that the gain is much higher than the cost.
 For the more technical parts, such as the implementation of database servers, 
 the presence of a research software engineer is a real plus.
 
-# References {-}
+# ACKNOWLEDGEMENTS {-}
+
+The authors would like to thank ...
+
+# REFERENCES {-}
+::: {#refs}
+:::
+
+# APPENDIX (Optional) {-}
+
+Any additional supporting data may be appended, provided the paper does
+not exceed the limits given above.
+
+```{js, echo=FALSE}
+// insert a soft break to avoid an infinite loop with FF
+// this is because FF handles lists differently
+document.querySelector('#TOC h1').insertAdjacentHTML('afterend', '<wbr>');
+```

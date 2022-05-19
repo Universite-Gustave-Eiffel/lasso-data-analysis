@@ -1,0 +1,96 @@
+:root{
+  font-family: "Times New Roman",serif;
+      }
+
+
+/* page size */
+@page {
+  size: 210mm 297mm;
+  @top-left {
+    content: none;
+  }
+  @top-center {
+    content: none;
+  }
+}
+/* first page */
+@page :first {
+  @top-center {
+    content: none;
+  }
+  @top-right {
+    content: none;
+  }
+}
+
+.pagedjs_left_page .pagedjs_margin-top-center {
+  font-size: 16px;
+}
+
+
+
+
+
+.level1 h1 {
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+h1 .title{
+  font-size: 12px;
+  text-transform: uppercase;
+  text-align: center;
+}
+.level1:not(:first-child) {
+  margin-top: 0px;
+}
+
+h2 {
+  font-weight: bold;
+}
+h3 {
+  margin: 0;
+}
+.abstract-header{
+ text-transform: uppercase;
+ font-weight: bold;
+ font-size: 9px;
+ text-align: left;
+
+}
+.keywords-heading{
+ text-transform: uppercase;
+ font-weight: bold;
+ font-size: 9px;
+}
+
+.abstract{}
+body {
+ font-size: 9px;
+ column-count: 2;
+ column-gap: 6mm;
+
+
+}
+
+
+.level1 {
+  break-before: page;
+}
+.section > h1, .section > h2, .section > h3, .section > h4, .section > h5, .section > h6 {
+  break-after: avoid;
+}
+.footnotes {
+  break-before: always;
+  break-after: always;
+}
+.figure {
+  break-inside: avoid;
+}
+
+/* do not break captions */
+caption {
+  break-inside: avoid;
+  break-after: avoid;
+}
+
