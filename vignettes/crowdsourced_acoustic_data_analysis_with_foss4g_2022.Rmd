@@ -179,8 +179,9 @@ values easily if threshold values changed.
 
 The analyses were carried out in two stages: a first exploratory analysis aimed 
 at verifying whether certain known environmental dynamics could be visible in the 
-data set, on the territory of metropolitan France. 
-This first analysis having brought encouraging results, we took it again in order 
+data set, on the territory of metropolitan France.
+
+The first analysis having brought encouraging results, we took it again in order 
 to refine it and to extend the field of research.
 In order to have a better qualification of the quality of the dataset, we look if
 there is a relation between meteorological events in the user environment and 
@@ -194,22 +195,24 @@ several complementary documents[^5].
 
 The selection criteria for the data we were going to use for our analyses were 
 both attributive and spatial.
-We removed from the analysis the tracks tagged *test* or *indoor* as we wanted 
-only outdoor recording. 
-Short tracks (duration less than 5 seconds) were discarded.
+We removed from all the analysis the tracks tagged *test* or *indoor* as we wanted 
+only outdoor recording.
+While these two analyses share a common basis, the selection criteria were refined between the two analyses. 
+
+Short tracks (duration less than 5 seconds) were discarded in both analysis.
 Long tracks (duration longer than 15 minutes) have been removed from the exploratory analysis.
 They were kept in the extended analysis.
 
-In the exploratory analysis, we kept the tracks where the GPS median accuracy was 
-less than 20 meters.
-In the extended analysis, we kept all the tracks in metropolitan France but 
-discarded points with a GPS accuracy greater than 20 meters from the tracks.
+In the exploratory analysis, we kept the tracks where the GPS median accuracy of the whole track was less than 20 meters.
+In the extended analysis, we implemented an algorithm to detect and remove outliers track points using a method from the R package CoordinateCleaner[^CCleaner].
+This method was used to keep tracks that would have been eliminated because some of their points had aberrant coordinates, which allowed us to work with larger samples and with a better localization accuracy.
 
-<!-- NOTE: toujours d'actualité dans l'analyse de Ludovic ?-->
-We decided to keep tracks that are comprised in a rather small area, 
-the bounding box area of the track should be less than 625 square meters which 
-corresponds to a square of 25 by 25 meters. 
+[^CCleaner]: https://search.r-project.org/CRAN/refmans/CoordinateCleaner/html/cc_outl.html
 
+In the exploratory analysis, we decided to keep tracks that are comprised in a rather small area,
+the bounding box area would have to be equivalent to a square of 25 by 25 meters. This criterion was not considered in the extended analysis, but a threshold of 8 m/s (equivalent to 30 km/h) was set between 2 GPS measurements to eliminate tracks recorded in motor vehicles.
+
+Although the extended analysis examined some questions on the global dataset, the results presented here are for tracks in metropolitan France.
 To extract data regarding France metropolitan area, we pre-filtered the data
 using the NaturalEarth dataset to keep tracks that are within the France country.
 This spatial filtering was implemented by creating a materialized view within the 
