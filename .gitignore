@@ -8,5 +8,5 @@
 *_cache
 synop.*.gz
 *.rds
-raw_data/*.csv
-raw_data/*.geojson
+raw_data/**
+vignettes/LM_temporal_analysis_article.Rmd

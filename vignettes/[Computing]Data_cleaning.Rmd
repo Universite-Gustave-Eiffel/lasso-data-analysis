@@ -11,7 +11,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r library-calculate-components, include=FALSE}
+```{r library-cleaning, include=FALSE}
 
 #geographical outliers manager
 library(dplyr)
@@ -63,7 +63,6 @@ for(pk in filtered_track_info$pk_track){
   x <- cc_outl(track, lon = "lon", lat = "lat", species = "pk_track", method = "mad", min_occs = 2, verbose = FALSE)
   #Check if any point is still very far after the filtering, can occur if the track is solely composed of points very far from each others
   #In this case, the track is not usable and will not be kept (unit = m)
-  #Filtre distance à revoir entre pts conséq -> virer > 15km/h
   x_coord <- x %>% select(lon,lat)
   temp <- sapply(2:nrow(x_coord),function(i){distm(x_coord[i-1,],x_coord[i,])})
   if(length(temp[temp > 8]) > 0){

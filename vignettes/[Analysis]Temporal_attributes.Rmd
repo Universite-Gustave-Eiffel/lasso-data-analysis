@@ -1,0 +1,70 @@
+---
+title: "Internship report"
+subtitle: "Analysis of temporal attributes"
+author: "Ludovic Moisan"
+supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
+date: "`r Sys.Date()`"
+output: 
+  html_document :
+    theme: united
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r library-tempo-analysis, include = FALSE}
+
+library(lubridate)
+library(chron)
+library(here)
+library(dplyr)
+# handle figures and tables numbering
+library(captioner)
+
+```
+
+```{r setup-tempo-analysis, include=FALSE}
+
+here::i_am("vignettes/[Analysis]Temporal_attributes.Rmd")
+
+if(!dir.exists(here("data"))){
+  dir.create(here("data"))
+}
+
+if(!exists("all_info_sun")){
+  if(!file.exists(here::here("data","all_info_sun.rds"))){
+    URL <- "https://zenodo.org/record/6563518/files/meteo_france.rds?download=1"
+    all_info_sun <- readRDS(url(URL))
+    saveRDS(all_info_sun,here::here("data","all_info_sun.rds"))
+  }
+  else{
+  all_info_sun <- readRDS(here::here("data","all_info_sun.rds"))
+  }
+}
+
+```
+
+```{r graph-tempo-data, echo = FALSE, fig.align='center', out.width="80%", message = FALSE, fig.cap= fig_nums("type_tempo")}
+
+plot_world_days <- ggplot(df_tags_day_type, aes(fill=day_type, y=proportion, x=tag)) + 
+    geom_bar(position="dodge", stat="identity")+ 
+  scale_fill_manual(values = c("#007eed","#e100ed","#edae00","#ed4700"))+
+  labs(
+    x = "Tag names",
+    y = "Proportion of tags (%)",
+    title = "Repartition of tags by type of day",
+    subtitle = "Noisecapture's tags in the World,
+      2017-2020")
+
+plot_france_days <- ggplot(df_tags_day_type_fr, aes(fill=day_type, y=proportion, x=tag)) + 
+  geom_bar(position="dodge", stat="identity")+ 
+  scale_fill_manual(values = c("#007eed","#e100ed","#edae00","#ed4700"))+
+  labs(
+    x = "Tag names",
+    y = "Proportion of tags (%)",
+    title = "Repartition of tags by type of day",
+    subtitle = "Noisecapture's tags in France,
+      2017-2020")
+
+grid.arrange(plot_world_days,plot_france_days)
+
+```

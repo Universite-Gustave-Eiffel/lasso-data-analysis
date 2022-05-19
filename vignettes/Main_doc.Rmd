@@ -90,11 +90,15 @@ From the *tracks_view* materialized view in our database, we are filtering track
 <!-- Write some stuff to introduce -->
 
 <!-- Knit child document to add components in our dataset -->
-```{r calculate-comp, child=if (!fast) "[Computing]Calculate_components.Rmd", include = FALSE}
+```{r calculate-comp, child="[Computing]Calculate_components.Rmd", eval = !fast, include = FALSE}
 ```
 
 <!-- Knit child document to add weather in our dataset -->
-```{r adding-weather, child=if (!fast) "[Computing]Adding_weather.Rmd", include = FALSE}
+```{r adding-weather, child="[Computing]Adding_weather.Rmd", eval = !fast, include = FALSE}
+```
+
+<!-- Knit child document to add temporal attributes in our dataset -->
+```{r adding-weather, child="[Computing]Adding_temporal_data.Rmd", eval = !fast, include = FALSE}
 ```
 
 <!-- Knit child document to analyse weather -->
@@ -108,6 +112,10 @@ From the *tracks_view* materialized view in our database, we are filtering track
 <!-- Knit child document to analyse repartition of tags around sunrise -->
 ```{r tags-sunrise, child= "[Analysis]Tags_around_sunrise.Rmd" , echo=FALSE, fig.align='center', out.width="80%",message=FALSE}
 ```
+
+<!-- <!-- Knit child document to analyse repartition of tags around sunrise --> -->
+<!-- ```{r temporal-attributes, child= "[Analysis]Temporal_attributes.Rmd" , echo=FALSE, fig.align='center', out.width="80%",message=FALSE} -->
+<!-- ``` -->
 
 
 # Reproductibility

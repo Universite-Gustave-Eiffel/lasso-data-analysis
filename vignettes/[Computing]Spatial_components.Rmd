@@ -19,7 +19,14 @@ library(dplyr)
 library(tidyr)
 library(rgdal)
 library(geojsonsf)
+library(geosphere)
 library(sf)
+library(raster)
+library(leaflet)
+library(stringr)
+
+source(here::here("vignettes","Kdtree.R"))
+# https://github.com/marcusvolz/mathart/blob/master/R/kdtree.R
 
 ```
 
@@ -54,34 +61,138 @@ if(!exists("bars_fr")){
   bars_fr <- geojson_sf(here::here("raw_data","osm-fr-bars.geojson"))
   }
 }
+# 
+# if(!exists("rest_fr")){
+#   if(!file.exists(here::here("raw_data","osm-restaurant-fr.geojson"))){
+#     URL_rest <- "https://babel.opendatasoft.com/explore/dataset/osm-restaurant-fr/download/?format=geojson&timezone=Europe/Berlin&lang=fr"
+#     rest_fr = geojson_sf(URL_rest)
+#     st_write(rest_fr,here::here("raw_data","osm-restaurant-fr.geojson"))
+#   }
+#   else{
+#   rest_fr <- geojson_sf(here::here("raw_data","osm-restaurant-fr.geojson"))
+#   }
+# }
+# 
+# if(!exists("school_fr")){
+#   if(!file.exists(here::here("raw_data","osm-fr-ecoles.geojson"))){
+#     URL_school <- "https://babel.opendatasoft.com/explore/dataset/osm-fr-ecoles/download/?format=geojson&timezone=Europe/Berlin&lang=fr"
+#     school_fr = geojson_sf(URL_school)
+#     st_write(school_fr,here::here("raw_data","osm-fr-ecoles.geojson"))
+#   }
+#   else{
+#   school_fr <- geojson_sf(here::here("raw_data","osm-fr-ecoles.geojson"))
+#   }
+# }
+# 
+# #Download Metropolitain France's geometry
+# if(!exists("france_metro")){
+#   if(!file.exists(here::here("raw_data","2020_France_metro_WGS84.geojson"))){
+#     URLfr <- "https://github.com/nicolas-roelandt/lasso-data-analysis/raw/main/raw_data/2020_France_metro_WGS84.geojson"
+#     france_metro <- geojson_sf(URLfr)
+#     st_write(france_metro,here::here("raw_data","2020_France_metro_WGS84.geojson"))
+#   }
+#   else{
+#   france_metro <- geojson_sf(here::here("raw_data","2020_France_metro_WGS84.geojson"))
+#   }
+# }
+# 
+# if(!exists("communes_fr")){
+#   if(!file.exists(here::here("raw_data","georef-france-commune.geojson"))){
+#     URL_communes <- "https://public.opendatasoft.com/explore/dataset/georef-france-commune/download/?format=geojson&timezone=Europe/Berlin&lang=fr"
+#     communes_fr = geojson_sf(URL_communes)
+#     st_write(communes_fr,here::here("raw_data","georef-france-commune.geojson"))
+#   }
+#   else{
+#   communes_fr <- geojson_sf(here::here("raw_data","georef-france-commune.geojson"))
+#   }
+# }
+# 
+# 
+# if(!exists("pop_fr")){
+#   if(!file.exists(here::here("data","pop_fr.rds"))){
+#     URL_pop <- "https://zenodo.org/record/6554256/files/base-pop-historiques-1876-2019.csv?download=1"
+#     pop_fr <- read.csv2(URL_pop, header = TRUE)
+#     saveRDS(pop_fr, here::here("data","pop_fr.rds"))
+#   }
+#   else{
+#   pop_fr <- readRDS(here::here("data","pop_fr.rds"))
+#   }
+# }
 
-if(!exists("rest_fr")){
-  if(!file.exists(here::here("raw_data","osm-restaurant-fr.geojson"))){
-    URL_rest <- "https://babel.opendatasoft.com/explore/dataset/osm-restaurant-fr/download/?format=geojson&timezone=Europe/Berlin&lang=fr"
-    rest_fr = geojson_sf(URL_rest)
-    st_write(rest_fr,here::here("raw_data","osm-restaurant-fr.geojson"))
-  }
-  else{
-  rest_fr <- geojson_sf(here::here("raw_data","osm-restaurant-fr.geojson"))
-  }
-}
+# if(!exists("carroye_pop_fr")){
+#   if(!file.exists(here::here("raw_data/shapefile_pop","Filosofi2015_carreaux_200m_metropole.shp"))){
+#     print("not implemented yet")
+#   }
+#   else{
+#   carroye_pop_fr <- read_sf(here::here("raw_data/shapefile_pop","Filosofi2015_carreaux_200m_metropole.shp"))
+#   }
+# }
 
-if(!exists("school_fr")){
-  if(!file.exists(here::here("raw_data","osm-fr-ecoles.geojson"))){
-    URL_school <- "https://babel.opendatasoft.com/explore/dataset/osm-fr-ecoles/download/?format=geojson&timezone=Europe/Berlin&lang=fr"
-    school_fr = geojson_sf(URL_school)
-    st_write(school_fr,here::here("raw_data","osm-fr-ecoles.geojson"))
-  }
-  else{
-  school_fr <- geojson_sf(here::here("raw_data","osm-fr-ecoles.geojson"))
-  }
-}
+
+```
+
+```{r carroye, echo = FALSE, eval = FALSE}
+
+carroye_pop_fr <- read_sf("C:/Users/moisan/Documents/Stage/github/lasso-data-analysis/raw_data/shapefile_pop/Filosofi2015_carreaux_200m_metropole.shp")
+
+bars_fr <- read_sf("C:/Users/moisan/Documents/Stage/github/lasso-data-analysis/raw_data/osm-fr-bars.geojson")
+
+carroye_pop_fr <- st_transform(carroye_pop_fr, crs = st_crs("EPSG:4326"))
+
+intersection <- st_intersection(carroye_pop_fr,bars_fr)
+
+
+ggplot() + 
+  geom_sf(data = carroye_pop_fr, size = 1, color = "black", fill = "cyan1") + 
+  ggtitle("AOI Boundary Plot") + 
+  coord_sf()
+
+leaflet(carroye_pop_fr) %>% addProviderTiles(providers$CartoDB.Positron) %>% 
+  addPolygons(fillColor = "ind", weight = 0.1,
+    highlightOptions = highlightOptions(color = "white", weight = 2,
+      bringToFront = TRUE))
+
+```
+
+```{r pop-dataset, echo = FALSE, eval = FALSE}
+
+str(pop_fr)
+str(communes_fr)
+# Data of all french cities, including dromcom territories
+city_pop <- sf::st_as_sf(inner_join(pop_fr %>% select(CODGEO,PMUN19),communes_fr %>% select(com_code,geo_point_2d,geometry), 
+                          by=c("CODGEO" = "com_code")))
+
+str(city_pop)
+# Only select french cities in metropolitain territory
+# Pop column in original dataset is string coded and has spaces, we need to get rid of them and then convert to num
+city_pop_fr <- st_intersection(city_pop,france_metro) %>% 
+  dplyr::mutate(PMUN19 = as.numeric(str_replace_all(PMUN19, "\\s+", "")),pop_norm = (PMUN19-min(PMUN19))/(max(PMUN19)-min(PMUN19)))
+
+dt<-sample(2, nrow(city_pop_fr), replace = TRUE, prob=c (0.05,0.2))
+train_df <- city_pop_fr[dt==1,]
+
+str(city_pop_fr)
+
+leaflet(city_pop_fr) %>% addProviderTiles(providers$CartoDB.Positron) %>% 
+  addPolygons(fillColor = "red", fillOpacity = "pop_norm", weight = 0.2,
+    highlightOptions = highlightOptions(color = "white", weight = 2,
+      bringToFront = TRUE))
+
+
+```
+
+```{r pop-visualisation, echo = FALSE}
+
+
 
 ```
 
 ```{r density-map, include = FALSE}
+source("C:/Users/moisan/Documents/Stage/github/lasso-data-analysis/vignettes/Kdtree.R")
 
+all_info_sun = readRDS("C:/Users/moisan/Documents/Stage/github/lasso-data-analysis/data/all_info_sun.rds")
 
+kdtree
 
 ```
 
