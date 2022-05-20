@@ -190,9 +190,10 @@ leaflet(city_pop_fr) %>% addProviderTiles(providers$CartoDB.Positron) %>%
 ```{r density-map, include = FALSE}
 source("C:/Users/moisan/Documents/Stage/github/lasso-data-analysis/vignettes/Kdtree.R")
 
-all_info_sun = readRDS("C:/Users/moisan/Documents/Stage/github/lasso-data-analysis/data/all_info_sun.rds")
+all_info_tempo <- readRDS("C:/Users/moisan/Documents/Stage/github/lasso-data-analysis/data/all_info_tempo.rds")
+meteo <- readRDS("C:/Users/moisan/Documents/Stage/github/lasso-data-analysis/data/meteo_france.rds")
 
-kdtree
+kdtree(all_info_sun %>% dplyr::filter(admin=="France") %>% dplyr::mutate(x = lon,y = lat))
 
 ```
 

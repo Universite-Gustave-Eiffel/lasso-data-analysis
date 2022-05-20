@@ -16,6 +16,7 @@ editor_options:
 #geographical outliers manager
 library(dplyr)
 library(sf)
+library(geosphere)
 library(CoordinateCleaner)
 
 ```
@@ -64,7 +65,7 @@ for(pk in filtered_track_info$pk_track){
   #Check if any point is still very far after the filtering, can occur if the track is solely composed of points very far from each others
   #In this case, the track is not usable and will not be kept (unit = m)
   x_coord <- x %>% select(lon,lat)
-  temp <- sapply(2:nrow(x_coord),function(i){distm(x_coord[i-1,],x_coord[i,])})
+  temp <- sapply(2:nrow(x_coord),function(i){geosphere::distm(x_coord[i-1,],x_coord[i,])})
   if(length(temp[temp > 8]) > 0){
     n = n+1
     next

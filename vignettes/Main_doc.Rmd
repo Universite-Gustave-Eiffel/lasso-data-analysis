@@ -127,6 +127,7 @@ Most of the treatment has been made within the PostGIS database. The scripts fol
 ```{r spatial-data-info, echo = FALSE}
 
 
+
 ```
 
 ## Session informations
