@@ -81,13 +81,21 @@ in this type of exploratory work.
 
 # Context
 
-<!-- Présentation de l'acoustique environnementale -->
+Noise has a major impact on the health and quality of life of humans and wildlife. 
+A study, coordinated by the WHO and published in 2011, indicates that at least one million healthy life years (DALYs) 
+would be lost each year in Western Europe due to traffic noise [L. Fritschi, L. Brown, R. Kim, D. Schwela, et S. Kephalopolous, « Burden of Disease from Environmental Noise: Quantification of Healthy Life Years Lost in Europe », World Health Organization, 2011.]. Its health, physiological and psychological 
+effects are numerous: hearing damage, sleep disturbances, cardiovascular pathologies, etc. In a more global way, 
+studies show that the perceived noise environment is significantly correlated with an individual's satisfaction with 
+his or her living environment, with his or her health-related quality of life or with the restorative effect of a place [D. Botteldooren, L. Dekoninck, et D. Gillis, « The influence of traffic noise on appreciation of the living quality of a neighborhood », International Journal of Environmental Research and Public Health, vol. 8, no 3, p. 777‑798, 2011, doi: 10.3390/ijerph8030777.]. 
+The economic and social impact of noise has also been demonstrated with a social cost of noise in France estimated at 
+147 billion euros per year [DOUILLET Maia, SIPOS Gala, DELUGIN Léna, BULLIOT Benoît, REMONTET Lucas, BIDAULT Elsa, ADEME, I Care & Consult, BRUITPARIF OBSERVATOIRE DU BRUIT EN ILE-DE-FRANCE, ENERGIES DEMAIN, "Coût social du bruit en France", ADEME, Expertise, 2021]. A complete and precise evaluation of the presence of noise in the environment is 
+therefore of great necessity.
 
 The NoiseCapture app is part of a global Open Science approach (called Noise-Planet) led by Université 
 Gustave Eiffel and CNRS, for the development of tools for the assessment of the sound environment. 
 This project is particularly interested in the implementation of a participative approach for the 
-production of data with smartphones in order to eventually propose an alternative method of assessment of the 
-sound environment. For this purpose, an Android application and a spatial data infrastructure 
+production of data with smartphones in order to eventually propose an alternative method of environmental sound mapping.
+For this purpose, an Android application and a spatial data infrastructure 
 have been specifically developed. The whole system allows to collect physical data (acoustic measurements, GPS positions...) 
 and perceptual data (pleasantness, presence of sound sources), without any territory limit, while 
 respecting the privacy of the contributors. The collected data are freely accessible, 
