@@ -93,7 +93,7 @@ and perceptual data (pleasantness, presence of sound sources), without any terri
 respecting the privacy of the contributors. The collected data are freely accessible, 
 in particular by the scientific community which would like to develop new tools for the evaluation and representation of sound environments. 
 
-The beginining of this analysis was the release of a 3 years collection of environnemental
+The beginning of this analysis was the release of a 3 years collection of environnemental
 acoustic samples. A first article presenting this dataset has been published in 2021 [@picautSmartphoneBasedCrowdSourcedDatabase2021].
 
 It details the structure of the database and the data, the profile of the 
@@ -133,7 +133,8 @@ In addition to data from the collaborative collection, some additional data were
 used to limit the study area. First we chose to limit the geographical scope of this 
 preliminary study to metropolitan France because this area contains the largest 
 number of recordings and it avoided us to face the problems of time zones.
-Then we extended some analysis worldwide.
+Then we extended some analysis worldwide. The results presented here concern tracks
+recorded in the France metropolitan area.
 
 To facilitate the reproducibility of spatial filtering, it was decided to use 
 open data sets from recognized sources: the Natural Earth database 
@@ -146,19 +147,22 @@ analysed using a statistical analysis language.
 ### Tools{#tools}
 
 In order to be as open as possible and to work in the most collaborative way,
-we decided a FOSS toolset: PostGreSQL/Postgis to store the data and the R language 
+we decided a FOSS toolset: PostgreSQL/Postgis to store the data and the R language 
 to analyse and produce knowledge from it.
 We also used Git as it is a great tool to facilitate remote collaboration.
 
-**PostGIS**: the data are provided as a dump from a PostGreSQL/PostGIS database [@paulramseyPostGIS2001].
-Several scripts create materialized views that perform much of the attribute and spatial filtering. 
-Those views are the entry point for the R language to get data.
+**PostGIS**: the data are provided as a dump from a PostgreSQL/PostGIS database [@paulramseyPostGIS2001].
+In order to access the data, we had to set up a PostgreSQL server and configure 
+it according to the indications provided with the dataset.
+Several views have been set up to pre-filter the data and provide stable access 
+points for the R language.
+
 
 **R**: the R language [@rcoreteamRLanguageStatistical2021]
 is a programming language for data processing and statistics with many libraries 
 dedicated to geospatial data.
 R allowed us to query the database to get data, refine it to our needs, then produce
-data analysis, graphs and reports using Rmarkdown.
+data analysis, graphs and reports using Rmarkdown files.
 
 Rmarkdown, an R package, allows to mix code in several programming languages and
 text in markdown for the dynamic production of graphs, tables and documents.
@@ -173,18 +177,22 @@ facilitate code sources communication, for this purpose, we used git.
 
 **Git**: Git is a Distributed Version Control System (DVCS) [@chacon2014pro]. 
 It enables collaborative and decentralized work.
-The choice of Git was natural as different collaborators are present on several
-sites (Nantes, Lyon, Paris) and Git is already used within the UMRAE laboratory.
+Using the Github online plateforme, we could communicate source code changes to 
+each other in a desynchronized way between different collaborators present on several
+sites (Nantes, Lyon, Paris).
+Git is already used within the UMRAE laboratory.
 
 ### Implementation
 
-The raw data are provided in the form of a PostGreSQL/PostGIS dump. 
-A server has been set up accordingly to the documentation provided to store the data.  
-Several materialized views were created in order to provide stable access to data 
+The raw data are provided in the form of a PostgreSQL/PostGIS dump.
+A server has been set up to store the data.
+Several SQL scripts create materialized views that perform much of the attribute 
+and spatial filtering and provide stable access to data 
 corresponding to defined criteria.
 A materialized view is a good compromise between a table and a view because it
 has similar response time to a table and also allows us to recompute 
 values easily if threshold values changed.
+Those views are the entry point for the R language to get data to analyse.
 
 The analyses were carried out in two stages: a first exploratory analysis aimed 
 at verifying whether certain known environmental dynamics could be visible in the 
@@ -233,35 +241,22 @@ This could have introduce complications with timezone handling.
 We refined the spatial filtering to France's metropolitan area 
 using an authoritative dataset [@institutgeographiquenationalAdminExpress].
 
-<!--
-Plus we wanted to be able see if seasons have distinct dynamics.
-Metropolitan France has a temperate climate [@ClimatFranceMetropolitaine] 
-where the climate in the West Indies, Reunion, New Caledonia and Polynesia is of
-the tropical maritime type [@ClimatsOutremerMeteoFrance].
-That motivated our need to separate overseas records from metropolitan ones
--->
-
 In order to facilitate the replication of the study on areas without this kind 
 of issues, this as not been done within the database but at the beginning of the 
 Rmarkdown document where the exploratory analysis is conducted.
-The Rmarkdown document establishes the connection with the materialized view and then 
+The Rmarkdown document establishes the connection with the materialized view 
+containing the data from the PostgreSQL server and then 
 performs the operations allowing to finalize data preparation and analyze the data.
 
-<!--It is a document mixing narrative, figures and code (mostly in R but also several programming languages). -->
+The data is analyzed using several Rmarkdown files that can be launched independently or not.
+Some files prepare additional data or calculate indicators. 
+Others analyze the results.
 
-<!-- Package list is much more longer than that with the extended analysis
-We also transform the track timestamp to local time and compute seasons using the R packages 
-`lubridate` from the `tidyverse` metapackage [@wickhamWelcomeTidyverse2019] and 
-`hydroTSM` [@mauriciozambrano-bigiariniHydroTSMTimeSeries2020].
-
-We also used the `suncalc` package (@thieurmelSuncalcComputeSun2019) to compute 
-the sunrise time of the day of the track at its location.
---> 
 # Results
 ## Environmental acoustics results 
 
 The main goal of this preliminary study was to verify the scientific value of 
-crowdsourced acoustic data and if tags are sufficients to describe user environment.
+crowdsourced acoustic data and if tags are sufficient to describe user environment.
 
 The study concerns tracks bearing a tag, recorded in metropolitan France. 
 It focuses on the proportion of a certain tag in relation to all the tags for a 
