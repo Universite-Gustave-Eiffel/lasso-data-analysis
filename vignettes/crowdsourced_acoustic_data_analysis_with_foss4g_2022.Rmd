@@ -403,7 +403,7 @@ amount of rainfall but sufficient to qualify the presence or absence of it.
   
 ## Benefits of OpenScience and literate programming
 
-Intrinsically, Free and Open Source Software (FOSS) brings many benefits to a 
+Intrinsically, Free and Open Source Software (FOSS) brings many benefits to any 
 project, whether it is a scientific one or not.
 The problem of licenses is greatly facilitated because they are usable by all, 
 without discrimination and without additional cost.
@@ -418,9 +418,13 @@ The reduction of the number of tools needed for the scientific production was
 possible thanks to the use of a programming language allowing to cover practically 
 all the aspects of the project, whether it is the connection to the database, 
 the statistical analyses, the production of tables and graphs as well as reports.
+A reduced toolbox also promotes reproducibility by limiting the constraints of 
+installing software on a machine.
+Nevertheless, the analysis uses a large list of R packages and some of them may 
+have dependencies that can cause problems.
 
-While free software facilitates the implementation of tools, literate programming is 
-more oriented to communication between humans.
+While free software facilitates the implementation and deployment of tools, 
+literate programming is more oriented to communication between humans.
 Thus, as early as 1984, Donald Knuth, who invented the concept, questions the 
 relationship between the developer of a program and the source code he produces.
 He proposes that, beyond the simple transmission of instructions to a computer, 
@@ -477,9 +481,6 @@ For a researcher working on similar questions, a research project where the data
 methods, code and even the scientific literature produced are open and documented, 
 makes it much easier to revisit the work in order to answer one's own questions 
 because it provides a complete example and not just final results.
-
-<!-- Pertinence de cette partie ? C'est une limite de la reproductibilité qui n'a 
-pas été traitée dans cette étude, c'est un point d'amélioration -->
 
 While being a valuable aid for reproducibility, the FOSS and literate programming
 with notebook tools such as Rmarkdown used in this project suffer from some limitations. 
