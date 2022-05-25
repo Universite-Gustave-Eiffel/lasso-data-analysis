@@ -11,6 +11,8 @@ editor_options:
   chunk_output_type: console
 ---
 
+<!-- This file is for the calculation and implementation of our temporal attributes -->
+
 ```{r library-tempo-add, include = FALSE}
 
 library(lubridate)

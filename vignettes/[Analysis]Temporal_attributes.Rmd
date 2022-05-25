@@ -11,6 +11,9 @@ editor_options:
   chunk_output_type: console
 ---
 
+<!-- This file is for the plotting and analysis of our temporal attributes -->
+
+
 ```{r library-tempo-analysis, include = FALSE}
 
 library(lubridate)

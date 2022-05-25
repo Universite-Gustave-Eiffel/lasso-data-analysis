@@ -11,6 +11,8 @@ editor_options:
   chunk_output_type: console
 ---
 
+<!-- This file is for the calculation and generation of our weather data for further analysis -->
+
 ```{r library-add-weather, include= FALSE}
 
 library(here)

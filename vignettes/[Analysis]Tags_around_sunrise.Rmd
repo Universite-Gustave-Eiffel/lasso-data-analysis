@@ -11,6 +11,8 @@ editor_options:
   chunk_output_type: console
 ---
 
+<!-- This file is for the calculation, plotting and analysis of the distribution of tags around their local sunrise. -->
+
 ```{r library-sunrise, include=FALSE}
 
 library(here)

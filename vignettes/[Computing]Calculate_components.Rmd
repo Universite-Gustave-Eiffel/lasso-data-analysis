@@ -11,6 +11,7 @@ editor_options:
   chunk_output_type: console
 ---
 
+<!-- This file is for the calculation and implementation of numerous components, such as timezones and  sunrise data -->
 
 ```{r library-calculate-components, include=FALSE}
 

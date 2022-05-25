@@ -11,6 +11,8 @@ editor_options:
   chunk_output_type: console
 ---
 
+<!-- This file is for the cleaning of our database for our temporal analysis -->
+
 ```{r library-cleaning, include=FALSE}
 
 #geographical outliers manager

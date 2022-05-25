@@ -11,6 +11,8 @@ editor_options:
   chunk_output_type: console
 ---
 
+<!-- This file is for the calculation, plotting and analysis of the distribution of tags based on weather data. -->
+
 ```{r library-weather-analysis, include=FALSE}
 
 library(here)
@@ -98,6 +100,14 @@ for(i in 0:len){
   group_wind_prop <- append(group_wind_prop,(nrow(meteo_france_tag_wind %>% filter(beaufort == i))/length(unique((meteo_france_clean_wind %>% filter(beaufort == i))$pk_track)))*100)
 }
 
+#Estimate presence of element by tag
+rain_france_rain <- meteo_france_tag_rain %>% filter(rain_mm > 0)
+rain <- nrow(rain_france_rain)/length(unique((meteo_france_tag_rain)$pk_track))*100
+
+rain_tracks <- (meteo_france_clean_rain %>% filter(tag_name =="rain"))$pk_track
+test_rain <- meteo_france_clean_rain %>% dplyr::filter(rain_mm > 0, !pk_track %in% rain_tracks)
+quant_rain <- quantile((test_rain %>% distinct(pk_track, .keep_all = TRUE))$rain_mm,seq(0,1,by=0.1))
+
 #Gives correlation between the rain/wind measures and their tag's group proportion
 cor.gwind <- cor.test(group_wind_prop,sort(unique(meteo_france_clean_wind$beaufort)),method="spearman")
 cor.grain <- cor.test(group_rain_prop,sort(unique(meteo_france_clean_rain$groups_rain)),method="spearman")
@@ -115,7 +125,7 @@ In order to get valuable data, we decided to focus on tracks from France, for bo
 The weather data used is from France's national weather organisation *Météo-France*, available along with its full documentation from their website :
   [French weather data](https://donneespubliques.meteofrance.fr/?fond=produit&id_produit=90&id_rubrique=32)
   
-It is to keep in mind that the weather data available to us via this method is limited to the one measured at weather stations. We coded a function getting the weather observed at the closest station. The median distance between stations and our tracks is **`r round(median(meteo_france$dist_station)/1000,2)` kilometers**, resulting in a small margin of error, the weather being susceptible to change on such a distance.  
+It is to keep in mind that the weather data available to us via this method is limited to the one measured at weather stations. We coded a function getting the weather observed at the closest station. The median distance between stations and our tracks is **`r round(median(meteo_france$dist_station)/1000,2)` kilometers**, resulting in a small margin of error, the weather being susceptible to change on such a distance. 
 
 ```{r rain-graph, echo=FALSE, fig.align='center', out.width="80%", message = FALSE, fig.cap= fig_nums("rain")}
 
@@ -142,7 +152,7 @@ ggplot() +
       2017-2020")
 ```
 
-In order to create those graphs, we selected scales to group our data (wind force and precipitation) and calculate the proportion of tags present in those groups. We tried to create groups of equal representation for our data, but our data being non-uniform and disparate, some of our groups of data are much less populated than others, creating a potential bias that could only be corrected by the aggregation of more participator's data. This issue also explains why there is such a large grey zone of potential linear regression on `r fig_nums("wind", display="cite")`.
+In order to create those graphs, we selected scales to group our data (wind force and precipitation) and calculate the proportion of tags present in those groups. We tried to create groups of equal representation for our data, but our data being non-uniform and disparate, some of our groups of data are much less populated than others, creating a potential bias that could only be corrected by the aggregation of more participator's data.
 
 
 **The correlation coefficient between rain tags and the amount of rain is estimated at `r cor.grain$estimate` with a p-value of `r cor.grain$p.value`.**
@@ -153,3 +163,9 @@ In order to create those graphs, we selected scales to group our data (wind forc
 Both correlation calculation were carried by a `r cor.gwind$method` at a 0.95 confidence level.
 
 The proportion of "wind" tags seem to strongly correlate with the strength of wind on a Beaufort scale. However, the correlation between "rain" tags and the presence of rain is more subtle. The graph shows us that the "rain" tags seem rather equivalently used whatever the strength of the rain is, but that it is not used when there is no rain falling. Given this, even though the rain's correlation score is lower that the wind's one, they both tend to indicate that the use of these tags are coherent with their environment, and that only their usage in term of proportion differ.
+
+For the rain data, `r round(rain,2)`% of rains are being tagged as rain.
+The quantile (10% increments) of measured rainfall (mm/h) not tagged as "rain" by users is as follows :    
+`r attributes(quant_rain)$names`    
+`r quant_rain`    
+

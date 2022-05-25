@@ -11,6 +11,10 @@ editor_options:
   chunk_output_type: console
 ---
 
+#FILE NOT FINISHED AND NOT MEANT TO BE RUN AS IS.
+#USE OF ABSOLUTE PATHS AND MANY LIBRARY IMPORTS FOR TESTING AND COMPARING METHODS.
+
+
 ```{r library-sunrise, include=FALSE}
 
 library(here)
@@ -24,9 +28,17 @@ library(sf)
 library(raster)
 library(leaflet)
 library(stringr)
+library(RANN)
 
-source(here::here("vignettes","Kdtree.R"))
-# https://github.com/marcusvolz/mathart/blob/master/R/kdtree.R
+library(shiny)
+
+library(mathart)
+library(SPODT)
+library(CART)
+
+library(tree)
+
+library(ClustGeo)
 
 ```
 
@@ -96,28 +108,28 @@ if(!exists("bars_fr")){
 #   }
 # }
 # 
-# if(!exists("communes_fr")){
-#   if(!file.exists(here::here("raw_data","georef-france-commune.geojson"))){
-#     URL_communes <- "https://public.opendatasoft.com/explore/dataset/georef-france-commune/download/?format=geojson&timezone=Europe/Berlin&lang=fr"
-#     communes_fr = geojson_sf(URL_communes)
-#     st_write(communes_fr,here::here("raw_data","georef-france-commune.geojson"))
-#   }
-#   else{
-#   communes_fr <- geojson_sf(here::here("raw_data","georef-france-commune.geojson"))
-#   }
-# }
+if(!exists("communes_fr")){
+  if(!file.exists(here::here("raw_data","georef-france-commune.geojson"))){
+    URL_communes <- "https://public.opendatasoft.com/explore/dataset/georef-france-commune/download/?format=geojson&timezone=Europe/Berlin&lang=fr"
+    communes_fr = geojson_sf(URL_communes)
+    st_write(communes_fr,here::here("raw_data","georef-france-commune.geojson"))
+  }
+  else{
+  communes_fr <- geojson_sf(here::here("raw_data","georef-france-commune.geojson"))
+  }
+}
 # 
 # 
-# if(!exists("pop_fr")){
-#   if(!file.exists(here::here("data","pop_fr.rds"))){
-#     URL_pop <- "https://zenodo.org/record/6554256/files/base-pop-historiques-1876-2019.csv?download=1"
-#     pop_fr <- read.csv2(URL_pop, header = TRUE)
-#     saveRDS(pop_fr, here::here("data","pop_fr.rds"))
-#   }
-#   else{
-#   pop_fr <- readRDS(here::here("data","pop_fr.rds"))
-#   }
-# }
+if(!exists("pop_fr")){
+  if(!file.exists(here::here("data","pop_fr.rds"))){
+    URL_pop <- "https://zenodo.org/record/6554256/files/base-pop-historiques-1876-2019.csv?download=1"
+    pop_fr <- read.csv2(URL_pop, header = TRUE)
+    saveRDS(pop_fr, here::here("data","pop_fr.rds"))
+  }
+  else{
+  pop_fr <- readRDS(here::here("data","pop_fr.rds"))
+  }
+}
 
 # if(!exists("carroye_pop_fr")){
 #   if(!file.exists(here::here("raw_data/shapefile_pop","Filosofi2015_carreaux_200m_metropole.shp"))){
@@ -187,14 +199,162 @@ leaflet(city_pop_fr) %>% addProviderTiles(providers$CartoDB.Positron) %>%
 
 ```
 
+```{r tag-visualisation, echo=FALSE}
+
+all_info_tempo <- readRDS("C:/Users/moisan/Documents/Stage/github/lasso-data-analysis/data/all_info_tempo.rds")
+
+pal <- colorNumeric(palette = "RdYlBu", domain = all_info_tempo$pleasantness)
+
+ui = fluidPage(
+  sidebarPanel(selectInput(inputId = "tag_name", "Tag Name", choices = sort(unique(all_info_tempo$tag_name)),selected = "chatting")),
+  leafletOutput(outputId = "map", height = 600, width = 800)
+  )
+
+server = function(input, output) {
+  output$map = renderLeaflet({
+    leaflet(data = all_info_tempo[(all_info_tempo$tag_name) == input$tag_name, ] %>% filter(admin == "France")) %>%
+      setView(lat = 46.62, lng = 2.55, zoom = 6) %>% #To focus on France on opening, can be changed or disabled
+      addTiles() %>% addProviderTiles(providers$CartoDB.Positron) %>%
+      addCircleMarkers(lng = ~lon, lat = ~lat, stroke = FALSE, fillOpacity = 0.8, color = ~pal(pleasantness),
+                   radius = 6, 
+                   clusterOptions = markerClusterOptions(spiderfyOnMaxZoom = FALSE, maxClusterRadius = 60, disableClusteringAtZoom = 12),
+                   popup = ~leafpop::popupTable(all_info_tempo,
+                                       zcol = c("pk_track", "noise_level", "pleasantness"),
+                                       row.numbers = FALSE, feature.id = FALSE)) %>%
+      addLegend(position = "bottomright",
+            pal = pal, values = ~pleasantness, opacity = 1)})
+  
+}
+shinyApp(ui, server)
+
+```
+
 ```{r density-map, include = FALSE}
-source("C:/Users/moisan/Documents/Stage/github/lasso-data-analysis/vignettes/Kdtree.R")
 
 all_info_tempo <- readRDS("C:/Users/moisan/Documents/Stage/github/lasso-data-analysis/data/all_info_tempo.rds")
 meteo <- readRDS("C:/Users/moisan/Documents/Stage/github/lasso-data-analysis/data/meteo_france.rds")
+france <- geojson_sf("C:/Users/moisan/Documents/Stage/github/lasso-data-analysis/raw_data/2020_France_metro_WGS84.geojson")
+communes <- geojson_sf("C:/Users/moisan/Documents/Stage/github/lasso-data-analysis/raw_data/georef-france-commune.geojson")
+bars_fr <- geojson_sf("C:/Users/moisan/Documents/Stage/github/lasso-data-analysis/raw_data/osm-fr-bars.geojson")
+pop <- readRDS("C:/Users/moisan/Documents/Stage/github/lasso-data-analysis/data/pop_fr.rds")
 
-kdtree(all_info_sun %>% dplyr::filter(admin=="France") %>% dplyr::mutate(x = lon,y = lat))
+pop_fr <- pop %>% dplyr::select(com_code = CODGEO, PMUN19)
+pop_fr[nrow(pop_fr) + 1,] = c("75056","2160928")
+
+pop_fr <- pop_fr %>% dplyr::mutate(PMUN19 = as.numeric(str_replace_all(PMUN19, "\\s+", "")))
+
+communes_fr <- st_transform(sf::st_intersection(communes,france), crs= st_crs("EPSG:2154"))
+communes_fr <- communes_fr[rowSums(is.na(communes_fr)) != ncol(communes_fr), ]
+
+communes_sp <- as_Spatial(communes_fr)
+bars_sp <- as_Spatial(st_transform(bars_fr,crs= st_crs("EPSG:2154")))
+
+bars_communes <- sp::over(bars_sp,communes_sp)
+
+communes_bars <- data.frame(table(bars_communes$com_code)) %>% dplyr::rename(com_code = Var1, bars_nb = Freq)
+
+communes_fr_bar <- left_join(communes_fr,communes_bars) %>% left_join(pop_fr) %>% 
+  mutate(bar_by_hab = bars_nb/PMUN19, hab_by_bar = PMUN19/bars_nb, surface = st_area(geometry), bar_kmsq = surface/bars_nb/1000000)
+
+plot(communes_fr_bar["bar_kmsq"], border = NA, main = "Bars par km²")
+
+
 
 ```
+
+```{r test_spatial, include = FALSE}
+
+# df_fr <- all_info_tempo %>% dplyr::filter(admin == "France")
+# 
+# test <- df_fr %>% distinct(pk_track, .keep_all= TRUE)
+# 
+# kdt_res <- mathart::kdtree(test %>% dplyr::mutate(x = lon,y = lat))
+# 
+# ggplot() +
+#   geom_segment(aes(x, y, xend = xend, yend = yend), kdt_res)
+
+df_fr <- all_info_tempo %>% dplyr::filter(admin == "France")
+
+test <- df_fr %>% distinct(pk_track, .keep_all= TRUE)
+
+coord_tag <- test %>% dplyr::select(c(tag_name,lon,lat))
+
+DT_sf <- st_as_sf(test, coords = c("lon", "lat"), 
+                 crs = 4326)
+
+x <- nn2(test %>% dplyr::select(x = lon,y = lat), k = 20, treetype = "kd")
+
+matrix_coord <- x[["nn.idx"]]
+
+df_coord <- data.frame(matrix(nrow = nrow(matrix_coord), ncol = ncol(matrix_coord)))
+
+for(n in (1:nrow(DT_sf))){
+  df_coord[matrix_coord==n] <- DT_sf[n,]$geometry
+}
+
+df_coord <- st_as_sf(df_coord)
+
+for(n in (1:nrow(df_coord))){
+  df_coord[n,]$box <- st_bbox(df_coord[n,])
+}
+
+
+#df_coord <- df_coord %>% dplyr::mutate(group = row.names(df_coord))
+
+# ggplot() + geom_sf(data=df_coord)
+# ggplot() + geom_sf(data=df_coord, aes(color = group))
+
+
+coord_tag <- all_info_tempo %>% dplyr::filter(admin == "France") %>% dplyr::select(c(tag_name,lon,lat))
+
+tree_test <- tree::tree(tag_name ~., data = coord_tag, control = tree.control(dim(coord_tag)[1]))
+
+plot(tree_test)
+
+# 
+# spodt.results <- spodt(time_length ~ 1, data = sp_test)
+# 
+# spodt.tree(spodt.results)
+# 
+# SSL.result <- spodtSpatialLines(spodt.results, sp_test)
+# plot(SSL.result)
+# points(sp_test, cex = log(sp_test@data$time_length * 10))
+
+
+
+df_fr <- all_info_tempo %>% dplyr::filter(admin == "France")
+
+test <- df_fr %>% distinct(pk_track, .keep_all= TRUE)
+
+y <- partitions::kdTree(test)
+
+
+
+df_chat_fr <- all_info_tempo %>% dplyr::filter(admin == "France" & tag_name == "chatting") %>% dplyr::select(pk_track,lon,lat)
+
+DT_sf <- st_as_sf(df_chat_fr, coords = c("lon", "lat"), crs = 4326)
+
+library(SearchTrees)
+
+quad <- SearchTrees::createTree(df_chat_fr)
+
+library(quadtree)
+library(raster)
+
+rasterFromXYZ(xyz = df_chat_fr)
+
+
+carroye <- read_sf("C:/Users/moisan/Documents/Stage/github/lasso-data-analysis/raw_data/shapefile_pop/Filosofi2015_carreaux_200m_metropole.shp")
+
+library(RapidPolygonLookup)
+
+chat_fr <- RapidPolygonLookup(DT_sf, carroye, poly.list = NULL, k = 10, N = nrow(DT_sf), 
+    poly.id = "fips", poly.id.colname = "census.block", keep.data = TRUE, 
+    verbose = 0)
+
+
+
+```
+
 
 

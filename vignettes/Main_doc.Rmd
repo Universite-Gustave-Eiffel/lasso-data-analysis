@@ -13,6 +13,8 @@ editor_options:
   chunk_output_type: console
 ---
 
+<!-- This file is a template generator for our report, providing options for the method of processing our scripts -->
+
 <style>
 body {
 text-align: justify}
