@@ -256,11 +256,7 @@ communes_bars <- data.frame(table(bars_communes$com_code)) %>% dplyr::rename(com
 communes_fr_bar <- left_join(communes_fr,communes_bars) %>% left_join(pop_fr) %>% 
   mutate(bar_by_hab = bars_nb/PMUN19, hab_by_bar = PMUN19/bars_nb, surface = st_area(geometry), bar_kmsq = surface/bars_nb/1000000)
 
-communes_fr_bar_lot <- left_join(communes_fr,communes_bars) %>% left_join(pop_fr) %>% dplyr::filter(PMUN19 > 2000) %>%
-  mutate(bar_by_hab = bars_nb/PMUN19, hab_by_bar = PMUN19/bars_nb, surface = st_area(geometry), bar_kmsq = surface/bars_nb/1000000)
-
 plot(communes_fr_bar["bar_by_hab"], border = NA, main = "Bars par habitant")
-plot(communes_fr_bar_lot["bar_by_hab"], border = NA, title(main = "Bars par habitant", sub = "Villes de plus de 2000 habitants"))
 
 ```
 
@@ -358,5 +354,15 @@ chat_fr <- RapidPolygonLookup(DT_sf, carroye, poly.list = NULL, k = 10, N = nrow
 
 ```
 
+```{r tetsqfueq}
 
+df_fr <- all_info_tempo %>% dplyr::filter(admin == "France") %>% distinct(pk_track, .keep_all= TRUE) %>% dplyr::select(c(lon,lat))
+
+dend <- hclust(dist(df_fr), method="complete")
+plot(dend, hang=-1)
+points(c(-100,100), c(2,2), col="red", type="l", lty=2)
+groups <- cutree(df_fr, h=2)
+plot(theData, col=groups)
+
+```
 
