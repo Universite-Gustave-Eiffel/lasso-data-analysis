@@ -469,10 +469,16 @@ Nevertheless, the other technical aspects of the analysis (creation of SQL views
 connection and interrogation of the database with R, etc.)
 would have been more difficult to master if they were not already illustrated in 
 a detailed document.
+
 It is at this point that literate programming comes into its own, since more than 
 a series of instructions, the reader is also provided with the methodology and 
 the analysis of the results produced.
 This represents a considerable time saving at the beginning of the project.
+The techniques of literate programming aim to promote communication between humans 
+and with the use of a decentralized versioning tool, to work independently
+while being able to easily share the progress of its work.
+The working environment used for this work has allowed to accelerate the publication 
+since only 6 months separate the beginning of the work and the submitted version of this article.
 
 For the scientific community, the COVID-19 health crisis has shown that public 
 confidence in the scientific community is fragile.
