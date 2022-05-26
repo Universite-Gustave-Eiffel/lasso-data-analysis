@@ -61,19 +61,23 @@ The application is open-source and all collected data are available under an Ope
 [^2]: https://www.univ-gustave-eiffel.fr/en/
 [^3]: https://www.cnrs.fr/en
 
-The study presented here is the first exploratory analysis of the first three years of data 
-collection, through the prism of sound sources. The analysis only focused on the 
-tags checked by the users and not on the sound spectrum of the measurements.
+The study presented here is the first exploratory analysis of the first three years 
+of data collection, through the prism of sound sources.
+The analysis only focused on the tags checked by the users to qualify their environment
+and not on the sound spectrum of the measurements as it will be analyse in a further time.
 
-The first objective of the study was to control the quality of the tag data provided by the public, 
-either by checking if some known temporal dynamics of sound sources are present in the dataset, or by checking the correspondence 
-between some tags related to the acoustic measurement conditions (presence of rain or wind) with the records
-from the national meteorological service database.
+The first objective of the study was to control the quality of the tag data 
+provided by the public, either by checking if some known temporal dynamics of 
+sound sources are present in the dataset, or by checking the correspondence 
+between some tags related to the acoustic measurement conditions (presence of rain 
+or wind) with the records from the national meteorological service database.
 
-As these exploratory works will be extended and consolidated thereafter to a more global exploration 
-of the database, and with the will to include this study within the framework of the Open Science, an 
-attention was brought on the reproducibility aspect of the analysis. 
-It was entirely realized with free software and literate programming techniques.
+As these exploratory works will be extended and consolidated thereafter to a 
+more global exploration of the database, and with the will to include this study 
+within the framework of the Open Science, an attention was brought on the 
+reproducibility aspect of the analysis. 
+It was entirely realized with Free and Open Source Software (FOSS) and 
+literate programming techniques.
 
 The context of the study, the implemented methodology and the first results 
 will be presented as well as the benefits of using literate programming 
@@ -84,12 +88,15 @@ in this type of exploratory work.
 The NoiseCapture app is part of a global Open Science approach (called Noise-Planet) led by Université 
 Gustave Eiffel and CNRS, for the development of tools for the assessment of the sound environment. 
 This project is particularly interested in the implementation of a participative approach for the 
-production of data with smartphones in order to eventually propose an alternative method of assessment of the 
-sound environment. For this purpose, an Android application and a spatial data infrastructure 
-have been specifically developed. The whole system allows to collect physical data (acoustic measurements, GPS positions...) 
+production of data with smartphones in order to eventually propose an alternative 
+method of assessment of the sound environment. 
+For this purpose, an Android application and a spatial data infrastructure 
+have been specifically developed. 
+The whole system allows to collect physical data (acoustic measurements, GPS positions...) 
 and perceptual data (pleasantness, presence of sound sources), without any territory limit, while 
 respecting the privacy of the contributors. The collected data are freely accessible, 
-in particular by the scientific community which would like to develop new tools for the evaluation and representation of sound environments. 
+in particular by the scientific community which would like to develop new tools 
+for the evaluation and representation of sound environments. 
 
 The beginning of this analysis was the release of a 3 years collection of environnemental
 acoustic samples. A first article presenting this dataset has been published in 2021 [@picautSmartphoneBasedCrowdSourcedDatabase2021].
