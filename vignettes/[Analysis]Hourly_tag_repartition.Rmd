@@ -11,6 +11,9 @@ editor_options:
   chunk_output_type: console
 ---
 
+<!-- This file is for the calculation, plotting and analysis of the distribution of tags based on their local time. -->
+
+
 ```{r library-hourly, include=FALSE}
 
 library(here)
@@ -101,16 +104,16 @@ ggplot(tags_hourly_repartition %>% dplyr::filter(admin == "France")) +
 
 ```{r hourly-tag-road, echo= FALSE, fig.align='center', out.width="80%", message = FALSE, fig.cap=fig_nums("hour-fr-road")}
 
-ggplot(tags_hourly_repartition %>% dplyr::filter(admin == "France" & tag_name == "road")) +
+ggplot(tags_hourly_repartition %>% filter(admin == "France" & tag_name == "road")) +
   aes(x = local_time, y = percentage) +
-  geom_col() + geom_smooth(method = "loess", se = FALSE, color = "blue") +
+  geom_col() + geom_smooth(method = "gam", se = FALSE, color = "blue") +
   labs(
-    x = "Local hour",
+    x = "Local time (hours)",
     y = "Proportion of tag per hour",
-    title = "Hourly repartition of tags",
+    title = "Hourly repartition of road tags",
     subtitle = "Noicecaptures tags in France,
     2017 - 2020"
   ) +
-  scale_x_continuous(breaks = c(0,6,12,18,23))
+  scale_x_continuous(breaks = seq(from = 0, to = 24, by = 3))
 
 ```

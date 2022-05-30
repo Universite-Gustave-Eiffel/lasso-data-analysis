@@ -16,16 +16,15 @@ abstract : |
  The application is open-source, and all its data are available freely.
  This study presents the results of the first exploratory analysis of 3 years of 
  data collection through the lens of sound sources.
- Sound dynamics of roads related to commuting or bird songs have been observed. 
- The first results are therefore encouraging. 
  This analysis is based only on the tags given by the users and not on the sound 
- spectrum of the measurement, which will be studied at a later stage. 
- As this preparatory work will be consolidated and extended later, and with the will
- to register this study in the framework of the Open Science, we paid attention 
- to its reproducibility. 
- The context of the study, the tools and techniques used and the first results 
- obtained will be presented as well as the benefits of using literate programming 
- in this type of preparatory work.
+ spectrum of the measurement, which will be studied at a later stage.
+ The first results are encouraging, we were able to observe well known temporal 
+ dynamics of roads related to commuting or bird songs in the dataset.
+ We also found correlations between wind an rain tags and their measurements by 
+ the the national meteorological service.
+ The context of the study, the Free and Open Source Software tools and techniques 
+ used are presented as well 
+ as the benefits of using literate programming in this type of exploratory work.
 pkgdown:
   as_is: true
 output:
@@ -61,19 +60,23 @@ The application is open-source and all collected data are available under an Ope
 [^2]: https://www.univ-gustave-eiffel.fr/en/
 [^3]: https://www.cnrs.fr/en
 
-The study presented here is the first exploratory analysis of the first three years of data 
-collection, through the prism of sound sources. The analysis only focused on the 
-tags checked by the users and not on the sound spectrum of the measurements.
+The study presented here is the first exploratory analysis of the first three years 
+of data collection, through the prism of sound sources.
+The analysis only focused on the tags checked by the users to qualify their environment
+and not on the sound spectrum of the measurements as it will be analyse in a further time.
 
-The first objective of the study was to control the quality of the tag data provided by the public, 
-either by checking if some known temporal dynamics of sound sources are present in the dataset, or by checking the correspondence 
-between some tags related to the acoustic measurement conditions (presence of rain or wind) with the records
-from the national meteorological service database.
+The first objective of the study was to control the quality of the tag data 
+provided by the public, either by checking if some known temporal dynamics of 
+sound sources are present in the dataset, or by checking the correspondence 
+between some tags related to the acoustic measurement conditions (presence of rain 
+or wind) with the records from the national meteorological service database.
 
-As these exploratory works will be extended and consolidated thereafter to a more global exploration 
-of the database, and with the will to include this study within the framework of the Open Science, an 
-attention was brought on the reproducibility aspect of the analysis. 
-It was entirely realized with free software and literate programming techniques.
+As these exploratory works will be extended and consolidated thereafter to a 
+more global exploration of the database, and with the will to include this study 
+within the framework of the Open Science, an attention was brought on the 
+reproducibility aspect of the analysis. 
+It was entirely realized with Free and Open Source Software (FOSS) and 
+literate programming techniques.
 
 The context of the study, the implemented methodology and the first results 
 will be presented as well as the benefits of using literate programming 
@@ -97,13 +100,14 @@ This project is particularly interested in the implementation of a participative
 production of data with smartphones in order to eventually propose an alternative method of environmental sound mapping.
 For this purpose, an Android application and a spatial data infrastructure 
 have been specifically developed. The whole system allows to collect physical data (acoustic measurements, GPS positions...) 
+
 and perceptual data (pleasantness, presence of sound sources), without any territory limit, while 
 respecting the privacy of the contributors. The collected data are freely accessible, 
-in particular by the scientific community which would like to develop new tools for the evaluation and representation of sound environments. 
+in particular by the scientific community which would like to develop new tools 
+for the evaluation and representation of sound environments. 
 
 The beginning of this analysis was the release of a 3 years collection of environnemental
 acoustic samples. A first article presenting this dataset has been published in 2021 [@picautSmartphoneBasedCrowdSourcedDatabase2021].
-
 It details the structure of the database and the data, the profile of the 
 contributors and the contributions but does not analyze the content of the data. 
 This is what this article proposes to begin.
@@ -469,10 +473,16 @@ Nevertheless, the other technical aspects of the analysis (creation of SQL views
 connection and interrogation of the database with R, etc.)
 would have been more difficult to master if they were not already illustrated in 
 a detailed document.
+
 It is at this point that literate programming comes into its own, since more than 
 a series of instructions, the reader is also provided with the methodology and 
 the analysis of the results produced.
 This represents a considerable time saving at the beginning of the project.
+The techniques of literate programming aim to promote communication between humans 
+and with the use of a decentralized versioning tool, to work independently
+while being able to easily share the progress of its work.
+The working environment used for this work has allowed to accelerate the publication 
+since only 6 months separate the beginning of the work and the submitted version of this article.
 
 For the scientific community, the COVID-19 health crisis has shown that public 
 confidence in the scientific community is fragile.
@@ -500,6 +510,22 @@ solutions such as [Docker](https://www.docker.com/) and [Guix](https://guix.gnu.
 
 # Conclusion {-}
 
+The major objective of this study was to control the quality of the tag data in an
+environmental acoustics crowdsourced dataset.
+The first step was too find if known temporal dynamics of sound sources are present in the dataset
+The first results were encouraging because road sound dynamics related to commuting or 
+animal activity can be observed.
+
+In a second time, we checked the correspondence 
+between tags related to the acoustic measurement conditions (presence of rain or wind) 
+with the records from the national meteorological service database.
+It works very well with the wind with a strong positive correlation.
+We believe that this works with rain but that either the sample size is too small 
+or the perception of light rain is not sufficient for the user to think about 
+adding the corresponding tag. 
+As a result, the correlation between actual rainfall observations and the 
+presence of rain tags in the database is weaker and less significant than for wind.
+
 This study shows that it is possible to observe known dynamics in environmental acoustics in 
 the crowdsourced NoiseCapture dataset (road dynamics related to commuting or animal activity). It also
 increases the level of confidence brought to this dataset by the fact that the
@@ -507,25 +533,30 @@ measurement conditions indicated by the user seem to correspond to real measurem
 Some questions still need to be explored, notably those concerning the representativeness and 
 representativeness and the unbalanced nature of the samples, which are sometimes weak for certain periods.
 
-The systematic use of open source software, the provision of documented code files 
-and a document mixing narrative, figures and code have allowed the resumption and
-continuation of the analyses shown here.
-
 We also wanted to show that Free and Open Source Software can be used to produce 
 scientific knowledge all along the production chain, from data collection, 
 storage, analysis and even presentation.
 By mobilizing only a few tools, it is quite possible to produce scientific 
 knowledge in a more reproducible way.
 
+The systematic use of open source software, the provision of documented code files 
+and a document mixing narrative, figures and code has greatly facilitated the 
+recovery and continuation of the work presented here. 
+And this within our own research team.
+
 We are aware that the acquisition of the necessary skills to mobilize these tools 
-is not easy but we believe that the gain is much higher than the cost. 
+is not easy but we believe that the gain is much higher than the cost.
+Reproducibility is an important constraint for research projects that often have 
+limited means, nevertheless it is an investment in the future, both for the team 
+and for the scientific community interested in the work.
 For the more technical parts, such as the implementation of database servers, 
-the presence of a research software engineer is a real plus.
+the presence of research software engineers is a real plus.
 
 # ACKNOWLEDGEMENTS {-}
 
 The authors would like to thank the [I-SITE FUTURE](http://www.future-isite.fr/recherche/les-appels-a-projets-exploratoire/?L=1) 
 for the founding of this exploratory project.
+We would like to thank the FOSS community for providing us all those tools to work with.
 
 # REFERENCES {-}
 ::: {#refs}

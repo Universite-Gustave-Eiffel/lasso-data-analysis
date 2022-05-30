@@ -11,6 +11,8 @@ editor_options:
   chunk_output_type: console
 ---
 
+<!-- This file is for the plotting and analysis of our data distribution in our database -->
+
 ```{r library-database-overview, include=FALSE}
 
 #Data handling

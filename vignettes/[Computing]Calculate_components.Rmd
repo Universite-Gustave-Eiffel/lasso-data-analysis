@@ -11,6 +11,7 @@ editor_options:
   chunk_output_type: console
 ---
 
+<!-- This file is for the calculation and implementation of numerous components, such as timezones and  sunrise data -->
 
 ```{r library-calculate-components, include=FALSE}
 
@@ -20,6 +21,7 @@ library(suncalc)
 library(here)
 library(sf)
 library(geojsonsf)
+library(lubridate)
 
 here::i_am("vignettes/[Computing]Adding_weather.Rmd")
 
@@ -63,6 +65,8 @@ st_crs(clean_track_info) <- 4326
 
 ```{r metropolitain_france, include = FALSE}
 #We want to separate Metropolitain France and overseas french territories for further analysis (typically because of climate and sunrises/sunsets differences under some latitude)
+
+sf_use_s2(FALSE)
 
 clean_track_info <- clean_track_info %>% 
   mutate(admin = case_when(
