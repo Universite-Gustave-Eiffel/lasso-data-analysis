@@ -13,6 +13,8 @@ editor_options:
   chunk_output_type: console
 ---
 
+<!-- This file is a template generator for our report, providing options for the method of processing our scripts -->
+
 <style>
 body {
 text-align: justify}
@@ -90,11 +92,15 @@ From the *tracks_view* materialized view in our database, we are filtering track
 <!-- Write some stuff to introduce -->
 
 <!-- Knit child document to add components in our dataset -->
-```{r calculate-comp, child=if (!fast) "[Computing]Calculate_components.Rmd", include = FALSE}
+```{r calculate-comp, child="[Computing]Calculate_components.Rmd", eval = !fast, include = FALSE}
 ```
 
 <!-- Knit child document to add weather in our dataset -->
-```{r adding-weather, child=if (!fast) "[Computing]Adding_weather.Rmd", include = FALSE}
+```{r adding-weather, child="[Computing]Adding_weather.Rmd", eval = !fast, include = FALSE}
+```
+
+<!-- Knit child document to add temporal attributes in our dataset -->
+```{r adding-weather, child="[Computing]Adding_temporal_data.Rmd", eval = !fast, include = FALSE}
 ```
 
 <!-- Knit child document to analyse weather -->
@@ -109,6 +115,10 @@ From the *tracks_view* materialized view in our database, we are filtering track
 ```{r tags-sunrise, child= "[Analysis]Tags_around_sunrise.Rmd" , echo=FALSE, fig.align='center', out.width="80%",message=FALSE}
 ```
 
+<!-- <!-- Knit child document to analyse repartition of tags around sunrise --> -->
+<!-- ```{r temporal-attributes, child= "[Analysis]Temporal_attributes.Rmd" , echo=FALSE, fig.align='center', out.width="80%",message=FALSE} -->
+<!-- ``` -->
+
 
 # Reproductibility
 
@@ -117,6 +127,7 @@ From the *tracks_view* materialized view in our database, we are filtering track
 Most of the treatment has been made within the PostGIS database. The scripts folder contains several scripts to execute to prepare the dataset.
 
 ```{r spatial-data-info, echo = FALSE}
+
 
 
 ```

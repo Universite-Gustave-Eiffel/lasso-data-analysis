@@ -11,6 +11,8 @@ editor_options:
   chunk_output_type: console
 ---
 
+<!-- This file is for the calculation and generation of our weather data for further analysis -->
+
 ```{r library-add-weather, include= FALSE}
 
 library(here)
@@ -20,11 +22,12 @@ library(lubridate)
 library(chron)
 library(geosphere)
 library(data.table)
+library(RCurl)
 
 here::i_am("vignettes/[Computing]Adding_weather.Rmd")
 
-if(!dir.exists(here("raw_data"))){
-  dir.create(here("raw_data"))
+if(!dir.exists(here::here("raw_data"))){
+  dir.create(here::here("raw_data"))
 }
 
 ```
@@ -128,7 +131,7 @@ get_nearest_station <- function(long,lat){
 #Read the stations' data
 stations <- fread(here::here('raw_data','synop.csv'), sep=";", header = TRUE, 
                        select = c("numer_sta"="numeric","date_r"="character",
-                                  "rr3"="character","ff"="character","t"="character",
+                                  "rr3"="character","ff"="character","t"="character","nnuage1"="numeric",
                                   "year"="numeric","month"="numeric","day"="numeric","hour"="numeric"))
 get_weather <- function(long,lat,y,m=1,d=1,h=12){
   ID <- (get_nearest_station(long, lat))$ID
@@ -136,7 +139,7 @@ get_weather <- function(long,lat,y,m=1,d=1,h=12){
   if(!exists("stations")){
   stations <- fread(here::here('raw_data','synop.csv'), sep=";", header = TRUE, 
                        select = c("numer_sta"="numeric","date_r"="character",
-                                  "rr3"="character","ff"="numeric","t"="numeric",
+                                  "rr3"="character","ff"="numeric","t"="numeric","nnuage1"="numeric",
                                   "year"="numeric","month"="numeric","day"="numeric","hour"="numeric"))
   }
   station <- stations %>% filter(numer_sta == ID & year == y & month == m & day == d & hour == ceiling(h/3)*3)
@@ -146,25 +149,30 @@ get_weather <- function(long,lat,y,m=1,d=1,h=12){
   if(length(station$rr3)!=0){
     rain <- as.numeric(station$rr3)
   }
-    if(length(station$ff)==0){
+  if(length(station$ff)==0){
     wind <- NA
   }
   if(length(station$ff)!=0){
     wind <- as.numeric(station$ff)
   }
-    if(length(station$t)==0){
+  if(length(station$t)==0){
     kelvin <- NA
   }
   if(length(station$t)!=0){
     kelvin <- as.numeric(station$t)
   }
-  info_rain <- c(rain,kelvin,wind,dist)
-  return(info_rain)
+  if(length(station$nnuage1)==0){
+    cloud <- NA
+  }
+  if(length(station$nnuage1)!=0){
+    cloud <- as.numeric(station$nnuage1)
+  }
+  info_weather <- c(rain,kelvin,wind,cloud,dist)
+  return(info_weather)
 }
 
-df_meteo = as.data.frame(matrix(nrow = 1, ncol = 6))
-time_after_sunrise_france <- all_info_sun %>% filter(admin == "France" & lat > 35 & lat < 55 & lon > -6 & lon < 9)
-meteo_df <- time_after_sunrise_france
+df_meteo = as.data.frame(matrix(nrow = 1, ncol = 7))
+meteo_df <- all_info_sun %>% filter(admin == "France")
 for(i in 1:nrow(meteo_df)) {
     row <- meteo_df[i,]
     track <- row$pk_track
@@ -177,12 +185,12 @@ for(i in 1:nrow(meteo_df)) {
 
 df_meteo <- df_meteo %>% slice(2:nrow(df_meteo))
 
-#saveRDS(df_meteo, here::here("data","df_meteo.rds"))
+saveRDS(df_meteo, here::here("data","df_meteo.rds"))
 
-meteo_france <- df_meteo %>% mutate(pk_track = as.numeric(V1), tag_name = V2, rain_mm = as.numeric(V3), celsius = as.numeric(V4) - 273.15, wind = as.numeric(V5)*3.6, dist_station = as.numeric(V6)) %>% select(pk_track,tag_name,rain_mm,celsius,wind,dist_station)
+meteo_france <- df_meteo %>% dplyr::mutate(pk_track = as.numeric(V1), tag_name = V2, rain_mm = as.numeric(V3), celsius = as.numeric(V4) - 273.15, wind = as.numeric(V5)*3.6, cloud = as.numeric(V6), dist_station = as.numeric(V7)) %>% dplyr::select(pk_track,tag_name,rain_mm,celsius,wind,cloud,dist_station)
 
-meteo_france <- inner_join(meteo_france, all_info %>% filter(admin=="France"), by = c("pk_track","tag_name")) %>% select(pk_track,tag_name,rain_mm,celsius,wind,dist_station,season,local_date)
+meteo_france <- inner_join(meteo_france, all_info_sun %>% filter(admin=="France"), by = c("pk_track","tag_name")) %>% dplyr::select(pk_track,tag_name,rain_mm,celsius,wind,cloud,dist_station,season,local_date)
 
-#saveRDS(meteo_france, here::here("data","df_meteo.rds"))
+saveRDS(meteo_france, here::here("data","meteo_france.rds"))
 
 ```

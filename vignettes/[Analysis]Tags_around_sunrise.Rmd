@@ -11,6 +11,8 @@ editor_options:
   chunk_output_type: console
 ---
 
+<!-- This file is for the calculation, plotting and analysis of the distribution of tags around their local sunrise. -->
+
 ```{r library-sunrise, include=FALSE}
 
 library(here)
@@ -89,16 +91,15 @@ ggplot(tags_sunrise_repartition %>% dplyr::filter(admin=="France")) +
 
 ```{r sunrise-graph-animals, echo = FALSE, fig.align='center', out.width="80%", message = FALSE, fig.cap=fig_nums("sunrise-fr-animals")}
 
-ggplot(tags_sunrise_repartition %>% dplyr::filter(admin=="France" & tag_name =="animals")) +
+ggplot(tags_sunrise_repartition %>% filter(admin=="France" && tag_name =="animals")) +
   aes(x = after_sunrise, y = percentage)+
   geom_col() + geom_smooth(method = "loess", se = FALSE, color = "blue")  +
   labs(
     x = "Time around sunrise (hours)",
     y = "Proportion of tag (%)",
-    title = "Repartition of tags from local sunrise",
+    title = "Repartition of animals tags around local sunrise times",
     subtitle = "Noisecapture's tags in France,
       2017-2020") +
-  scale_x_continuous(breaks = c(-12,-6,0,6,12))+
-   facet_wrap(vars(tag_name), scales = "free_y")
+  scale_x_continuous(breaks = seq(from = -12, to = 12, by = 3))
   
 ```
