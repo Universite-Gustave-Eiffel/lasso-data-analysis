@@ -20,6 +20,7 @@ library(lubridate)
 library(chron)
 library(here)
 library(dplyr)
+library(ggplot2)
 # handle figures and tables numbering
 library(captioner)
 
@@ -33,22 +34,47 @@ if(!dir.exists(here("data"))){
   dir.create(here("data"))
 }
 
-if(!exists("all_info_sun")){
-  if(!file.exists(here::here("data","all_info_sun.rds"))){
-    URL <- "https://zenodo.org/record/6563518/files/meteo_france.rds?download=1"
-    all_info_sun <- readRDS(url(URL))
-    saveRDS(all_info_sun,here::here("data","all_info_sun.rds"))
+if(!exists("df_tags_day_type")){
+  if(!file.exists(here::here("data","df_tags_day_type.rds"))){
+    URLday <- "https://zenodo.org/record/6594826/files/df_tags_day_type.rds?download=1"
+    df_tags_day_type <- readRDS(url(URLday))
+    saveRDS(df_tags_day_type,here::here("data","df_tags_day_type.rds"))
   }
   else{
-  all_info_sun <- readRDS(here::here("data","all_info_sun.rds"))
+  df_tags_day_type <- readRDS(here::here("data","df_tags_day_type.rds"))
+  }
+}
+
+if(!exists("df_tags_day_type_fr")){
+  if(!file.exists(here::here("data","df_tags_day_type_fr.rds"))){
+    URLday <- "https://zenodo.org/record/6594826/files/df_tags_day_type_fr.rds?download=1"
+    df_tags_day_type_fr <- readRDS(url(URLday))
+    saveRDS(df_tags_day_type_fr,here::here("data","df_tags_day_type_fr.rds"))
+  }
+  else{
+  df_tags_day_type_fr <- readRDS(here::here("data","df_tags_day_type_fr.rds"))
   }
 }
 
 ```
 
+```{r figures-caption-day-types, include=FALSE}
+
+# Declare variables for figures and figures captions
+
+#Check first if figure numeration is already established by another child document to keep tracks of precedent numerations
+if(!exists("fig_nums")){
+fig_nums <- captioner::captioner(prefix = "Figure")
+}
+
+fig_nums("type_tempo", "Distribution of types of days by tag in the world", display = FALSE)
+fig_nums("type_tempo_fr", "Distribution of types of days by tag in France", display = FALSE)
+
+```
+
 ```{r graph-tempo-data, echo = FALSE, fig.align='center', out.width="80%", message = FALSE, fig.cap= fig_nums("type_tempo")}
 
-plot_world_days <- ggplot(df_tags_day_type, aes(fill=day_type, y=proportion, x=tag)) + 
+ggplot(df_tags_day_type, aes(fill=day_type, y=proportion, x=tag)) + 
     geom_bar(position="dodge", stat="identity")+ 
   scale_fill_manual(values = c("#007eed","#e100ed","#edae00","#ed4700"))+
   labs(
@@ -56,9 +82,16 @@ plot_world_days <- ggplot(df_tags_day_type, aes(fill=day_type, y=proportion, x=t
     y = "Proportion of tags (%)",
     title = "Repartition of tags by type of day",
     subtitle = "Noisecapture's tags in the World,
-      2017-2020")
+      2017-2020") +
+  theme(legend.position="bottom") + 
+  scale_x_discrete(guide = guide_axis(n.dodge=2))
 
-plot_france_days <- ggplot(df_tags_day_type_fr, aes(fill=day_type, y=proportion, x=tag)) + 
+
+```
+
+```{r graph-tempo-data-fr, echo = FALSE, fig.align='center', out.width="80%", message = FALSE, fig.cap= fig_nums("type_tempo_fr")}
+
+ggplot(df_tags_day_type_fr, aes(fill=day_type, y=proportion, x=tag)) + 
   geom_bar(position="dodge", stat="identity")+ 
   scale_fill_manual(values = c("#007eed","#e100ed","#edae00","#ed4700"))+
   labs(
@@ -66,8 +99,8 @@ plot_france_days <- ggplot(df_tags_day_type_fr, aes(fill=day_type, y=proportion,
     y = "Proportion of tags (%)",
     title = "Repartition of tags by type of day",
     subtitle = "Noisecapture's tags in France,
-      2017-2020")
-
-grid.arrange(plot_world_days,plot_france_days)
+      2017-2020") +
+  theme(legend.position="bottom") + 
+  scale_x_discrete(guide = guide_axis(n.dodge=2))
 
 ```
