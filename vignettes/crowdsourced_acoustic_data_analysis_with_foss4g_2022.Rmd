@@ -85,14 +85,23 @@ in this type of exploratory work.
 
 # Context
 
+Noise has a major impact on the health and quality of life of humans and wildlife. 
+A study, coordinated by the WHO and published in 2011, indicates that at least one million healthy life years (DALYs) 
+would be lost each year in Western Europe due to traffic noise [L. Fritschi, L. Brown, R. Kim, D. Schwela, et S. Kephalopolous, « Burden of Disease from Environmental Noise: Quantification of Healthy Life Years Lost in Europe », World Health Organization, 2011.]. Its health, physiological and psychological 
+effects are numerous: hearing damage, sleep disturbances, cardiovascular pathologies, etc. In a more global way, 
+studies show that the perceived noise environment is significantly correlated with an individual's satisfaction with 
+his or her living environment, with his or her health-related quality of life or with the restorative effect of a place [D. Botteldooren, L. Dekoninck, et D. Gillis, « The influence of traffic noise on appreciation of the living quality of a neighborhood », International Journal of Environmental Research and Public Health, vol. 8, no 3, p. 777‑798, 2011, doi: 10.3390/ijerph8030777.]. 
+The economic and social impact of noise has also been demonstrated with a social cost of noise in France estimated at 
+147 billion euros per year [DOUILLET Maia, SIPOS Gala, DELUGIN Léna, BULLIOT Benoît, REMONTET Lucas, BIDAULT Elsa, ADEME, I Care & Consult, BRUITPARIF OBSERVATOIRE DU BRUIT EN ILE-DE-FRANCE, ENERGIES DEMAIN, "Coût social du bruit en France", ADEME, Expertise, 2021]. A complete and precise evaluation of the presence of noise in the environment is 
+therefore of great necessity.
+
 The NoiseCapture app is part of a global Open Science approach (called Noise-Planet) led by Université 
 Gustave Eiffel and CNRS, for the development of tools for the assessment of the sound environment. 
 This project is particularly interested in the implementation of a participative approach for the 
-production of data with smartphones in order to eventually propose an alternative 
-method of assessment of the sound environment. 
+production of data with smartphones in order to eventually propose an alternative method of environmental sound mapping.
 For this purpose, an Android application and a spatial data infrastructure 
-have been specifically developed. 
-The whole system allows to collect physical data (acoustic measurements, GPS positions...) 
+have been specifically developed. The whole system allows to collect physical data (acoustic measurements, GPS positions...) 
+
 and perceptual data (pleasantness, presence of sound sources), without any territory limit, while 
 respecting the privacy of the contributors. The collected data are freely accessible, 
 in particular by the scientific community which would like to develop new tools 
@@ -136,7 +145,8 @@ certain labels in the global sample at certain temporalities.
 In addition to data from the collaborative collection, some additional data were 
 used to limit the study area. First we chose to limit the geographical scope of this 
 preliminary study to metropolitan France because this area contains the largest 
-number of recordings and it avoided us to face the problems of time zones.
+number of recordings and having a single administrative area facilitates the collection of 
+supplementary databases.
 Then we extended some analysis worldwide. The results presented here concern tracks
 recorded in the France metropolitan area.
 
@@ -204,9 +214,11 @@ data set, on the territory of metropolitan France.
 
 The first analysis having brought encouraging results, we took it again in order 
 to refine it and to extend the field of research.
-In order to have a better qualification of the quality of the dataset, we look if
-there is a relation between meteorological events in the user environment and 
-the proportion of tags corresponding to those event.
+In order to have a better qualification of the quality of the dataset, we look if there is a relationship 
+between the weather events in the environment and the tags filled by the user. 
+More precisely the indicator chosen is the ratio of users who have put a particular 
+tag among the users who have put at least one tag in a particular condition (i.e. no wind vs. wind).
+
 We will present some of this results here.
 
 The code producing the analysis and graphics are separated in 
@@ -217,10 +229,11 @@ several complementary documents[^5].
 The selection criteria for the data we were going to use for our analyses were 
 both attributive and spatial.
 We removed from all the analysis the tracks tagged *test* or *indoor* as we wanted 
-only outdoor recording.
-While these two analyses share a common basis, the selection criteria were refined between the two analyses. 
+only outdoor measurements.
+While these two analyses share a common basis, the selection criteria were refined between both. 
 
 Short tracks (duration less than 5 seconds) were discarded in both analysis.
+
 Long tracks (duration longer than 15 minutes) have been removed from the exploratory analysis.
 They were kept in the extended analysis.
 
@@ -231,7 +244,7 @@ This method was used to keep tracks that would have been eliminated because some
 [^CCleaner]: https://search.r-project.org/CRAN/refmans/CoordinateCleaner/html/cc_outl.html
 
 In the exploratory analysis, we decided to keep tracks that are comprised in a rather small area,
-the bounding box area would have to be equivalent to a square of 25 by 25 meters. This criterion was not considered in the extended analysis, but a threshold of 8 m/s (equivalent to 30 km/h) was set between 2 GPS measurements to eliminate tracks recorded in motor vehicles.
+the bounding box area would have to be equivalent to a square of 25 by 25 meters. This criterion was not considered in the extended analysis, but a threshold of 8 m/s (equivalent to 30 km/h) was set between 2 GPS measurements to eliminate tracks with aberrant distance between two measurements points.
 
 Although the extended analysis examined some questions on the global dataset, the results presented here are for tracks in metropolitan France.
 To extract data regarding France metropolitan area, we pre-filtered the data
@@ -284,8 +297,6 @@ Noise annoyance from road traffic and its effects on health are a major concern
 in France and are the subject of several studies (
 @meline2013TransportationNoiseAnnoyance, @grange2009PerceptionsBruitIledeFrance).
 
-We believe that a good quality collaborative dataset can provide an interesting 
-insight into the noise level and its perception by the user.
 In order to have a first idea of the quality of our dataset, we tried to see if 
 known phenomena in environmental acoustics appeared in the data.
 
@@ -347,7 +358,7 @@ events in an authoritative database.
 
 ### Correlation between tags and physical events in the user environment
 
-As we know the user position and we have the time stamp of the recording, we are 
+As we know the user position and we have the timestamp of the recording, we are 
 able to determine the weather conditions at that time and place using the services
 of Météo-France, the French national meteorological service.
 
@@ -360,11 +371,8 @@ The weather data used is from France's national weather organisation Météo-Fra
 available along with its full documentation from their website :
 [French weather data](https://donneespubliques.meteofrance.fr/?fond=produit&id_produit=90&id_rubrique=32)
 
-It is to keep in mind that the weather data available to us via this method is 
-limited to the one measured at weather stations. 
-We coded a function getting the weather observed at the closest station. 
-The median distance between weather stations and our tracks is **16.1 kilometers**, resulting 
-in a small margin of error, the weather being less susceptible to change on such a distance.
+The meteorological data collected are from the nearest meteorological stations. 
+The median distance between weather stations and our tracks is **16.1 kilometers**.
 
 ```{r rain-tag-use-caption, results='hide'}
 caption <- "Rain tag use."
@@ -391,18 +399,15 @@ knitr::include_graphics("https://github.com/nicolas-roelandt/lasso-data-analysis
 `r paste0('<p class="caption">',fig_nums("wind-tag-use"), '</p>')`
 
 The proportion of "wind" and "rain" tags seem to correlate with their corresponding physical events.
-In order to create those graphs, we selected scales to group our data 
-(wind force and precipitation) and calculate the proportion of tags present in those groups.
-We tried to create groups of equal representation for our data, but our data being 
-non-uniform and disparate, some of our groups of data are much less populated than others, 
-creating a potential bias that could only be corrected by the aggregation of more participator's data.
+In order to create those graphs, we selected scales to group the data 
+(wind force and precipitation) and compute the proportion of tags present in those groups.
 
 There is a strong correlation between the proportion of wind tags and the strength of wind, r(7) = .93, *p < 0.01*.
 The correlation between the proportion of rain tags and the amount of rain is less significative, r(6) = 0.68, *p < 0.1*. 
-This might be a perception bias from the participant or because of too small groups.
+This might be a perceptual bias from the participant or because of too small groups.
 The `r fig_nums("rain-tag-use", display = "cite")` shows that there is very few `rain`
 tags when the weather services does not record rain.
-We believe that the dataset we have studied is not sufficient to characterize the 
+The dataset we have studied is not sufficient to characterize the 
 amount of rainfall but sufficient to qualify the presence or absence of it.
   
 ## Benefits of OpenScience and literate programming
@@ -522,14 +527,19 @@ adding the corresponding tag.
 As a result, the correlation between actual rainfall observations and the 
 presence of rain tags in the database is weaker and less significant than for wind.
 
-Some questions still need to be explored, notably those concerning the 
-representativeness of samples that are sometimes weak for certain time periods.
+This study shows that it is possible to observe known dynamics in environmental acoustics in 
+the crowdsourced NoiseCapture dataset (road dynamics related to commuting or animal activity). It also
+increases the level of confidence brought to this dataset by the fact that the
+measurement conditions indicated by the user seem to correspond to real measurement conditions (rain and wind).
+Some questions still need to be explored, notably those concerning the representativeness and 
+representativeness and the unbalanced nature of the samples, which are sometimes weak for certain periods.
 
 We also wanted to show that Free and Open Source Software can be used to produce 
 scientific knowledge all along the production chain, from data collection, 
 storage, analysis and even presentation.
 By mobilizing only a few tools, it is quite possible to produce scientific 
 knowledge in a more reproducible way.
+
 The systematic use of open source software, the provision of documented code files 
 and a document mixing narrative, figures and code has greatly facilitated the 
 recovery and continuation of the work presented here. 
