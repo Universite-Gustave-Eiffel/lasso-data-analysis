@@ -32,6 +32,17 @@ if(!dir.exists(here::here("data"))){
   dir.create(here::here("data"))
 }
 
+if(!exists("all_info_sun")){
+  if(!file.exists(here::here("data","all_info_sun.rds"))){
+    URL2 <- "https://zenodo.org/record/6536129/files/time_after_sunrise.rds?download=1"
+    all_info_sun <- readRDS(url(URL2))
+    saveRDS(all_info_sun,here::here("data","all_info_sun.rds"))
+  }
+  else{
+  all_info_sun <- readRDS(here::here("data","all_info_sun.rds"))
+  }
+}
+
 ```
 
 ```{r figures-caption-tempo, include=FALSE}
@@ -55,7 +66,7 @@ available_country <- jsonlite::fromJSON("https://date.nager.at/api/v3/AvailableC
 
 start_year <- min(year(all_info_sun$record_utc))
 end_year <- max(year(all_info_sun$record_utc))
-code_liste <- all_info_sun$iso_a2_eh[!is.na(all_info$iso_a2_eh)]
+code_liste <- all_info_sun$iso_a2_eh[!is.na(all_info_sun$iso_a2_eh)]
 
 for(y in start_year:end_year){
   for(c in unique(code_liste)){
@@ -163,7 +174,7 @@ df_tags_day_type_fr <- rbind(df_temp1_fr,df_temp2_fr,df_temp3_fr,df_temp4_fr)
 lockdown_fr_1 <- interval(as_date("2020-03-17"),as_date("2020-05-11"))
 lockdown_fr_2 <- interval(as_date("2020-10-30"),as_date("2020-12-15"))
 lockdown_fr_3 <- interval(as_date("2021-04-04"),as_date("2021-05-03"))
-all_info_france <- all_info %>% filter(admin == "France")
+all_info_france <- all_info_sun %>% filter(admin == "France")
 
 is_lockdown <- function(d){
   if(d %within% lockdown_fr_1 | d %within% lockdown_fr_2 | d %within% lockdown_fr_3){
@@ -181,5 +192,7 @@ dayoff_info <- left_join(dayoff_info,dayoff_info_fr)
 all_info_tempo <- left_join(all_info_sun,dayoff_info)
 
 saveRDS(all_info_tempo,here::here("data","all_info_tempo.rds"))
+saveRDS(df_tags_day_type,here::here("data","df_tags_day_type.rds"))
+saveRDS(df_tags_day_type_fr,here::here("data","df_tags_day_type_fr.rds"))
 
 ```
