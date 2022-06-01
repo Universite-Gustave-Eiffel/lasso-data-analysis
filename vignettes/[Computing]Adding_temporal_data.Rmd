@@ -1,0 +1,198 @@
+---
+title: "Internship report"
+subtitle: "Adding temporal data"
+author: "Ludovic Moisan"
+supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
+date: "`r Sys.Date()`"
+output: 
+  html_document :
+    theme: united
+editor_options: 
+  chunk_output_type: console
+---
+
+<!-- This file is for the calculation and implementation of our temporal attributes -->
+
+```{r library-tempo-add, include = FALSE}
+
+library(lubridate)
+library(chron)
+library(here)
+library(dplyr)
+library(jsonlite)
+library(gridExtra)
+
+```
+
+```{r setup-tempo-add, include=FALSE}
+
+here::i_am("vignettes/[Computing]Adding_temporal_data.Rmd")
+
+if(!dir.exists(here::here("data"))){
+  dir.create(here::here("data"))
+}
+
+if(!exists("all_info_sun")){
+  if(!file.exists(here::here("data","all_info_sun.rds"))){
+    URL2 <- "https://zenodo.org/record/6536129/files/time_after_sunrise.rds?download=1"
+    all_info_sun <- readRDS(url(URL2))
+    saveRDS(all_info_sun,here::here("data","all_info_sun.rds"))
+  }
+  else{
+  all_info_sun <- readRDS(here::here("data","all_info_sun.rds"))
+  }
+}
+
+```
+
+```{r figures-caption-tempo, include=FALSE}
+
+# Declare variables for figures and table counting
+if(!exists("fig_nums")){
+fig_nums <- captioner::captioner(prefix = "Figure")
+}
+fig_nums("tempo", "Proportion of tags by type of day", display = FALSE)
+
+```
+
+```{r temporal-data, include = FALSE}
+
+day_off_world <- data.frame(matrix(ncol = 9))
+colnames(day_off_world) <- c("date","localName","name","countryCode","fixed","global","counties","launchYear","type")
+get_public_holiday <- function(y,code){
+  jsonlite::fromJSON(paste("https://date.nager.at/api/v2/publicholidays/",y,"/",code,sep=""))
+}
+available_country <- jsonlite::fromJSON("https://date.nager.at/api/v3/AvailableCountries")
+
+start_year <- min(year(all_info_sun$record_utc))
+end_year <- max(year(all_info_sun$record_utc))
+code_liste <- all_info_sun$iso_a2_eh[!is.na(all_info_sun$iso_a2_eh)]
+
+for(y in start_year:end_year){
+  for(c in unique(code_liste)){
+    if(c %in% available_country$countryCode){
+    day_off_world <- rbind(day_off_world,get_public_holiday(y,c))
+    }
+    else{
+      next
+    }
+  }
+}
+#Un jour important dans nos analyses mais non considéré comme un jour férié est la "Fête de la musique" le 21 Juin
+#Cette fête est présente dans plusieurs pays, mais les dates diffèrent. En France, la date est fixe.
+for(y in start_year:end_year){
+  day_off_world[nrow(day_off_world)+1,] <- 
+    c(paste(y,"-06-21",sep=""),"Fête de la musique","Music Day","FR",TRUE,FALSE,NA,1982,"Public")
+}
+
+#Jours fériés pour tous les pays / World
+day_info <- all_info_sun %>% dplyr::select(pk_track,tag_name,admin,iso_a2_eh,season,local_date ) %>% 
+  mutate(week_end = case_when(
+  chron::is.weekend(local_date) ~ TRUE,
+  TRUE ~ FALSE
+))
+
+dayoff_info <- data.frame(matrix(ncol = ncol(day_info)+1))
+colnames(dayoff_info) <- c(colnames(day_info),"ferie")
+dayoff_info$local_date <- as_datetime(dayoff_info$local_date)
+
+for(c in unique(day_info$iso_a2_eh)){
+  day_info_country <- day_info %>% filter(iso_a2_eh == c)
+  day_off_country <- day_off_world %>% filter(countryCode == c)
+  dayoff_info_country <- day_info_country %>% mutate(ferie = case_when(
+  as.Date(local_date) %in% as.Date(day_off_country$date) ~ TRUE,
+  TRUE ~FALSE
+  ))
+  dayoff_info <- rbind(dayoff_info,dayoff_info_country)
+}
+
+dayoff_info <- na.omit(dayoff_info)
+
+tags_norm <- c()
+tags_off <- c()
+tags_week <- c()
+tags_weekend <- c()
+for(t in unique(dayoff_info$tag_name)){
+  test_off <- (nrow(dayoff_info %>% filter(ferie == TRUE & tag_name == t))/ 
+                 length(unique(dayoff_info %>% filter(ferie == TRUE))$pk_track))*100
+  test_norm <- (nrow(dayoff_info %>% filter(ferie == FALSE & tag_name == t))/
+                  length(unique(dayoff_info %>% filter(ferie == FALSE))$pk_track))*100
+  
+  test_week <- (nrow(dayoff_info %>% filter(week_end == FALSE & tag_name == t))/
+                  length(unique(dayoff_info %>% filter(week_end == FALSE))$pk_track))*100
+  test_weekend <- (nrow(dayoff_info %>% filter(week_end == TRUE & tag_name == t))/
+                  length(unique(dayoff_info %>% filter(week_end == TRUE))$pk_track))*100
+  
+  tags_norm <- append(tags_norm,test_norm)
+  tags_week <- append(tags_week,test_week)
+  tags_weekend <- append(tags_weekend,test_weekend)
+  tags_off <- append(tags_off,test_off)
+
+}
+df_temp1 <- data.frame(proportion = tags_norm, tag = unique(dayoff_info$tag_name), day_type = "All days")
+df_temp2 <- data.frame(proportion = tags_week, tag = unique(dayoff_info$tag_name), day_type = "Weekdays")
+df_temp3 <- data.frame(proportion = tags_weekend, tag = unique(dayoff_info$tag_name), day_type = "Weekends")
+df_temp4 <- data.frame(proportion = tags_off, tag = unique(dayoff_info$tag_name), day_type = "Holidays")
+
+df_tags_day_type <- rbind(df_temp1,df_temp2,df_temp3,df_temp4)
+
+
+
+#Etude plus précise sur la France
+
+dayoff_info_fr <- dayoff_info %>% filter(admin == "France")
+
+tags_norm_fr <- c()
+tags_off_fr <- c()
+tags_week_fr <- c()
+tags_weekend_fr <- c()
+for(t in unique(dayoff_info_fr$tag_name)){
+test_off_fr <- (nrow(dayoff_info_fr %>% filter(ferie == TRUE & tag_name == t))/ 
+               length(unique(dayoff_info_fr %>% filter(ferie == TRUE))$pk_track))*100
+test_norm_fr <- (nrow(dayoff_info_fr %>% filter(ferie == FALSE & tag_name == t))/
+                length(unique(dayoff_info_fr %>% filter(ferie == FALSE))$pk_track))*100
+
+test_week_fr <- (nrow(dayoff_info_fr %>% filter(week_end == FALSE & tag_name == t))/
+                length(unique(dayoff_info_fr %>% filter(week_end == FALSE))$pk_track))*100
+test_weekend_fr <- (nrow(dayoff_info_fr %>% filter(week_end == TRUE & tag_name == t))/
+                length(unique(dayoff_info_fr %>% filter(week_end == TRUE))$pk_track))*100
+tags_norm_fr <- append(tags_norm_fr,test_norm_fr)
+tags_week_fr <- append(tags_week_fr,test_week_fr)
+tags_weekend_fr <- append(tags_weekend_fr,test_weekend_fr)
+tags_off_fr <- append(tags_off_fr,test_off_fr)
+}
+
+df_temp1_fr <- data.frame(proportion = tags_norm_fr, tag = unique(dayoff_info_fr$tag_name), day_type = "All days")
+df_temp2_fr <- data.frame(proportion = tags_week_fr, tag = unique(dayoff_info_fr$tag_name), day_type = "Weekdays")
+df_temp3_fr <- data.frame(proportion = tags_weekend_fr, tag = unique(dayoff_info_fr$tag_name), day_type = "Weekends")
+df_temp4_fr <- data.frame(proportion = tags_off_fr, tag = unique(dayoff_info_fr$tag_name), day_type = "Holidays")
+
+df_tags_day_type_fr <- rbind(df_temp1_fr,df_temp2_fr,df_temp3_fr,df_temp4_fr)
+
+#Covid
+
+lockdown_fr_1 <- interval(as_date("2020-03-17"),as_date("2020-05-11"))
+lockdown_fr_2 <- interval(as_date("2020-10-30"),as_date("2020-12-15"))
+lockdown_fr_3 <- interval(as_date("2021-04-04"),as_date("2021-05-03"))
+all_info_france <- all_info_sun %>% filter(admin == "France")
+
+is_lockdown <- function(d){
+  if(d %within% lockdown_fr_1 | d %within% lockdown_fr_2 | d %within% lockdown_fr_3){
+    return(TRUE)
+  }
+  else{
+    return(FALSE)
+  }
+}
+
+dayoff_info_fr$lockdown <- lapply(dayoff_info_fr$local_date, is_lockdown)
+
+dayoff_info <- left_join(dayoff_info,dayoff_info_fr)
+
+all_info_tempo <- left_join(all_info_sun,dayoff_info)
+
+saveRDS(all_info_tempo,here::here("data","all_info_tempo.rds"))
+saveRDS(df_tags_day_type,here::here("data","df_tags_day_type.rds"))
+saveRDS(df_tags_day_type_fr,here::here("data","df_tags_day_type_fr.rds"))
+
+```

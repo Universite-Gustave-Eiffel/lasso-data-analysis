@@ -1,0 +1,265 @@
+---
+title: "Internship report"
+subtitle: "Calculating new data components"
+author: "Ludovic Moisan"
+supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
+date: "`r Sys.Date()`"
+output: 
+  html_document :
+    theme: united
+editor_options: 
+  chunk_output_type: console
+---
+
+<!-- This file is for the calculation and implementation of numerous components, such as timezones and  sunrise data -->
+
+```{r library-calculate-components, include=FALSE}
+
+library(dplyr)
+library(purrr)
+library(suncalc)
+library(here)
+library(sf)
+library(geojsonsf)
+library(lubridate)
+
+here::i_am("vignettes/[Computing]Adding_weather.Rmd")
+
+if(!dir.exists(here("raw_data"))){
+  dir.create(here("raw_data"))
+}
+
+```
+
+```{r setup-calculate-component, include = FALSE}
+#Download Metropolitain France's geometry
+if(!exists("france_metro")){
+  if(!file.exists(here::here("raw_data","2020_France_metro_WGS84.geojson"))){
+    URLfr <- "https://github.com/nicolas-roelandt/lasso-data-analysis/raw/main/raw_data/2020_France_metro_WGS84.geojson"
+    france_metro <- geojson_sf(URLfr)
+    st_write(france_metro,here::here("raw_data","2020_France_metro_WGS84.geojson"))
+  }
+  else{
+  france_metro <- geojson_sf(here::here("raw_data","2020_France_metro_WGS84.geojson"))
+  }
+}
+
+```
+
+
+```{r adding-countries, include = FALSE, cache = TRUE}
+#Adding countries
+query <- "SELECT admin, iso_a2_eh, geog FROM countries;"
+
+countries <- sf::st_read(con,query = query)
+countries$iso_a2_eh[countries$iso_a2_eh=="-99"] <- NA
+
+sf_use_s2(FALSE)
+
+clean_track_info <- st_join(clean_track_info, countries, largest = FALSE)
+
+st_crs(clean_track_info) <- 4326
+
+```
+
+
+```{r metropolitain_france, include = FALSE}
+#We want to separate Metropolitain France and overseas french territories for further analysis (typically because of climate and sunrises/sunsets differences under some latitude)
+
+sf_use_s2(FALSE)
+
+clean_track_info <- clean_track_info %>% 
+  mutate(admin = case_when(
+    admin == "France" & !sf::st_intersects(., france_metro, sparse = FALSE) ~ "Dromcom",
+    TRUE ~ admin
+  ))
+
+```
+
+
+```{r intersect-geo-timezones, include = FALSE, cache = TRUE}
+#Adding timezones
+query <- "SELECT fid as timezone_id, geom, utc_format, tz_name1st FROM timezones;"
+
+timezones <- sf::st_read(con,query = query)
+
+st_crs(clean_track_info) #to check norm id <- 4326 (world default)
+
+st_crs(timezones) <- 4326 #specify world ref to match previous one since NA
+st_transform(timezones, crs = 4326)
+
+sf_use_s2(FALSE) #disable spherical geometry use
+
+full_info <- sf::st_join(clean_track_info, timezones) #intersect tracks geog with timezones geom
+
+#saveRDS(full_info, here("data","full_info.rds"))
+
+```
+
+```{r tag-info, include= FALSE}
+query <- "SELECT tv.pk_track, tag_name FROM tracks_view as tv
+INNER JOIN noisecapture_track_tag ntt ON tv.pk_track = ntt.pk_track /* Add track tags*/
+INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/;"
+
+tag_info <- RPostgreSQL::dbGetQuery(con,statement = query) %>% dplyr::filter(pk_track %in% clean_track_info$pk_track)
+
+```
+
+```{r time-processing-hour-season, include = FALSE}
+#We add tags infos and calculate local time based on timezones previously added
+
+all_info <- tag_info %>% 
+  dplyr::inner_join(
+    full_info %>% filter(!is.na(tz_name1st)) %>% sf::st_drop_geometry()) %>%
+  # add local time
+  dplyr::mutate(local_time = (lubridate::local_time(lubridate::ymd_hms(record_utc, tz = "UTC"),tz_name1st, units="hours"))) # target timezone
+
+#> Based on the local hour calculated and the UTC time given by the application's data, 
+#> we can determine the real date of the record. 
+#> For instance, a record located in New-York with UTC at 01:00 on tuesday 02/05,
+#> would actually have taken place at a local date of 21:00 monday 01/05
+
+all_info <- all_info %>% mutate(local_date = case_when(
+  ymd(substr(ymd_hms(record_utc) + hm(utc_format),1,10)) == ymd(substr(record_utc,1,10)) ~ ymd_hms((paste(substr(record_utc,1,10),"00:00:00"))) + local_time,
+  ymd(substr(ymd_hms(record_utc) + hm(utc_format),1,10)) < ymd(substr(record_utc,1,10)) ~ ymd_hms((paste(substr(record_utc,1,10),"00:00:00"))) - 86400 + local_time,
+    ymd(substr(ymd_hms(record_utc) + hm(utc_format),1,10)) > ymd(substr(record_utc,1,10)) ~ ymd_hms((paste(substr(record_utc,1,10),"00:00:00"))) + 86400 + local_time
+))
+
+all_info$lon <- as.numeric(all_info$lon)
+all_info$lat <- as.numeric(all_info$lat)
+
+#>Seasons must be calculated according to the date AND the latitude.
+#>The calculation of the hydroTSM library works only for metropolitan France or French Polynesia (specify in "type=")
+#>The dates of the beginning of seasons below are generic, the precision of the date to the hour is not necessary here.
+#>Seasons are only present between latitudes (-)23.5 and (-)66.5.
+#>The equator and the poles, not really having seasons, are noted separately, in both "season" and "hemisphere" columns.
+
+
+y_m <- format(all_info$record_utc, format ="%m-%d")
+all_info$ym <- y_m
+
+north_spring <- "03-21"
+north_summer <- "06-22"
+north_autumn <- "09-22"
+north_winter <- "12-22"
+start_year <- "01-01"
+end_year <- "12-31"
+south_autumn <- "03-21"
+south_winter <- "06-22"
+south_spring <- "09-22"
+south_summer <- "12-22"
+
+all_info <- all_info %>%
+  mutate(season = case_when(
+    lat > 23.5 & lat < 66.5 & y_m >= north_spring & y_m < north_summer  ~ "spring",
+    lat > 23.5 & lat < 66.5 & y_m >= north_summer & y_m < north_autumn  ~ "summer",
+    lat > 23.5 & lat < 66.5 & y_m >= north_autumn & y_m < north_winter  ~ "autumn",
+    lat > 23.5 & lat < 66.5 & y_m >= north_winter & y_m <= end_year  ~ "winter",
+        lat > 23.5 & lat < 66.5 & y_m >= start_year & y_m < north_spring  ~ "winter",
+
+    lat < -23.5 & lat > -66.5 & y_m >= south_autumn & y_m < south_winter  ~ "autumn",
+    lat < -23.5 & lat > -66.5 & y_m >= south_winter & y_m < south_spring  ~ "winter",
+    lat < -23.5 & lat > -66.5 & y_m >= south_spring & y_m < south_summer  ~ "spring",
+    lat < -23.5 & lat > -66.5 & y_m >= south_summer & y_m <= end_year  ~ "summer",
+        lat < -23.5 & lat > -66.5 & y_m >= start_year & y_m < south_autumn  ~ "summer",
+    
+    lat <= 23.5 & lat >= -23.5 ~ "equator",
+    lat >= 66.5 | lat <= -66.5 ~ "pole"
+    ))
+
+all_info <- all_info %>%
+  mutate(hemisphere = case_when(
+    lat > 23.5 & lat < 66.5 ~ "north",
+    lat < -23.5 & lat > -66.5 ~ "south",
+    lat <= 23.5 & lat >= -23.5 ~ "equator",
+    lat >= 66.5 | lat <= -66.5 ~ "pole"
+  ))
+
+
+#saveRDS(all_info, here("data","all_info.rds"))
+```
+
+```{r compute-sunrise, include = FALSE, cache= TRUE}
+get_sunrise <- function(pk_track, date, lat, lon, tz= "UTC") {
+  # compute sunrise time from localisation and UTC time
+  #return NA if error
+  in_pk_track = pk_track
+  in_lat = round(lat,5)
+  in_lon = round(lon,5)
+  in_tz = tz
+  
+  sunrise = tryCatch(suncalc::getSunlightTimes(
+    date = lubridate::date(date),
+    lat = in_lat,
+    lon = in_lon,
+    tz   = in_tz
+  )$sunrise, error=function(e) NA)
+
+  return(dplyr::tribble(
+ ~pk_track, ~sunrise_utc,
+ in_pk_track, sunrise)
+)
+}
+
+get_sunset <- function(pk_track, date, lat, lon, tz= "UTC") {
+  # compute sunset time from localisation and UTC time
+  #return NA if error
+  in_pk_track = pk_track
+  in_lat = round(lat,5)
+  in_lon = round(lon,5)
+  in_tz = tz
+  
+  sunset = tryCatch(suncalc::getSunlightTimes(
+    date = lubridate::date(date),
+    lat = in_lat,
+    lon = in_lon,
+    tz   = in_tz
+  )$sunset, error=function(e) NA)
+
+  return(dplyr::tribble(
+ ~pk_track, ~sunset_utc,
+ in_pk_track, sunset)
+)
+}
+
+
+# Compute sunrise hours for each track in a new dataframe
+# Impossible to calculate directly for the timezone defined with the local_date, the suncalc package glitches
+# More detail : https://github.com/datastorm-open/suncalc/issues/2
+
+sunrises <- purrr::pmap_dfr(all_info[!duplicated(all_info$pk_track),] %>% select(pk_track, date = record_utc, lat, lon), get_sunrise)
+sunsets <- purrr::pmap_dfr(all_info[!duplicated(all_info$pk_track),] %>% select(pk_track, date = record_utc, lat, lon), get_sunset)
+
+sunrises <- inner_join(sunrises %>% dplyr::filter(!is.na(sunrise_utc)),
+            all_info %>% dplyr::select(pk_track, tag_name, tz_name1st),
+            by = "pk_track") %>% dplyr::mutate(local_sunrise = lubridate::local_time(sunrise_utc,tz_name1st, units = "hours"))
+sunsets <- inner_join(sunsets %>% dplyr::filter(!is.na(sunset_utc)),
+            all_info %>% dplyr::select(pk_track, tag_name, tz_name1st),
+            by = "pk_track") %>% dplyr::mutate(local_sunset = lubridate::local_time(sunset_utc,tz_name1st, units = "hours"))
+
+sun_info <- inner_join(sunrises,sunsets)
+
+#saveRDS(sun_info, here("data","sun_info.rds"))
+```
+
+```{r time-after-sunrise, include = FALSE}
+# join sun_info to study data
+
+all_info_sun <- left_join(all_info,sun_info)
+
+# Mutating hours to fit in a 12h window around the sunrise or sunset
+all_info_sun <- 
+  all_info_sun %>% mutate(after_sunrise = case_when(
+  local_time - local_sunrise >= 12 ~ -(24 - local_time + local_sunrise),
+  TRUE ~ local_time - local_sunrise))
+
+all_info_sun <- 
+  all_info_sun %>% mutate(after_sunset = case_when(
+  local_time - local_sunset >= 12 ~ -(24 - local_time - local_sunset),
+  local_time - local_sunset <= -12 ~ 24 - abs(local_time - local_sunset),
+  TRUE ~ local_time - local_sunset
+))
+
+
+#saveRDS(all_info_sun, file = "vignettes/all_info_sun.rds")
+```

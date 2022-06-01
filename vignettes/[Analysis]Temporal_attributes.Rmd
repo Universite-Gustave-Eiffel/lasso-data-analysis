@@ -1,0 +1,106 @@
+---
+title: "Internship report"
+subtitle: "Analysis of temporal attributes"
+author: "Ludovic Moisan"
+supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
+date: "`r Sys.Date()`"
+output: 
+  html_document :
+    theme: united
+editor_options: 
+  chunk_output_type: console
+---
+
+<!-- This file is for the plotting and analysis of our temporal attributes -->
+
+
+```{r library-tempo-analysis, include = FALSE}
+
+library(lubridate)
+library(chron)
+library(here)
+library(dplyr)
+library(ggplot2)
+# handle figures and tables numbering
+library(captioner)
+
+```
+
+```{r setup-tempo-analysis, include=FALSE}
+
+here::i_am("vignettes/[Analysis]Temporal_attributes.Rmd")
+
+if(!dir.exists(here("data"))){
+  dir.create(here("data"))
+}
+
+if(!exists("df_tags_day_type")){
+  if(!file.exists(here::here("data","df_tags_day_type.rds"))){
+    URLday <- "https://zenodo.org/record/6594826/files/df_tags_day_type.rds?download=1"
+    df_tags_day_type <- readRDS(url(URLday))
+    saveRDS(df_tags_day_type,here::here("data","df_tags_day_type.rds"))
+  }
+  else{
+  df_tags_day_type <- readRDS(here::here("data","df_tags_day_type.rds"))
+  }
+}
+
+if(!exists("df_tags_day_type_fr")){
+  if(!file.exists(here::here("data","df_tags_day_type_fr.rds"))){
+    URLday <- "https://zenodo.org/record/6594826/files/df_tags_day_type_fr.rds?download=1"
+    df_tags_day_type_fr <- readRDS(url(URLday))
+    saveRDS(df_tags_day_type_fr,here::here("data","df_tags_day_type_fr.rds"))
+  }
+  else{
+  df_tags_day_type_fr <- readRDS(here::here("data","df_tags_day_type_fr.rds"))
+  }
+}
+
+```
+
+```{r figures-caption-day-types, include=FALSE}
+
+# Declare variables for figures and figures captions
+
+#Check first if figure numeration is already established by another child document to keep tracks of precedent numerations
+if(!exists("fig_nums")){
+fig_nums <- captioner::captioner(prefix = "Figure")
+}
+
+fig_nums("type_tempo", "Distribution of types of days by tag in the world", display = FALSE)
+fig_nums("type_tempo_fr", "Distribution of types of days by tag in France", display = FALSE)
+
+```
+
+```{r graph-tempo-data, echo = FALSE, fig.align='center', out.width="80%", message = FALSE, fig.cap= fig_nums("type_tempo")}
+
+ggplot(df_tags_day_type, aes(fill=day_type, y=proportion, x=tag)) + 
+    geom_bar(position="dodge", stat="identity")+ 
+  scale_fill_manual(values = c("#007eed","#e100ed","#edae00","#ed4700"))+
+  labs(
+    x = "Tag names",
+    y = "Proportion of tags (%)",
+    title = "Repartition of tags by type of day",
+    subtitle = "Noisecapture's tags in the World,
+      2017-2020") +
+  theme(legend.position="bottom") + 
+  scale_x_discrete(guide = guide_axis(n.dodge=2))
+
+
+```
+
+```{r graph-tempo-data-fr, echo = FALSE, fig.align='center', out.width="80%", message = FALSE, fig.cap= fig_nums("type_tempo_fr")}
+
+ggplot(df_tags_day_type_fr, aes(fill=day_type, y=proportion, x=tag)) + 
+  geom_bar(position="dodge", stat="identity")+ 
+  scale_fill_manual(values = c("#007eed","#e100ed","#edae00","#ed4700"))+
+  labs(
+    x = "Tag names",
+    y = "Proportion of tags (%)",
+    title = "Repartition of tags by type of day",
+    subtitle = "Noisecapture's tags in France,
+      2017-2020") +
+  theme(legend.position="bottom") + 
+  scale_x_discrete(guide = guide_axis(n.dodge=2))
+
+```

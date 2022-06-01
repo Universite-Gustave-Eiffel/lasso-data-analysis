@@ -1,7 +1,13 @@
 .Rproj.user
 .Rhistory
+.RData
 .Rdata
 .httr-oauth
 .DS_Store
-documentation/ #local documentation
-documentation
+*.html
+*_cache
+synop.*.gz
+*.rds
+raw_data/**
+vignettes/LM_temporal_analysis_article.Rmd
+vignettes/[Computing]Spatial_components.Rmd

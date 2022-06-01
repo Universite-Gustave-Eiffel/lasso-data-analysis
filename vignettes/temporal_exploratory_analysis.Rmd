@@ -1,0 +1,654 @@
+---
+title: "Temporal exploratory analysis"
+author:
+- name: Nicolas Roelandt
+  affiliation: AME, Univ. Gustave Eiffel, IFSTTAR, F-69675 Bron, France
+- name: Pierre Aumond
+  affiliation: UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France
+- name: Ludovic Moisan
+  affiliation: UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France
+date: "`r Sys.Date()`"
+pkgdown:
+  as_is: true
+output:
+  bookdown::html_document2
+params:
+  database: FALSE # set to FALSE to use the cache
+---
+
+# Replication
+## Get the source code
+
+As the analysis part of project as been treated as R package, there is several ways 
+to get the code source:
+
+- using git
+
+```{bash git-clone, eval=FALSE}
+git clone https://github.com/nicolas-roelandt/lasso-data-analysis
+```
+
+- using R and the [remotes package](https://remotes.r-lib.org/):
+
+```{r package-installation, eval=FALSE}
+# We suggest to use the remotes package
+# install.packages("remotes")
+remotes::install_github("nicolas-roelandt/lasso-data-analysis")
+```
+
+- download as a [zip archive](https://github.com/nicolas-roelandt/lasso-data-analysis/archive/refs/heads/main.zip)
+
+## Setup
+This analysis use several packages that you'll need to install beforehand.
+
+```{r setup-preparation, eval=FALSE}
+# Package list
+pkgs <- c("RPostgreSQL",
+          "DBI",
+          "sf",
+          "dplyr",
+          "purrr",
+          "ggplot2",
+          "scales",
+          "lubridate",
+          "hydroTSM",
+          "suncalc",
+          "xfun")
+
+# Packages installation from CRAN
+# We suggest to use the remotes package to install required packages
+# Already installed packages won't be reinstalled
+remotes::install_cran(pkgs)
+```
+
+```{r setup, warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Database connection
+library(RPostgreSQL)
+library(DBI)
+drv <- DBI::dbDriver("PostgreSQL")
+
+# Data handling
+library(sf)
+library(dplyr)
+library(purrr)
+
+# Graphs
+library(ggplot2)
+library(scales)
+
+# time / date handling
+library(lubridate)
+library(hydroTSM)
+
+# Get sun rise time
+## install.packages("suncalc")
+library(suncalc)
+
+# data cache handling
+library(xfun)
+```
+
+## Database connection
+
+We provide the database connection parameters to make it easier to replicate and update.
+However, this database is not publicly available. 
+Those parameters are here to help you connect with your own database (see  the 
+[README](https://github.com/nicolas-roelandt/lasso-data-analysis#how-to-reproduce=) for more information on that aspect.
+
+
+To help replication, the results of SQL queries have been cached (using the 
+`xfun::cache_rds` function) and are available as `.rds` files inside the github repository:
+https://github.com/nicolas-roelandt/lasso-data-analysis/tree/FOSS4G2022/vignettes/temporal_exploratory_analysis_cache/html
+
+```{r con-parameters, eval=params$database}
+con <- DBI::dbConnect(
+drv,
+dbname ="noisecapture",
+host = "lassopg.ifsttar.fr", #server IP or hostname
+port = 5432, #Port on which we ran the proxy
+user="noisecapture",
+# password stored in .Renviron. To edit : usethis::edit_r_environ()
+password=Sys.getenv('noisecapture_password')
+)
+```
+
+You can check your connection by requesting the tag list for example.
+
+```{r tag-list}
+# Tag list
+tag_list <- xfun::cache_rds({
+  query <- "SELECT distinct  * FROM noisecapture_tag;"
+  RPostgreSQL::dbGetQuery(con,statement = query) 
+},rerun = params$database)
+
+tag_list
+```
+
+# Data cleaning
+
+The data stored in the database is not useable as is.
+Most of the data is not taggued, the accuraccy of the GPS position can vary, the track is too long.
+So the data needs to be filtered.
+
+This has been done within the database using views.
+Please see the [03_create_views.sql](https://github.com/nicolas-roelandt/lasso-data-analysis/blob/main/scripts/03_create_views.sql) script for more details.
+
+In summary, it removes test and indoor records, filter tracks that have a duration between 5 to 900 seconds.
+It also remove the tracks where the GPS accuracy was below a 20 meters threshold and that are larger than a 25 square meters area.
+
+This study is focused on France so there is a spatial filtering on its boundaries.
+
+The final data is stored in a view called `france_tracks` that can be called at will.
+
+## Retrieve data
+### Track information
+
+```{r join-track-info}
+track_info <- xfun::cache_rds({
+  query <- "SELECT  pk_track, record_utc, time_length, pleasantness, noise_level, track_uuid, geog
+FROM france_tracks;"
+
+ sf::st_read(con,query = query)
+},rerun = params$database)
+
+track_info %>% head()
+```
+
+Some records are not in the France metropolitan area so they need to be discarded.
+
+```{r france-metro-filtering}
+# Define where to save the dataset
+extraWD <- here::here("raw_data")
+# Get some data available to anyone
+if (!file.exists(file.path(extraWD, "2020_France_metro_WGS84.geojson"))) {
+  githubURL <- "https://github.com/nicolas-roelandt/lasso-data-analysis/raw/main/raw_data/2020_France_metro_WGS84.geojson"
+  download.file(githubURL, file.path(extraWD, "2020_France_metro_WGS84.geojson"))
+  #unzip(file.path(extraWD, "2020_France_metro_WGS84.zip"), exdir = extraWD)
+}
+france_metro <- sf::st_read(dsn=file.path(extraWD, "2020_France_metro_WGS84.geojson"))
+
+filtered_track_info <- track_info %>%
+  dplyr::filter(sf::st_intersects(., france_metro, sparse = FALSE)) 
+```
+
+`r nrow(filtered_track_info)` tracks meets the study criteria (duration, envelop area, etc.).
+`r nrow(track_info) - nrow(filtered_track_info)` tracks where not in France's metropolitan area.
+
+### Tag information 
+
+```{r tag-info}
+tag_info <- xfun::cache_rds({
+  query <- "SELECT ft.pk_track, tag_name FROM france_tracks as ft
+INNER JOIN noisecapture_track_tag ntt ON ft.pk_track = ntt.pk_track /* Add track tags*/
+INNER JOIN noisecapture_tag ntag ON ntag.pk_tag = ntt.pk_tag /* Add track tags*/;"
+
+ RPostgreSQL::dbGetQuery(con,statement = query) %>% dplyr::filter(pk_track %in% filtered_track_info$pk_track)
+})
+
+head(tag_info)
+```
+
+Those `r nrow(filtered_track_info)` tracks correspond to `r nrow(tag_info)` tags as a track can have multiple tags.
+
+
+```{r tag-histo, echo=FALSE}
+tag_info %>%
+  mutate(tag_name = factor(tag_name, levels = unique(tag_info$tag_name))) %>%
+  group_by(tag_name) %>% 
+  dplyr::count(name = "count") %>%
+  dplyr::arrange(desc(count)) %>%
+  ggplot() +
+  aes(x = reorder(tag_name, count), y = count) +
+  geom_bar(stat="identity", fill = "#112446") +
+  coord_flip()+ 
+  labs(
+    x = "Tag",
+    title = "Tag repartition in the subset",
+    caption = "Count of each tag"
+  ) +
+  theme_minimal()
+```
+
+```{r tag-histo-save, echo=FALSE, message=FALSE}
+ggsave("plots/tags_repartition.png")
+```
+
+# Time repartition
+## All year
+```{r merge-informations}
+all_info <- tag_info %>% 
+  dplyr::inner_join(
+    filtered_track_info %>% sf::st_drop_geometry()) %>%
+  # add local hour
+  dplyr::mutate(local_time = lubridate::hour( # extract hour
+    lubridate::with_tz( # convert to local time
+      lubridate::ymd_hms(record_utc, tz = "UTC"), # convert text to date
+      "Europe/Paris")), # target timezone
+    season = hydroTSM::time2season(lubridate::date(record_utc), out.fmt = "seasons", type="default")) # compute season
+
+all_info %>% head() %>% knitr::kable()
+```
+
+
+```{r compute-tags-occurrences}
+occurences <- all_info %>% dplyr::group_by(tag_name, local_time) %>% dplyr::count(name = "occurences")
+
+occurences %>% head() %>% knitr::kable()
+```
+
+
+```{r compute-tags-hourly-repartition}
+tags_hourly_repartition <- occurences %>% 
+  left_join(
+    occurences %>% dplyr::group_by(local_time) %>% dplyr::summarise(total = sum(occurences)),
+    by = "local_time") %>% 
+  mutate(percentage = occurences * 100 / total)
+
+tags_hourly_repartition %>% head() %>% knitr::kable()
+```
+
+
+```{r tags-hourly-repartition-graph}
+ggplot(tags_hourly_repartition) +
+  aes(x = local_time, y = percentage) +
+  geom_point(shape = "circle", size = 1.5, colour = "#112446") +
+  labs(
+    x = "Time of the day",
+    y = "Percentage",
+    title = "Hourly repartition of tags",
+    subtitle = "Noicecaptures tags in metropolitan France,
+    2017 - 2020"
+  ) +
+  theme_minimal() +
+  facet_wrap(vars(tag_name))
+```
+```{r tags-hourly-repartition-graph-save, echo=FALSE, message=FALSE}
+ggsave("plots/tags_hourly_dynamics.png") 
+```
+
+### Hourly dynamics, details
+
+```{r dynamic-graphs, message=FALSE}
+dynamic_graphs <- function(tag) {
+  
+  title <- paste("Repartition of",gsub("_", " ",tag),"sounds in local time")
+  ggplot(tags_hourly_repartition %>% dplyr::filter(tag_name == tag)) +
+  aes(x = local_time, y = percentage) +
+  geom_point(shape = "circle", size = 1.5, colour = "#112446") +
+  labs(
+    x = "Time of the day",
+    y = "Percentage",
+    title = title,
+    subtitle = "Noicecaptures tags in metropolitan France,
+    2017 - 2020"
+  ) +
+   geom_smooth(method = "loess", se = FALSE, aes(colour="loess")) + # smooth curve test (see span parameter to fit more to the peak before sunrise)
+  scale_colour_manual(values=c("blue", "red"))+
+   theme_minimal()
+  
+  # save graphs
+  ggsave(paste0("plots/",gsub(" ", "_",title),".png")) 
+}
+
+# Render graphs
+graphs <- purrr::map(unique(tags_hourly_repartition$tag_name), dynamic_graphs)
+```
+
+```{r display-dynamics-graphs, echo=FALSE, message=FALSE}
+# Display graphs in the document
+# as include_graphics needs a character vector and not a list, it has to be transformed
+# see https://stackoverflow.com/a/51269116
+knitr::include_graphics(as.character(graphs))
+```
+
+## Seasonal repartition
+### Animals
+
+```{r compute-animals-hourly-repartition-season}
+seasonal_occurences <- all_info %>% 
+  dplyr::group_by(tag_name, local_time, season) %>% 
+  dplyr::count(name = "occurences")
+
+animals_seasonal_repartition <- seasonal_occurences %>% 
+  dplyr::filter(tag_name == "animals") %>% 
+  mutate(seasonal_time = paste0(season,'_',local_time)) %>%
+  left_join(
+    seasonal_occurences %>%
+      dplyr::group_by(local_time, season) %>% 
+      dplyr::summarise(total = sum(occurences))%>% 
+      dplyr::mutate(seasonal_time = paste0(season,'_',local_time)) %>% select(-season),
+    by = "seasonal_time") %>% 
+  mutate(percentage = occurences * 100 / total)
+  
+
+animals_seasonal_repartition %>% dplyr::select(-local_time.y, -seasonal_time) %>% head() %>% knitr::kable()
+```
+
+```{r animals-hourly-repartition-season-graph}
+ggplot(animals_seasonal_repartition) +
+  aes(x = local_time.x, y = percentage) +
+  geom_point(shape = "circle", size = 1.5, colour = "#112446") +
+  labs(
+    x = "Local time",
+    y = "Percentage",
+    title = "Seasonal occurences of animals sounds"
+  ) +
+  theme_minimal() +
+  facet_wrap(vars(season))
+```
+```{r animals-hourly-repartition-season-graph-save, echo=FALSE, message=FALSE}
+ggsave("plots/animals_seasonal_dynamic.png") 
+```
+
+
+```{r seasonal-graphs, message=FALSE}
+season_graphs <- function(tag) {
+  
+  title <- paste("Seasonal occurences of",tag,"sounds")
+  seasonal_occurences %>% 
+  dplyr::filter(tag_name == tag) %>% 
+  mutate(seasonal_time = paste0(season,'_',local_time)) %>%
+  left_join(
+    seasonal_occurences %>%
+      dplyr::group_by(local_time, season) %>% 
+      dplyr::summarise(total = sum(occurences))%>% 
+      dplyr::mutate(seasonal_time = paste0(season,'_',local_time)) %>% select(-season),
+    by = "seasonal_time") %>% 
+  mutate(percentage = occurences * 100 / total) %>%
+    ggplot() +
+  aes(x = local_time.x, y = percentage) +
+  geom_point(shape = "circle", size = 1.5, colour = "#112446") +
+  labs(
+    x = "Local time",
+    y = "Percentage",
+    title = title
+  ) +
+  theme_minimal() +
+  facet_wrap(vars(season))
+  
+  # save graphs
+  ggsave(paste0("plots/",gsub(" ", "_",title),".png")) 
+}
+
+# Render graphs
+graphs <- purrr::map(unique(seasonal_occurences$tag_name), season_graphs)
+```
+
+```{r display-graphs, echo=FALSE, message=FALSE}
+# Display graphs in the document
+# as include_graphics needs a character vector and not a list, it has to be transformed
+# see https://stackoverflow.com/a/51269116
+knitr::include_graphics(as.character(graphs))
+```
+
+# Sound dynamics: sunrise study
+
+```{r compute-sunrise}
+get_sunrise <- function(pk_track, date, lat, lon, tz ="UTC") {
+  # compute sunrise time from localisation and UTC time
+  #return NA if error
+  in_pk_track = pk_track
+  in_lat = round(lat,5)
+  in_lon = round(lon,5)
+  in_tz = tz
+  
+  
+  sunrise = tryCatch(suncalc::getSunlightTimes(
+    date = lubridate::date(date),
+    lat = in_lat,
+    lon = in_lon,
+    tz   = in_tz
+  )$sunrise, error=function(e) NA)
+
+  return(dplyr::tribble(
+ ~pk_track, ~sunrise,
+ in_pk_track, sunrise)
+)
+}
+
+# Compute track centroid coordinates
+suncalc_prep <- filtered_track_info %>% dplyr::bind_cols(
+  filtered_track_info %>% st_centroid() %>% st_coordinates() %>% as_tibble() %>% select(lat = Y, lon = X)
+) 
+
+# Compute sunrise hours for each track in a new dataframe
+sunrises <- purrr::pmap_dfr(suncalc_prep %>% select(pk_track, date = record_utc, lat, lon) %>% st_drop_geometry, get_sunrise )
+```
+```{r time-after-sunrise}
+# join sunrises to study data
+# removes records where sunrise time cannot be compute (track 265404)
+time_after_sunrise <- suncalc_prep %>% 
+  dplyr::inner_join(sunrises %>% filter(!is.na(sunrise))) %>% #remove NAs to avoid errors later on
+  dplyr::mutate(local_time = lubridate::hour( # extract hour
+    lubridate::with_tz( # convert to local time
+      lubridate::ymd_hms(record_utc, tz = "UTC"), # convert text to date
+      "Europe/Paris")),
+    local_sunrise = lubridate::hour( # extract hour
+    lubridate::with_tz( # convert to local time
+      lubridate::ymd_hms(sunrise, tz = "UTC"), # convert text to date
+      "Europe/Paris")),
+    time_after_sunrise = local_time -local_sunrise
+    ) %>% left_join( all_info %>% select(pk_track,tag_name))
+
+time_after_sunrise %>% head() %>% knitr::kable()
+```
+
+
+```{r time-after-sunrise-percentage}
+occurences <- time_after_sunrise %>% sf::st_drop_geometry() %>% dplyr::group_by(tag_name, time_after_sunrise) %>% dplyr::count(name = "occurences")
+
+time_after_sunrise_repartition <- occurences %>% 
+  left_join(
+    occurences %>% dplyr::group_by(time_after_sunrise) %>% dplyr::summarise(total = sum(occurences)),
+    by = "time_after_sunrise") %>% 
+  mutate(percentage = occurences * 100 / total)
+
+time_after_sunrise_repartition %>% head() %>% knitr::kable()
+```
+
+
+```{r time-after-sunrise-graph}
+ggplot(time_after_sunrise_repartition) +
+   aes(x = time_after_sunrise, y = percentage) +
+   geom_point(shape = "circle", size = 1.5, colour = "#112446") +
+   labs(
+     x = "Time before or after sunrise",
+     y = "Percentage",
+     title = "Hourly repartition of tags",
+     subtitle = "Noicecaptures tags in metropolitan France,
+     2017 - 2020"
+   ) +
+   theme_minimal() +
+   facet_wrap(vars(tag_name))
+
+```
+
+```{r time-after-sunrise-graph-save, echo=FALSE, message=FALSE}
+ggsave("plots/tag_dynamics_around_sunrise.png")
+```
+
+
+```{r time-after-sunrise-animals-graph, include=FALSE}
+ggplot(time_after_sunrise_repartition %>% dplyr::filter(tag_name == "animals")) +
+   aes(x = time_after_sunrise, y = percentage) +
+   geom_point(shape = "circle", size = 1.5, colour = "#112446") +
+   labs(
+     x = "Time before or after sunrise",
+     y = "Percentage",
+     title = "Hourly repartition of animal tags",
+     subtitle = "Noicecaptures tags in metropolitan France,
+     2017 - 2020"
+   ) +
+   geom_smooth(method = "loess", se = FALSE, aes(colour="loess")) + # smooth curve test (see span parameter to fit more to the peak before sunrise)
+  # geom_smooth(method = "lm", formula = y ~ poly(x, 3), se = FALSE, aes(colour="Polynomial")) +
+  scale_colour_manual(values=c("blue", "red"))+
+   theme_minimal()
+```
+```{r time-after-sunrise-animals-graph-save, include=FALSE, message=FALSE}
+ggsave("plots/animal_dynamics_around_sunrise.png")
+```
+
+
+```{r sunrise-graphs, message=FALSE}
+sunrise_graphs <- function(tag) {
+  
+  title <- paste("Repartition of",tag,"sounds around sunrise time")
+  ggplot(time_after_sunrise_repartition %>% dplyr::filter(tag_name == tag)) +
+   aes(x = time_after_sunrise, y = percentage) +
+   geom_point(shape = "circle", size = 1.5, colour = "#112446") +
+   labs(
+     x = "Time before or after sunrise",
+     y = "Percentage",
+     title = title,
+     subtitle = "Noicecaptures tags in metropolitan France,
+     2017 - 2020"
+   ) +
+   geom_smooth(method = "loess", se = FALSE, aes(colour="loess")) + # smooth curve test (see span parameter to fit more to the peak before sunrise)
+  # geom_smooth(method = "lm", formula = y ~ poly(x, 3), se = FALSE, aes(colour="Polynomial")) +
+  scale_colour_manual(values=c("blue", "red"))+
+   theme_minimal()
+  
+  # save graphs
+  ggsave(paste0("plots/",gsub(" ", "_",title),".png")) 
+}
+
+# Render graphs
+graphs <- purrr::map(unique(seasonal_occurences$tag_name), sunrise_graphs)
+```
+
+```{r display-sunrise-graphs, echo=FALSE, message=FALSE}
+# Display graphs in the document
+# as include_graphics needs a character vector and not a list, it has to be transformed
+# see https://stackoverflow.com/a/51269116
+knitr::include_graphics(as.character(graphs))
+```
+
+
+
+
+# Monthly repartition
+
+```{r monthly-repartition}
+monthly_occurences <- all_info %>% dplyr::mutate(local_month = lubridate::month( # extract hour
+    lubridate::with_tz( # convert to local time
+      lubridate::ymd_hms(record_utc, tz = "UTC"), # convert text to date
+      "Europe/Paris"))) %>%
+  dplyr::group_by(tag_name, local_month, season) %>% 
+  dplyr::count(name = "occurences")
+
+tags_monthly_repartition <- monthly_occurences %>%  left_join(
+    monthly_occurences %>% dplyr::group_by(local_month) %>% dplyr::summarise(total = sum(occurences)),
+    by = "local_month") %>% 
+  mutate(percentage = occurences * 100 / total)
+```
+
+```{r tags-monthly-repartition-graph}
+
+data_breaks <- data.frame(start = c(0, 3, 6, 9),  # Create data with breaks
+                          end = c(3, 6, 9, 12),
+                          Seasons = factor(c("Winter", "Spring", "Summer", "Autumn"), 
+                                          levels = c("Winter", "Spring", "Summer", "Autumn"),
+                          labels = c("Winter", "Spring", "Summer", "Autumn")))
+data_breaks                                       # Print data with breaks
+
+ggplot() +
+  # Add background colors to plot
+  geom_rect(data = data_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Seasons),
+            alpha = 0.25) +
+  scale_fill_manual(values = c("Winter" = "white",
+                               "Spring" = "green",
+                               "Summer" = "yellow",
+                               "Autumn" = "brown"
+                               )) +
+  geom_point(data = tags_monthly_repartition, aes(x = local_month, y = percentage),
+             shape = "circle", size = 1.5, colour = "#112446") +
+  labs(
+    x = "Month",
+    y = "Percentage",
+    title = "Monthly repartition of tags",
+    subtitle = "Noicecaptures tags in metropolitan France,
+    2017 - 2020"
+  ) +
+  theme_minimal() +
+  scale_x_continuous(breaks = scales::pretty_breaks(), labels=c("Jan","Feb","Apr","Jun", "Aug", "Oct", "Dec", "null"), limits = c(1,12))+
+  facet_wrap(vars(tag_name))
+
+```
+
+```{r tags-monthly-repartition-graph-save, echo=FALSE, message=FALSE}
+ggsave("plots/tags_monthly_dynamics.png")
+```
+
+<!-- TODO
+
+
+- timezones : https://github.com/Ifsttar/NoiseCapture/tree/master/onomap-geoserver/geoserver/src/test/resources/org/noise_planet/noisecapturegs
+  - loaded in database
+  - not used because metropolitan France study only
+  - intersect track geom with timezones and use timezone variable in computations ("Europe/Paris" -> tz)
+- investiguate with there is doubles in tags_monthly_dynamic graph in Road March and industrial June (data related ? Agregation ?)
+
+-->
+
+# Packages citations
+
+```{r}
+citation("tidyverse")
+```
+```{r}
+citation("sf")
+```
+
+```{r}
+citation("hydroTSM")
+```
+
+
+```{r}
+citation("suncalc")
+```
+
+# Reproductibility
+## Data sources
+Most of the treatment has been made within the PostGIS database.
+The scripts folder contains several scripts to execute to prepare the dataset.
+
+## Session informations
+
+```{r session-info, echo=FALSE}
+extract_loaded_package <- function(packages_info) {
+  return(packages_info$Package) 
+}
+
+xfun::session_info(sapply(sessionInfo()$otherPkgs, extract_loaded_package), dependencies = FALSE)
+```
+
+## Database information
+
+```{r pg-version}
+# print software versions
+pg_version  <- xfun::cache_rds({
+  RPostgreSQL::dbGetQuery(con,statement = paste("SELECT version();")) # should return PostgreSQL 10.15 or higher
+},rerun = params$database)
+print(pg_version)
+```
+```{r postgis-version}
+postgis_version  <- xfun::cache_rds({
+  RPostgreSQL::dbGetQuery(con,statement = paste("SELECT postgis_full_version();")) # should return PostGIS 2.5 or higher
+},rerun = params$database)
+print(postgis_version)
+```
+
+```{r close-DB-connection, eval=params$database}
+# close connection
+RPostgreSQL::dbDisconnect(con)
+```
+
+

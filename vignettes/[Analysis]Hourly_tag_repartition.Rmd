@@ -1,0 +1,119 @@
+---
+title: "Internship report"
+subtitle: "Hourly tag repartition"
+author: "Ludovic Moisan"
+supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
+date: "`r Sys.Date()`"
+output: 
+  html_document :
+    theme: united
+editor_options: 
+  chunk_output_type: console
+---
+
+<!-- This file is for the calculation, plotting and analysis of the distribution of tags based on their local time. -->
+
+
+```{r library-hourly, include=FALSE}
+
+library(here)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(captioner)
+
+```
+
+```{r figures-caption-hours, include=FALSE}
+
+# Declare variables for figures and figures captions
+
+#Check first if figure numeration is already established by another child document to keep tracks of precedent numerations
+if(!exists("fig_nums")){
+fig_nums <- captioner::captioner(prefix = "Figure")
+}
+
+fig_nums("hour-fr", "Tags hourly proportions", display = FALSE)
+fig_nums("hour-fr-road", "Road tags hourly proportions", display = FALSE)
+
+```
+
+```{r setup-hourly, include = FALSE}
+
+here::i_am("vignettes/[Analysis]Hourly_tag_repartition.Rmd")
+
+if(!dir.exists(here("data"))){
+  dir.create(here("data"))
+}
+
+if(!exists("all_info")){
+  if(!file.exists(here("data","all_info.rds"))){
+    URL <- "https://zenodo.org/record/6536129/files/all_info.rds?download=1"
+    all_info <- readRDS(url(URL))
+    saveRDS(all_info,here("data","all_info.rds"))
+  }
+  else{
+  all_info <- readRDS(here("data","all_info.rds"))
+  }
+}
+
+```
+
+```{r compute-tags-occurrences-for-countries, include =FALSE, fig.align='center', out.width="80%", message = FALSE}
+#Calculate proportion of tags per country and per hour
+#Hours are rounded via round() function
+
+occurences <- all_info %>% dplyr::group_by(tag_name, admin, local_time = as.numeric(round(local_time))) %>% dplyr::count(name = "track_occurences")
+
+occurences["local_time"][occurences["local_time"] == 0] <- 24
+
+occurences <- all_info %>% dplyr::group_by(tag_name, admin, local_time = as.numeric(floor(local_time))) %>% dplyr::count(name = "track_occurences")
+
+```
+
+```{r compute-tags-hourly-repartition-country, include =FALSE}
+
+tags_hourly_repartition <- occurences %>% 
+  left_join(
+    occurences %>%  dplyr::group_by(local_time, admin) %>% dplyr::summarise(total = sum(track_occurences)),
+    by = c("local_time", "admin"))
+
+tags_hourly_repartition <- tags_hourly_repartition %>% dplyr::group_by(local_time,admin) %>% dplyr::mutate(percentage = track_occurences * 100 / total)
+
+```
+
+```{r hourly-tags-fr, echo= FALSE, fig.align='center', out.width="80%", message = FALSE, fig.cap=fig_nums("hour-fr")}
+
+ggplot(tags_hourly_repartition %>% dplyr::filter(admin == "France")) +
+  aes(x = local_time, y = percentage) +
+  geom_col() + geom_smooth(method = "loess", se = FALSE, color = "blue") +
+  labs(
+    x = "Local hour",
+    y = "Proportion of tag per hour",
+    title = "Hourly repartition of tags",
+    subtitle = "Noicecaptures tags in France,
+    2017 - 2020"
+  ) +
+  scale_x_continuous(breaks = c(0,6,12,18,23))+
+  facet_wrap(vars(tag_name), scales = "free_y")
+
+#loess graph by stats::loess(percentage ~ local_time, data = tags_hourly_repartition %>% filter(admin == "France"))
+
+#ggsave(here("plots","tags_hourly_repartition_France.png"), width = 20, height = 10) 
+```
+
+```{r hourly-tag-road, echo= FALSE, fig.align='center', out.width="80%", message = FALSE, fig.cap=fig_nums("hour-fr-road")}
+
+ggplot(tags_hourly_repartition %>% filter(admin == "France" & tag_name == "road")) +
+  aes(x = local_time, y = percentage) +
+  geom_col() + geom_smooth(method = "gam", se = FALSE, color = "blue") +
+  labs(
+    x = "Local time (hours)",
+    y = "Proportion of tag per hour",
+    title = "Hourly repartition of road tags",
+    subtitle = "Noicecaptures tags in France,
+    2017 - 2020"
+  ) +
+  scale_x_continuous(breaks = seq(from = 0, to = 24, by = 3))
+
+```

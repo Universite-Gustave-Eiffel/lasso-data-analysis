@@ -1,0 +1,196 @@
+---
+title: "Internship report"
+subtitle: "Adding weather data"
+author: "Ludovic Moisan"
+supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
+date: "`r Sys.Date()`"
+output: 
+  html_document :
+    theme: united
+editor_options: 
+  chunk_output_type: console
+---
+
+<!-- This file is for the calculation and generation of our weather data for further analysis -->
+
+```{r library-add-weather, include= FALSE}
+
+library(here)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(chron)
+library(geosphere)
+library(data.table)
+library(RCurl)
+
+here::i_am("vignettes/[Computing]Adding_weather.Rmd")
+
+if(!dir.exists(here::here("raw_data"))){
+  dir.create(here::here("raw_data"))
+}
+
+```
+
+```{r meteo-get-data, echo = FALSE, include = FALSE, cache= TRUE}
+
+#Weather
+#https://donneespubliques.meteofrance.fr/?fond=produit&id_produit=90&id_rubrique=32
+#Documentation: https://donneespubliques.meteofrance.fr/client/document/parametres-inclus-dans-les-fichiers-de-donnees-synop_283.pdf
+
+#Stations list
+
+filename <- here::here("raw_data","postesSynop.csv")
+
+if(!file.exists(filename)){
+  f = CFILE(filename, mode="wb")
+  curlPerform(url = "https://donneespubliques.meteofrance.fr/donnees_libres/Txt/Synop/postesSynop.csv", writedata = f@ref)
+  close(f)
+}
+
+synopStations <- read.csv2(filename)
+
+#Weather data
+meteoData <- list()
+
+date <- as.Date("20170101",format="%Y%m%d")
+
+while(format(date,"%Y%m") < format(Sys.Date(),"%Y%m")){
+  
+  
+  #Download file
+  filename <- here::here("raw_data",paste0("synop.",format(date,"%Y%m"),".csv.gz"))
+  
+  if(!file.exists(filename) | (format(date,"%Y%m") == format(Sys.Date(),"%Y%m"))){
+    f = CFILE(filename, mode="wb")
+    curlPerform(url = gsub(" ", "",paste("https://donneespubliques.meteofrance.fr/donnees_libres/Txt/Synop/Archive/synop.",format(date,"%Y%m"),".csv.gz")), writedata = f@ref)
+    close(f)
+  }
+  
+  month(date) <- month(date) + 1
+
+  
+  meteoData[[format(date,"%Y%m")]] <- read.csv2(gzfile(filename))
+}
+
+#Perform date transformations
+for (name in names(meteoData)) {
+  #Date characters
+  meteoData[[name]]$date_string <- format(meteoData[[name]]$date, scientific = FALSE)
+  meteoData[[name]]$date_string <- as.character(meteoData[[name]]$date_string)
+  #Year
+  meteoData[[name]]$year <- as.numeric(substr(meteoData[[name]]$date_string, 1, 4))
+  #Month
+  meteoData[[name]]$month <- as.numeric(substr(meteoData[[name]]$date_string, 5, 6))
+  #Day
+  meteoData[[name]]$day <- as.numeric(substr(meteoData[[name]]$date_string, 7, 8))
+  #Hour
+  meteoData[[name]]$hour <- as.numeric(substr(meteoData[[name]]$date_string, 9, 10))
+  #Format date
+  meteoData[[name]]$date_r <- paste(substr(meteoData[[name]]$date_string, 1, 4),
+                                    substr(meteoData[[name]]$date_string, 5, 6),
+                                    substr(meteoData[[name]]$date_string, 7, 8),
+                                    substr(meteoData[[name]]$date_string, 9, 10),
+                                    sep = "-")
+}
+
+#Export to CSV
+
+#Delete old one to update 
+exportFilename <- here::here("raw_data","synop.csv")
+if(exists(exportFilename)){
+  file.remove(exportFilename)
+}
+
+count <- 0
+for (name in names(meteoData)) {
+  if(count == 0){
+    write.table(meteoData[[name]], file = exportFilename,sep = ";",row.names = FALSE,col.names = TRUE)
+  } else{
+    write.table(meteoData[[name]], file = exportFilename, append=TRUE,sep = ";",row.names = FALSE,col.names = FALSE)
+  }
+  count <- count+1
+}
+
+synopStations <- read.csv(here::here('raw_data','postesSynop.csv'), sep=";", header = TRUE)
+
+#Function to determine the nearest station given any coordinate
+get_nearest_station <- function(long,lat){
+  if(!exists("synopStations")){
+  synopStations <- read.csv(here::here('raw_data','postesSynop.csv'), sep=";", header = TRUE)
+  }
+  synopStations$distance <- apply(synopStations[,c('Longitude','Latitude')], 1,
+                                  function(x){
+                                    synopStations$distance <- 
+                                      distGeo(c( as.numeric(x['Longitude']),as.numeric(x['Latitude'])),c(long,lat))
+                                  })
+  
+  synopStations[which(synopStations$distance==min(synopStations$distance, na.rm = TRUE)), ]
+}
+
+#Read the stations' data
+stations <- fread(here::here('raw_data','synop.csv'), sep=";", header = TRUE, 
+                       select = c("numer_sta"="numeric","date_r"="character",
+                                  "rr3"="character","ff"="character","t"="character","nnuage1"="numeric",
+                                  "year"="numeric","month"="numeric","day"="numeric","hour"="numeric"))
+get_weather <- function(long,lat,y,m=1,d=1,h=12){
+  ID <- (get_nearest_station(long, lat))$ID
+  dist <- (get_nearest_station(long, lat))$distance
+  if(!exists("stations")){
+  stations <- fread(here::here('raw_data','synop.csv'), sep=";", header = TRUE, 
+                       select = c("numer_sta"="numeric","date_r"="character",
+                                  "rr3"="character","ff"="numeric","t"="numeric","nnuage1"="numeric",
+                                  "year"="numeric","month"="numeric","day"="numeric","hour"="numeric"))
+  }
+  station <- stations %>% filter(numer_sta == ID & year == y & month == m & day == d & hour == ceiling(h/3)*3)
+  if(length(station$rr3)==0){
+    rain <- NA
+  }
+  if(length(station$rr3)!=0){
+    rain <- as.numeric(station$rr3)
+  }
+  if(length(station$ff)==0){
+    wind <- NA
+  }
+  if(length(station$ff)!=0){
+    wind <- as.numeric(station$ff)
+  }
+  if(length(station$t)==0){
+    kelvin <- NA
+  }
+  if(length(station$t)!=0){
+    kelvin <- as.numeric(station$t)
+  }
+  if(length(station$nnuage1)==0){
+    cloud <- NA
+  }
+  if(length(station$nnuage1)!=0){
+    cloud <- as.numeric(station$nnuage1)
+  }
+  info_weather <- c(rain,kelvin,wind,cloud,dist)
+  return(info_weather)
+}
+
+df_meteo = as.data.frame(matrix(nrow = 1, ncol = 7))
+meteo_df <- all_info_sun %>% filter(admin == "France")
+for(i in 1:nrow(meteo_df)) {
+    row <- meteo_df[i,]
+    track <- row$pk_track
+    tag <- row$tag_name
+    meteo_info <- 
+      get_weather(row$lon,row$lat,year(row$record_utc),month(row$record_utc),day(row$record_utc),hour(row$record_utc))
+    info <- c(track,tag,meteo_info)
+    df_meteo[nrow(df_meteo) + 1,] <- info
+}
+
+df_meteo <- df_meteo %>% slice(2:nrow(df_meteo))
+
+saveRDS(df_meteo, here::here("data","df_meteo.rds"))
+
+meteo_france <- df_meteo %>% dplyr::mutate(pk_track = as.numeric(V1), tag_name = V2, rain_mm = as.numeric(V3), celsius = as.numeric(V4) - 273.15, wind = as.numeric(V5)*3.6, cloud = as.numeric(V6), dist_station = as.numeric(V7)) %>% dplyr::select(pk_track,tag_name,rain_mm,celsius,wind,cloud,dist_station)
+
+meteo_france <- inner_join(meteo_france, all_info_sun %>% filter(admin=="France"), by = c("pk_track","tag_name")) %>% dplyr::select(pk_track,tag_name,rain_mm,celsius,wind,cloud,dist_station,season,local_date)
+
+saveRDS(meteo_france, here::here("data","meteo_france.rds"))
+
+```
