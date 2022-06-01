@@ -53,7 +53,43 @@
       <a href="../articles/crowdsourced_acoustic_data_analysis_with_foss4g_2022.html">Crowdsourced acoustic open data analysis with FOSS4G tools</a>
     </li>
     <li>
+      <a href="../articles/Main_doc.html">Intership report</a>
+    </li>
+    <li>
       <a href="../articles/temporal_exploratory_analysis.html">Temporal exploratory analysis</a>
+    </li>
+    <li>
+      <a href="../articles/%5BAnalysis%5DDatabase_overview.html">Internship report</a>
+    </li>
+    <li>
+      <a href="../articles/%5BAnalysis%5DHourly_tag_repartition.html">Internship report</a>
+    </li>
+    <li>
+      <a href="../articles/%5BAnalysis%5DTags_around_sunrise.html">Internship report</a>
+    </li>
+    <li>
+      <a href="../articles/%5BAnalysis%5DTags_around_sunset.html">Internship report</a>
+    </li>
+    <li>
+      <a href="../articles/%5BAnalysis%5DTemporal_attributes.html">Internship report</a>
+    </li>
+    <li>
+      <a href="../articles/%5BAnalysis%5DWeather_analysis.html">Internship report</a>
+    </li>
+    <li>
+      <a href="../articles/%5BComputing%5DAdding_temporal_data.html">Internship report</a>
+    </li>
+    <li>
+      <a href="../articles/%5BComputing%5DAdding_weather.html">Internship report</a>
+    </li>
+    <li>
+      <a href="../articles/%5BComputing%5DCalculate_components.html">Internship report</a>
+    </li>
+    <li>
+      <a href="../articles/%5BComputing%5DData_cleaning.html">Internship report</a>
+    </li>
+    <li>
+      <a href="../articles/%5BComputing%5DSpatial_components.html">Internship report</a>
     </li>
   </ul>
 </li>
@@ -78,7 +114,7 @@
             <address class="author_afil">
       UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France<br><h4 data-toc-skip class="author">Ludovic Moisan</h4>
             <address class="author_afil">
-      UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France<br><h4 data-toc-skip class="date">2022-05-11</h4>
+      UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France<br><h4 data-toc-skip class="date">2022-05-30</h4>
       
       
       <div class="hidden name"><code>temporal_exploratory_analysis.Rmd</code></div>
@@ -194,7 +230,7 @@ password<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/bas
 <span class="va">tag_list</span> <span class="op">&lt;-</span> <span class="fu">xfun</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/xfun/man/cache_rds.html" class="external-link">cache_rds</a></span><span class="op">(</span><span class="op">{</span>
   <span class="va">query</span> <span class="op">&lt;-</span> <span class="st">"SELECT distinct  * FROM noisecapture_tag;"</span>
   <span class="fu">RPostgreSQL</span><span class="fu">::</span><span class="fu">dbGetQuery</span><span class="op">(</span><span class="va">con</span>,statement <span class="op">=</span> <span class="va">query</span><span class="op">)</span> 
-<span class="op">}</span><span class="op">)</span>
+<span class="op">}</span>,rerun <span class="op">=</span> <span class="va">params</span><span class="op">$</span><span class="va">database</span><span class="op">)</span>
 
 <span class="va">tag_list</span></code></pre></div>
 <pre><code><span class="co">##    pk_tag       tag_name</span>
@@ -263,7 +299,7 @@ It also remove the tracks where the GPS accuracy was below a 20 meters threshold
 FROM france_tracks;"</span>
 
  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">st_read</a></span><span class="op">(</span><span class="va">con</span>,query <span class="op">=</span> <span class="va">query</span><span class="op">)</span>
-<span class="op">}</span><span class="op">)</span>
+<span class="op">}</span>,rerun <span class="op">=</span> <span class="va">params</span><span class="op">$</span><span class="va">database</span><span class="op">)</span>
 
 <span class="va">track_info</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Simple feature collection with 6 features and 6 fields</span>
@@ -297,7 +333,7 @@ FROM france_tracks;"</span>
 <span class="op">}</span>
 <span class="va">france_metro</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">st_read</a></span><span class="op">(</span>dsn<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">extraWD</span>, <span class="st">"2020_France_metro_WGS84.geojson"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Reading layer `2020_France_metro_WGS84' from data source </span>
-<span class="co">##   `D:\Roelandt\PROJETS\InProgress\06_UMRAE\2021\LASSO\raw_data\2020_France_metro_WGS84.geojson' </span>
+<span class="co">##   `D:\Roelandt\PROJETS\InProgress\06_UMRAE\2021\lasso-data-analysis\raw_data\2020_France_metro_WGS84.geojson' </span>
 <span class="co">##   using driver `GeoJSON'</span>
 <span class="co">## Simple feature collection with 1 feature and 1 field</span>
 <span class="co">## Geometry type: MULTIPOLYGON</span>
@@ -1216,14 +1252,14 @@ The scripts folder contains several scripts to execute to prepare the dataset.</
 <code class="sourceCode R"><span class="co"># print software versions</span>
 <span class="va">pg_version</span>  <span class="op">&lt;-</span> <span class="fu">xfun</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/xfun/man/cache_rds.html" class="external-link">cache_rds</a></span><span class="op">(</span><span class="op">{</span>
   <span class="fu">RPostgreSQL</span><span class="fu">::</span><span class="fu">dbGetQuery</span><span class="op">(</span><span class="va">con</span>,statement <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"SELECT version();"</span><span class="op">)</span><span class="op">)</span> <span class="co"># should return PostgreSQL 10.15 or higher</span>
-<span class="op">}</span><span class="op">)</span>
+<span class="op">}</span>,rerun <span class="op">=</span> <span class="va">params</span><span class="op">$</span><span class="va">database</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">pg_version</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">##                                                                                                                             version</span>
-<span class="co">## 1 PostgreSQL 10.19 (Ubuntu 10.19-1.pgdg18.04+1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0, 64-bit</span></code></pre>
+<pre><code><span class="co">##                                                                                                                                version</span>
+<span class="co">## 1 PostgreSQL 10.21 (Ubuntu 10.21-0ubuntu0.18.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0, 64-bit</span></code></pre>
 <div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">postgis_version</span>  <span class="op">&lt;-</span> <span class="fu">xfun</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/xfun/man/cache_rds.html" class="external-link">cache_rds</a></span><span class="op">(</span><span class="op">{</span>
   <span class="fu">RPostgreSQL</span><span class="fu">::</span><span class="fu">dbGetQuery</span><span class="op">(</span><span class="va">con</span>,statement <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"SELECT postgis_full_version();"</span><span class="op">)</span><span class="op">)</span> <span class="co"># should return PostGIS 2.5 or higher</span>
-<span class="op">}</span><span class="op">)</span>
+<span class="op">}</span>,rerun <span class="op">=</span> <span class="va">params</span><span class="op">$</span><span class="va">database</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">postgis_version</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##                                                                                                                                                                                            postgis_full_version</span>
 <span class="co">## 1 POSTGIS="2.5.5" [EXTENSION] PGSQL="100" GEOS="3.7.1-CAPI-1.11.1 27a5e771" PROJ="Rel. 4.9.3, 15 August 2016" GDAL="GDAL 2.4.2, released 2019/06/28" LIBXML="2.9.4" LIBJSON="0.12.1" LIBPROTOBUF="1.2.1" RASTER</span></code></pre>

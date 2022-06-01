@@ -13,7 +13,7 @@ pkgdown:
 output:
   bookdown::html_document2
 params:
-  database: FALSE
+  database: FALSE # set to FALSE to use the cache
 ---
 
 # Replication
@@ -121,7 +121,7 @@ You can check your connection by requesting the tag list for example.
 tag_list <- xfun::cache_rds({
   query <- "SELECT distinct  * FROM noisecapture_tag;"
   RPostgreSQL::dbGetQuery(con,statement = query) 
-})
+},rerun = params$database)
 
 tag_list
 ```
@@ -151,7 +151,7 @@ track_info <- xfun::cache_rds({
 FROM france_tracks;"
 
  sf::st_read(con,query = query)
-})
+},rerun = params$database)
 
 track_info %>% head()
 ```
@@ -636,13 +636,13 @@ xfun::session_info(sapply(sessionInfo()$otherPkgs, extract_loaded_package), depe
 # print software versions
 pg_version  <- xfun::cache_rds({
   RPostgreSQL::dbGetQuery(con,statement = paste("SELECT version();")) # should return PostgreSQL 10.15 or higher
-})
+},rerun = params$database)
 print(pg_version)
 ```
 ```{r postgis-version}
 postgis_version  <- xfun::cache_rds({
   RPostgreSQL::dbGetQuery(con,statement = paste("SELECT postgis_full_version();")) # should return PostGIS 2.5 or higher
-})
+},rerun = params$database)
 print(postgis_version)
 ```
 
