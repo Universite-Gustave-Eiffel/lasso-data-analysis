@@ -29,10 +29,10 @@ abstract : |
 pkgdown:
   as_is: true
 output:
-  #bookdown::html_document2: # vignette output
-  #  includes:
-  #    before_body: header.html
-  isprspaged::article # pdf output
+  bookdown::html_document2: # vignette output
+    includes:
+      before_body: header.html
+  #isprspaged::article # pdf output
 #knit: pagedown::chrome_print
 ---
 
@@ -567,5 +567,5 @@ We would like to thank the FOSS community for providing us all those tools to wo
 ```{js, echo=FALSE}
 // insert a soft break to avoid an infinite loop with FF
 // this is because FF handles lists differently
-document.querySelector('#TOC h1').insertAdjacentHTML('afterend', '<wbr>');
+//document.querySelector('#TOC h1').insertAdjacentHTML('afterend', '<wbr>');
 ```
