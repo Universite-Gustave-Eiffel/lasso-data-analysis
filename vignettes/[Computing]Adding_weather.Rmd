@@ -1,6 +1,6 @@
 ---
-title: "Internship report"
-subtitle: "Adding weather data"
+title: "Adding weather data"
+subtitle: "Crossing data with Météo_France"
 author: "Ludovic Moisan"
 supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
 date: "`r Sys.Date()`"
@@ -189,7 +189,7 @@ saveRDS(df_meteo, here::here("data","df_meteo.rds"))
 
 meteo_france <- df_meteo %>% dplyr::mutate(pk_track = as.numeric(V1), tag_name = V2, rain_mm = as.numeric(V3), celsius = as.numeric(V4) - 273.15, wind = as.numeric(V5)*3.6, cloud = as.numeric(V6), dist_station = as.numeric(V7)) %>% dplyr::select(pk_track,tag_name,rain_mm,celsius,wind,cloud,dist_station)
 
-meteo_france <- inner_join(meteo_france, all_info_sun %>% filter(admin=="France"), by = c("pk_track","tag_name")) %>% dplyr::select(pk_track,tag_name,rain_mm,celsius,wind,cloud,dist_station,season,local_date)
+meteo_france <- inner_join(meteo_france, all_info_sun %>% dplyr::filter(admin=="France"), by = c("pk_track","tag_name")) %>% dplyr::select(pk_track,tag_name,rain_mm,celsius,wind,cloud,dist_station,season,local_date)
 
 saveRDS(meteo_france, here::here("data","meteo_france.rds"))
 

@@ -1,6 +1,6 @@
 ---
-title: "Internship report"
-subtitle: "Analysis of temporal attributes"
+title: "Temporal attributes analysis"
+subtitle: "Types of days and special events"
 author: "Ludovic Moisan"
 supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
 date: "`r Sys.Date()`"
@@ -11,7 +11,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-<!-- This file is for the plotting and analysis of our temporal attributes -->
+<!-- This file is for the plotting and analysis of our temporal attributes (types of days and special events) -->
 
 
 ```{r library-tempo-analysis, include = FALSE}

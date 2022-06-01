@@ -1,6 +1,6 @@
 ---
-title: "Internship report"
-subtitle: "Tags around sunrise"
+title: "Sunrise analysis"
+subtitle: "Tags' distribution around sunrise"
 author: "Ludovic Moisan"
 supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
 date: "`r Sys.Date()`"
