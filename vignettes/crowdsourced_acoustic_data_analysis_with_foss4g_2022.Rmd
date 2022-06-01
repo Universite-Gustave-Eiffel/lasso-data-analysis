@@ -224,7 +224,7 @@ We will present some of this results here.
 The code producing the analysis and graphics are separated in 
 several complementary documents[^5].
 
-[^5]: https://nicolas-roelandt.github.io/lasso-data-analysis/articles/
+[^5]: https://ifsttar.github.io/lasso-data-analysis/articles/
 
 The selection criteria for the data we were going to use for our analyses were 
 both attributive and spatial.
