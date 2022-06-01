@@ -178,15 +178,15 @@ effects are numerous: hearing damage, sleep disturbances, cardiovascular patholo
 studies show that the perceived noise environment is significantly correlated with an individual’s satisfaction with
 his or her living environment, with his or her health-related quality of life or with the restorative effect of a place <span class="citation">(<a href="#ref-botteldooren2011InfluenceTrafficNoise" role="doc-biblioref">Botteldooren, Dekoninck, and Gillis 2011</a>)</span>.
 The economic and social impact of noise has also been demonstrated with a social cost of noise in France estimated at
-147 billion euros per year <span class="citation">(<a href="#ref-ademe2021EstimationCoutSocial" role="doc-biblioref">ADEME et al. 2021</a>)</span>. A complete and precise evaluation of the presence of noise in the environment is
+147 billion euros per year <span class="citation">(<a href="#ref-ademe2021EstimationCoutSocial" role="doc-biblioref">ADEME et al. 2021</a>)</span>. A complete and precise environmental noise assessment is
 therefore of great necessity.</p>
 <p>The NoiseCapture app is part of a global Open Science approach (called Noise-Planet) led by Université
 Gustave Eiffel and CNRS, for the development of tools for the assessment of the sound environment.
 This project is particularly interested in the implementation of a participative approach for the
-production of data with smartphones in order to eventually propose an alternative method of environmental sound mapping.
+production of data with smartphones to eventually propose an alternative method of environmental sound mapping.
 For this purpose, an Android application and a spatial data infrastructure
-have been specifically developed. The whole system allows to collect physical data (acoustic measurements, GPS positions…)</p>
-<p>and perceptual data (pleasantness, presence of sound sources), without any territory limit, while
+have been specifically developed. The whole system allows to collect physical data (acoustic measurements, GPS positions…)
+and perceptual data (pleasantness, presence of sound sources), without any territory limit, while
 respecting the privacy of the contributors. The collected data are freely accessible,
 in particular by the scientific community which would like to develop new tools
 for the evaluation and representation of sound environments.</p>
@@ -195,18 +195,19 @@ acoustic samples. A first article presenting this dataset has been published in 
 It details the structure of the database and the data, the profile of the
 contributors and the contributions but does not analyze the content of the data.
 This is what this article proposes to begin.</p>
-<div class="section level3" number="1.1">
-<h3 id="methodology">
-<span class="header-section-number">1.1</span> Methodology<a class="anchor" aria-label="anchor" href="#methodology"></a>
-</h3>
+</div>
+<div class="section level2" number="2">
+<h2 id="methodology">
+<span class="header-section-number">2</span> Methodology<a class="anchor" aria-label="anchor" href="#methodology"></a>
+</h2>
 <p>As the NoiseCapture application is Open Source and the data collection infrastructure
 use Free and Open Source Softwares (FOSS), we decided to pursue this by using
 open source software and data for the analysis part.</p>
 <p>First, we will introduce the dataset then we will present the tools we used and why we choose them.</p>
-<div class="section level4" number="1.1.1">
-<h4 id="data">
-<span class="header-section-number">1.1.1</span> Data<a class="anchor" aria-label="anchor" href="#data"></a>
-</h4>
+<div class="section level3" number="2.1">
+<h3 id="data">
+<span class="header-section-number">2.1</span> Data<a class="anchor" aria-label="anchor" href="#data"></a>
+</h3>
 <p>The data used in this study are contributions made by the user of the application
 between August 29, 2017 and August 28, 2020.
 During this period, nearly 70,000 unique contributors allowed
@@ -235,10 +236,10 @@ National Institute of Geographic and Forest Information <span class="citation">(
 <p>The raw data has been stored and pre-filtered in a geospatial database and has been
 analysed using a statistical analysis language.</p>
 </div>
-<div class="section level4" number="1.1.2">
-<h4 id="tools">
-<span class="header-section-number">1.1.2</span> Tools<a class="anchor" aria-label="anchor" href="#tools"></a>
-</h4>
+<div class="section level3" number="2.2">
+<h3 id="tools">
+<span class="header-section-number">2.2</span> Tools<a class="anchor" aria-label="anchor" href="#tools"></a>
+</h3>
 <p>In order to be as open as possible and to work in the most collaborative way,
 we decided a FOSS toolset: PostgreSQL/Postgis to store the data and the R language
 to analyse and produce knowledge from it.
@@ -266,13 +267,12 @@ facilitate code sources communication, for this purpose, we used git.</p>
 It enables collaborative and decentralized work.
 Using the Github online plateforme, we could communicate source code changes to
 each other in a desynchronized way between different collaborators present on several
-sites (Nantes, Lyon, Paris).
-Git is already used within the UMRAE laboratory.</p>
+sites (Nantes, Lyon, Paris).</p>
 </div>
-<div class="section level4" number="1.1.3">
-<h4 id="implementation">
-<span class="header-section-number">1.1.3</span> Implementation<a class="anchor" aria-label="anchor" href="#implementation"></a>
-</h4>
+<div class="section level3" number="2.3">
+<h3 id="pre-processing">
+<span class="header-section-number">2.3</span> Pre-processing<a class="anchor" aria-label="anchor" href="#pre-processing"></a>
+</h3>
 <p>The raw data are provided in the form of a PostgreSQL/PostGIS dump.
 A server has been set up to store the data.
 Several SQL scripts create materialized views that perform much of the attribute
@@ -291,7 +291,6 @@ In order to have a better qualification of the quality of the dataset, we look i
 between the weather events in the environment and the tags filled by the user.
 More precisely the indicator chosen is the ratio of users who have put a particular
 tag among the users who have put at least one tag in a particular condition (i.e. no wind vs. wind).</p>
-<p>We will present some of this results here.</p>
 <p>The code producing the analysis and graphics are separated in
 several complementary documents<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a>.</p>
 <p>The selection criteria for the data we were going to use for our analyses were
@@ -328,14 +327,13 @@ Some files prepare additional data or calculate indicators.
 Others analyze the results.</p>
 </div>
 </div>
-</div>
-<div class="section level2" number="2">
+<div class="section level2" number="3">
 <h2 id="results">
-<span class="header-section-number">2</span> Results<a class="anchor" aria-label="anchor" href="#results"></a>
+<span class="header-section-number">3</span> Results<a class="anchor" aria-label="anchor" href="#results"></a>
 </h2>
-<div class="section level3" number="2.1">
+<div class="section level3" number="3.1">
 <h3 id="environmental-acoustics-results">
-<span class="header-section-number">2.1</span> Environmental acoustics results<a class="anchor" aria-label="anchor" href="#environmental-acoustics-results"></a>
+<span class="header-section-number">3.1</span> Environmental acoustics results<a class="anchor" aria-label="anchor" href="#environmental-acoustics-results"></a>
 </h3>
 <p>The main goal of this preliminary study was to verify the scientific value of
 crowdsourced acoustic data and if tags are sufficient to describe user environment.</p>
@@ -357,9 +355,9 @@ known phenomena in environmental acoustics appeared in the data.</p>
 <p>Subsequently, we seek to determine for physical phenomena such as rain and wind
 if the presence of tags related to them in our dataset corresponded to real
 measurements of rain and wind of the national weather service.</p>
-<div class="section level4" number="2.1.1">
-<h4 id="known-environmental-acoustics-phenomena">
-<span class="header-section-number">2.1.1</span> Known environmental acoustics phenomena<a class="anchor" aria-label="anchor" href="#known-environmental-acoustics-phenomena"></a>
+<div class="section level4" number="3.1.1">
+<h4 id="known-environmental-acoustics-temporal-dynamics">
+<span class="header-section-number">3.1.1</span> Known environmental acoustics temporal dynamics<a class="anchor" aria-label="anchor" href="#known-environmental-acoustics-temporal-dynamics"></a>
 </h4>
 <p>A first axis of analysis concerns the time distribution of certains tags.
 The first tag we studied was the <code>animals</code> tag.
@@ -393,9 +391,9 @@ However, we wanted more precise quality indicators so we looked if we were able
 to correlate the mention of physical events in the dataset and records of thoses
 events in an authoritative database.</p>
 </div>
-<div class="section level4" number="2.1.2">
+<div class="section level4" number="3.1.2">
 <h4 id="correlation-between-tags-and-physical-events-in-the-user-environment">
-<span class="header-section-number">2.1.2</span> Correlation between tags and physical events in the user environment<a class="anchor" aria-label="anchor" href="#correlation-between-tags-and-physical-events-in-the-user-environment"></a>
+<span class="header-section-number">3.1.2</span> Correlation between tags and physical events in the user environment<a class="anchor" aria-label="anchor" href="#correlation-between-tags-and-physical-events-in-the-user-environment"></a>
 </h4>
 <p>As we know the user position and we have the timestamp of the recording, we are
 able to determine the weather conditions at that time and place using the services
@@ -429,9 +427,9 @@ The dataset we have studied is not sufficient to characterize the
 amount of rainfall but sufficient to qualify the presence or absence of it.</p>
 </div>
 </div>
-<div class="section level3" number="2.2">
+<div class="section level3" number="3.2">
 <h3 id="benefits-of-openscience-and-literate-programming">
-<span class="header-section-number">2.2</span> Benefits of OpenScience and literate programming<a class="anchor" aria-label="anchor" href="#benefits-of-openscience-and-literate-programming"></a>
+<span class="header-section-number">3.2</span> Benefits of OpenScience and literate programming<a class="anchor" aria-label="anchor" href="#benefits-of-openscience-and-literate-programming"></a>
 </h3>
 <p>Intrinsically, Free and Open Source Software (FOSS) brings many benefits to any
 project, whether it is a scientific one or not.
@@ -442,7 +440,7 @@ Another advantage, as long as one has the necessary skills, is to be able to ada
 the tool to one’s needs, an important quality in an often innovative field.
 Free software favors interoperability and this aspect is important when creating
 complex processing chains, implementing several different tools.</p>
-<p>As shown in Section <a href="#tools">1.1.2</a>, this study use a rather small toolset of FOSS.
+<p>As shown in Section <a href="#tools">2.2</a>, this study use a rather small toolset of FOSS.
 The reduction of the number of tools needed for the scientific production was
 possible thanks to the use of a programming language allowing to cover practically
 all the aspects of the project, whether it is the connection to the database,

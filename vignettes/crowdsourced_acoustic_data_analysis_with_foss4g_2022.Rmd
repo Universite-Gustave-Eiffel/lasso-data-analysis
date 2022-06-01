@@ -92,16 +92,15 @@ effects are numerous: hearing damage, sleep disturbances, cardiovascular patholo
 studies show that the perceived noise environment is significantly correlated with an individual's satisfaction with 
 his or her living environment, with his or her health-related quality of life or with the restorative effect of a place [@botteldooren2011InfluenceTrafficNoise]. 
 The economic and social impact of noise has also been demonstrated with a social cost of noise in France estimated at 
-147 billion euros per year [@ademe2021EstimationCoutSocial]. A complete and precise evaluation of the presence of noise in the environment is 
+147 billion euros per year [@ademe2021EstimationCoutSocial]. A complete and precise environmental noise assessment is 
 therefore of great necessity.
 
 The NoiseCapture app is part of a global Open Science approach (called Noise-Planet) led by Université 
 Gustave Eiffel and CNRS, for the development of tools for the assessment of the sound environment. 
 This project is particularly interested in the implementation of a participative approach for the 
-production of data with smartphones in order to eventually propose an alternative method of environmental sound mapping.
+production of data with smartphones to eventually propose an alternative method of environmental sound mapping.
 For this purpose, an Android application and a spatial data infrastructure 
 have been specifically developed. The whole system allows to collect physical data (acoustic measurements, GPS positions...) 
-
 and perceptual data (pleasantness, presence of sound sources), without any territory limit, while 
 respecting the privacy of the contributors. The collected data are freely accessible, 
 in particular by the scientific community which would like to develop new tools 
@@ -113,7 +112,7 @@ It details the structure of the database and the data, the profile of the
 contributors and the contributions but does not analyze the content of the data. 
 This is what this article proposes to begin.
 
-## Methodology
+# Methodology
 
 As the NoiseCapture application is Open Source and the data collection infrastructure 
 use Free and Open Source Softwares (FOSS), we decided to pursue this by using 
@@ -121,7 +120,7 @@ open source software and data for the analysis part.
 
 First, we will introduce the dataset then we will present the tools we used and why we choose them.
 
-### Data
+## Data
 
 The data used in this study are contributions made by the user of the application
 between August 29, 2017 and August 28, 2020.
@@ -158,7 +157,7 @@ National Institute of Geographic and Forest Information [@institutgeographiquena
 The raw data has been stored and pre-filtered in a geospatial database and has been
 analysed using a statistical analysis language.
 
-### Tools{#tools}
+## Tools{#tools}
 
 In order to be as open as possible and to work in the most collaborative way,
 we decided a FOSS toolset: PostgreSQL/Postgis to store the data and the R language 
@@ -194,9 +193,8 @@ It enables collaborative and decentralized work.
 Using the Github online plateforme, we could communicate source code changes to 
 each other in a desynchronized way between different collaborators present on several
 sites (Nantes, Lyon, Paris).
-Git is already used within the UMRAE laboratory.
 
-### Implementation
+## Pre-processing
 
 The raw data are provided in the form of a PostgreSQL/PostGIS dump.
 A server has been set up to store the data.
@@ -218,8 +216,6 @@ In order to have a better qualification of the quality of the dataset, we look i
 between the weather events in the environment and the tags filled by the user. 
 More precisely the indicator chosen is the ratio of users who have put a particular 
 tag among the users who have put at least one tag in a particular condition (i.e. no wind vs. wind).
-
-We will present some of this results here.
 
 The code producing the analysis and graphics are separated in 
 several complementary documents[^5].
@@ -304,7 +300,7 @@ Subsequently, we seek to determine for physical phenomena such as rain and wind
 if the presence of tags related to them in our dataset corresponded to real 
 measurements of rain and wind of the national weather service.
 
-### Known environmental acoustics phenomena 
+### Known environmental acoustics temporal dynamics 
 
 A first axis of analysis concerns the time distribution of certains tags.
 The first tag we studied was the `animals` tag. 
@@ -506,7 +502,7 @@ but there is no guarantee that the result will be exactly the same.
 The package R [renv](https://rstudio.github.io/renv/index.html) can help to 
 reproduce an R environment and environment by providing functions for saving and 
 restoring dependencies at the project level.
-In some cases, if this is not enough, it will be necessary to turn to higher-level
+In some cases, if this is not enough, it will be necessary to turn to lower-level
 solutions such as [Docker](https://www.docker.com/) and [Guix](https://guix.gnu.org/).
 
 # Conclusion {-}
