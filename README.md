@@ -4,9 +4,8 @@
 
 This short analysis explore the [data](https://research-data.ifsttar.fr/dataset.xhtml?persistentId=doi:10.25578/J5DG3W) collected by the [Noisecapture Android application](https://play.google.com/store/apps/details?id=org.noise_planet.noisecapture) between 2017 and 2020.
 
-A [first exploratory analysis](https://nicolas-roelandt.github.io/lasso-data-analysis/articles/temporal_exploratory_analysis.html) 
-focus on the tracks recorded in France and the search
-for known patterns in environmental acoustics.
+Several [exploratory analysis](https://ifsttar.github.io/lasso-data-analysis/articles/) 
+has been done, focusing on the tracks recorded in France.
 
 These preliminary works are part of the research carried out 
 within the framework of the LASSO project 
@@ -20,14 +19,14 @@ https://research-data.ifsttar.fr/dataset.xhtml?persistentId=doi:10.25578/J5DG3W
 
 ## How to reproduce
 ### Build the database
-#### Server configuration
+#### Database configuration
 - Ubuntu 18.04 or higher
 - PostgreSQL 10.15 or higher (14.0 is recommended)
 - Postgis 2.5 or higher
 
 #### Steps
 
-- Create an empty database named `noisecapture` with the Postgis extension
+- Create an empty database named `noisecapture` with the PostGIS extension
 - Copy in your home folder the SQL script `01_drop_foreign_keys.sql` if your available storage is less than 200 Gb
 - Execute the script `00_prepare_database.sh`, comment the second line if you want to keep foreign keys
 - Execute the SQL script `02_load_country_data.sql` to load additional data from [NaturalEarth](https://www.naturalearthdata.com/downloads/10m-cultural-vectors/) used by the analysis
@@ -40,7 +39,7 @@ to get the code source:
 - using git
 
 ```{bash git-clone, eval=FALSE}
-git clone https://github.com/nicolas-roelandt/lasso-data-analysis
+git clone https://github.com/ifsttar/lasso-data-analysis
 ```
 
 - using R and the [remotes package](https://remotes.r-lib.org/):
@@ -50,10 +49,10 @@ git clone https://github.com/nicolas-roelandt/lasso-data-analysis
 
 # We suggest to use the remotes packages to install required packages
 # install.packages("remotes")
-remotes::install_github("nicolas-roelandt/lasso-data-analysis")
+remotes::install_github("ifsttar/lasso-data-analysis")
 ```
 
-- download as a [zip archive](https://github.com/nicolas-roelandt/lasso-data-analysis/archive/refs/heads/main.zip)
+- download as a [zip archive](https://github.com/ifsttar/lasso-data-analysis/archive/refs/heads/main.zip)
 
 ### Setting up R
 This analysis use several packages that you'll need to install beforehand.
@@ -76,9 +75,7 @@ pkgs <- c("RPostgreSQL",
 # Already installed packages won't be reinstalled
 remotes::install_cran(pkgs)
 ```
-
-### Render [temporal_exploratory_analysis.Rmd](https://github.com/nicolas-roelandt/lasso-data-analysis/blob/FOSS4G2022/vignettes/temporal_exploratory_analysis.Rmd) vignette
-
+### Set connection parameters to the database
 
 Please be sure to adapt the connection parameters to your database.
 Those parameters are presented as an example, the database is not available online.
@@ -95,5 +92,31 @@ user="noisecapture",
 password=Sys.getenv('noisecapture_password') # password stored in .Renviron. Use this to edit it : usethis::edit_r_environ()
 )
 ```
+
+### Render analysis
+
+In order to facilitate reproductibility, the analysis have been set in several vignettes
+that are stored in the `vignettes` folder.
+Each document is autonomous and can be executed independently (except for the 
+`Main_doc.Rmd` document which executes others).
+
+The [crowdsourced_acoustic_data_analysis_with_foss4g_2022.Rmd](https://github.com/Ifsttar/lasso-data-analysis/blob/main/vignettes/crowdsourced_acoustic_data_analysis_with_foss4g_2022.Rmd) vignette is the source code to the published article.
+
+The [temporal_exploratory_analysis.Rmd](https://github.com/ifsttar/lasso-data-analysis/blob/main/vignettes/temporal_exploratory_analysis.Rmd) vignette corresponds to the first raw analysis.
+
+The [Main_doc.Rmd](https://github.com/Ifsttar/lasso-data-analysis/blob/main/vignettes/Main_doc.Rmd)
+vignettes calls and execute every `[Computing]` and `[Analysis]`.
+
+Those whose name begins with `[Analysis]` contain the analytical part. 
+They are based on pre-processed data that can be either downloaded from Zenodo 
+or generated using the documents whose name starts with `[Computing]`.
+The `[Computing]` documents must have a functional connection to the database 
+containing the noisecapture data and the corresponding views.
+
+
+
+
+
+
 
 
