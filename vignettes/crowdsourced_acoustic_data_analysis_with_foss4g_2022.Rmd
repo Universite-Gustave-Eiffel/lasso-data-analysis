@@ -3,7 +3,7 @@ title: "Crowdsourced acoustic open data analysis with FOSS4G tools"
 author: "Nicolas Roelandt<sup>1</sup>, Pierre Aumond<sup>2</sup>, Ludovic Moisan<sup>2</sup>"
 affiliation: "<sup>1</sup>AME, Univ. Gustave Eiffel, IFSTTAR, F-69675 Bron, France<br /><sup>2</sup>UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France"
 commission: "Commission IV, WG IV/4"
-keywords : 'Environmental acoustics, crowdsourced open data, FOSS4G, reproducibility, literate programming, Open Science, Open Geospatial Software, Open GIScience, Open Geospatial Data'
+keywords : 'Environmental acoustics, crowdsourced open data, FOSS4G, reproductibility, literate programming, Open Science, Open Geospatial Software, Open GIScience, Open Geospatial Data'
 bibliography: bibliography.bib
 biblio-style: "apalike"
 link-citations: true
@@ -17,15 +17,14 @@ abstract : |
  The application is open-source, and all its data are available freely.
  This study presents the results of the first exploratory analysis of 3 years of 
  data collection through the lens of sound sources.
- This analysis is based only on the tags given by the users and not on the sound 
+ This analysis is only based on the tags given by the users and not on the sound 
  spectrum of the measurement, which will be studied at a later stage.
- The first results are encouraging, we were able to observe well known temporal 
- dynamics of roads related to commuting or bird songs in the dataset.
- We also found correlations between wind an rain tags and their measurements by 
+ The first results are encouraging, we were able to observe well known temporal sound source
+ dynamics like road sounds temporal dynamic related to commuting or bird songs in the dataset.
+ We also found correlations between wind and rain tags and their measurements by 
  the the national meteorological service.
  The context of the study, the Free and Open Source Software tools and techniques 
- used are presented as well 
- as the benefits of using literate programming in this type of exploratory work.
+ used  and literate programming benefits are presented.
 pkgdown:
   as_is: true
 output:
@@ -75,7 +74,7 @@ or wind) with the records from the national meteorological service database.
 As these exploratory works will be extended and consolidated thereafter to a 
 more global exploration of the database, and with the will to include this study 
 within the framework of the Open Science, an attention was brought on the 
-reproducibility aspect of the analysis. 
+reproductibility aspect of the analysis. 
 It was entirely realized with Free and Open Source Software (FOSS) and 
 literate programming techniques.
 
@@ -149,7 +148,7 @@ supplementary databases.
 Then we extended some analysis worldwide. The results presented here concern tracks
 recorded in the France metropolitan area.
 
-To facilitate the reproducibility of spatial filtering, it was decided to use 
+To facilitate the reproductibility of spatial filtering, it was decided to use 
 open data sets from recognized sources: the Natural Earth database 
 [@pattersonNaturalEarth2021] and the Admin Express database from the French
 National Institute of Geographic and Forest Information [@institutgeographiquenationalAdminExpress].
@@ -160,9 +159,9 @@ analysed using a statistical analysis language.
 ## Tools{#tools}
 
 In order to be as open as possible and to work in the most collaborative way,
-we decided a FOSS toolset: PostgreSQL/Postgis to store the data and the R language 
+we decided on a FOSS toolset: PostgreSQL/Postgis to store the data and the R language 
 to analyse and produce knowledge from it.
-We also used Git as it is a great tool to facilitate remote collaboration.
+We also used Git for source code versioning and to facilitate remote collaboration.
 
 **PostGIS**: the data are provided as a dump from a PostgreSQL/PostGIS database [@paulramseyPostGIS2001].
 In order to access the data, we had to set up a PostgreSQL server and configure 
@@ -181,9 +180,9 @@ Rmarkdown, an R package, allows to mix code in several programming languages and
 text in markdown for the dynamic production of graphs, tables and documents.
 The use of Rmarkdown is one of the recommended means for literate
 programming (along with Jupyter Notebooks and Emacs Org-Mode [@desquilbet2019ReproducibleResearch])
-So it is a great tool to either communicate inside our team and publish our results.
+So it is a useful tool to either communicate progress inside our team and publish our results.
 
-Rmarkdown, as any markdown file, is a plain text file that can be easily versionned
+Rmarkdown, as any markdown file, is a plain text file that can be easily versioned
 with any version control system.
 As our team is scattered in several places in France, we needed a tool to 
 facilitate code sources communication, for this purpose, we used git.
@@ -204,17 +203,18 @@ corresponding to defined criteria.
 A materialized view is a good compromise between a table and a view because it
 has similar response time to a table and also allows us to recompute 
 values easily if threshold values changed.
+It is perfect to store data that does not change too often.
 Those views are the entry point for the R language to get data to analyse.
 
-The analyses were carried out in two stages: a first exploratory analysis aimed 
-at verifying whether certain known environmental dynamics could be visible in the 
-data set, on the territory of metropolitan France.
-
-The first analysis having brought encouraging results, we took it again in order 
+The analyses were carried out in two stages: a first exploratory analysis and more deeper one. 
+The first analysis aimed at verifying whether certain known environmental dynamics
+could be visible in the  data set.
+This first analysis brought encouraging results, we took it again in order 
 to refine it and to extend the field of research.
-In order to have a better qualification of the quality of the dataset, we look if there is a relationship 
-between the weather events in the environment and the tags filled by the user. 
-More precisely the indicator chosen is the ratio of users who have put a particular 
+In order to have a better qualification of the quality of the dataset, we look 
+if there is a relationship between the weather events in the environment and the
+tags filled by the user. 
+More precisely, the indicator chosen is the ratio of users who have put a particular 
 tag among the users who have put at least one tag in a particular condition (i.e. no wind vs. wind).
 
 The code producing the analysis and graphics are separated in 
@@ -231,16 +231,16 @@ While these two analyses share a common basis, the selection criteria were refin
 Short tracks (duration less than 5 seconds) were discarded in both analysis.
 
 Long tracks (duration longer than 15 minutes) have been removed from the exploratory analysis.
-They were kept in the extended analysis.
+They were kept in the second analysis.
 
 In the exploratory analysis, we kept the tracks where the GPS median accuracy of the whole track was less than 20 meters.
-In the extended analysis, we implemented an algorithm to detect and remove outliers track points using a method from the R package CoordinateCleaner[^CCleaner].
+In the extended analysis, we implemented an algorithm to detect and remove outliers track points using a method from the R package `CoordinateCleaner`[^CCleaner].
 This method was used to keep tracks that would have been eliminated because some of their points had aberrant coordinates, which allowed us to work with larger samples and with a better localization accuracy.
 
 [^CCleaner]: https://search.r-project.org/CRAN/refmans/CoordinateCleaner/html/cc_outl.html
 
-In the exploratory analysis, we decided to keep tracks that are comprised in a rather small area,
-the bounding box area would have to be equivalent to a square of 25 by 25 meters. This criterion was not considered in the extended analysis, but a threshold of 8 m/s (equivalent to 30 km/h) was set between 2 GPS measurements to eliminate tracks with aberrant distance between two measurements points.
+In the first analysis, we decided to keep tracks that are comprised in a rather small area,
+the bounding box area of the track would have to be equivalent to a square of 25 by 25 meters. This criterion was not considered in the extended analysis, but a threshold of 8 m/s (equivalent to 30 km/h) was set between 2 GPS measurements to eliminate tracks with aberrant distance between two measurements points.
 
 Although the extended analysis examined some questions on the global dataset, the results presented here are for tracks in metropolitan France.
 To extract data regarding France metropolitan area, we pre-filtered the data
@@ -268,10 +268,12 @@ Others analyze the results.
 # Results
 ## Environmental acoustics results 
 
-The main goal of this preliminary study was to verify the scientific value of 
-crowdsourced acoustic data and if tags are sufficient to describe user environment.
+The main goal of this preliminary study was to control the quality of the tags defined
+by the users in a crowdsourced acoustic data and if thoses tags are sufficient to 
+describe the user environment.
 
-The study concerns tracks bearing a tag, recorded in metropolitan France. 
+The results presented here concerns tracks bearing a tag, recorded in metropolitan 
+France between 2017 and 2020.
 It focuses on the proportion of a certain tag in relation to all the tags for a 
 given period (time of day, season, etc.). 
 In the sample studied, it is possible to note a large prevalence of the  *road* 
@@ -293,24 +295,23 @@ Noise annoyance from road traffic and its effects on health are a major concern
 in France and are the subject of several studies (
 @meline2013TransportationNoiseAnnoyance, @grange2009PerceptionsBruitIledeFrance).
 
-In order to have a first idea of the quality of our dataset, we tried to see if 
-known phenomena in environmental acoustics appeared in the data.
+In order to have a first idea of the quality of the tags in the dataset, we tried to see if known temporal dynamics in environmental acoustics appeared in the data.
 
 Subsequently, we seek to determine for physical phenomena such as rain and wind 
-if the presence of tags related to them in our dataset corresponded to real 
+if the presence of tags related to them in the dataset corresponded to real 
 measurements of rain and wind of the national weather service.
 
 ### Known environmental acoustics temporal dynamics 
 
 A first axis of analysis concerns the time distribution of certains tags.
 The first tag we studied was the `animals` tag. 
-We wanted to see if we wera able  to see a rise of this tag close to the sunrise.
+We wanted to see if we were able to see a rise of this tag presence in the dataset
+close to the sunrise.
 Indeed as shown by [@robbins1981effect], bird song activity is highest in the 
 morning, especially in the hour after sunrise.
 
-`r fig_nums("animals-sunrise", display = "cite")` shows that animal noises 
-(tag *animals*) are more frequent in the morning and especially 
-at sunrise time.
+`r fig_nums("animals-sunrise", display = "cite")` shows that the tag `animals`
+(associated to bird songs) is more frequent in the morning and especially at sunrise time.
 
 ```{r animals-sunrise-caption, results='hide'}
 caption <- "Animals acoustic dynamics."
@@ -335,7 +336,7 @@ for public transportation data versus road noise data), different types of study
 (Beijing metropolis and metropolitan France).
 
 ```{r road-dynamics-caption, results='hide'}
-caption <- "Road dynamics."
+caption <- "Road acoustics dynamics."
 fig_nums(name = "road-dynamics", caption = caption)
 ```
 
@@ -354,14 +355,14 @@ events in an authoritative database.
 
 ### Correlation between tags and physical events in the user environment
 
+In order to determine the accuracy of the manually selected tags by the users of 
+the NoiseCapture app, we wanted to proceed simple investigations concerning some 
+tags related to physical events, such as the weather related ones (rain,wind),
+which can be verified later on.
+
 As we know the user position and we have the timestamp of the recording, we are 
 able to determine the weather conditions at that time and place using the services
 of Météo-France, the French national meteorological service.
-
-In order to determine the accuracy of the manually selected tags by the users of 
-the NoiseCapture app, we want to proceed simple investigations concerning some 
-tags that concern physical events, such as the weather related ones (rain,wind),
-which can be verified later on.
 
 The weather data used is from France's national weather organisation Météo-France, 
 available along with its full documentation from their website :
@@ -371,7 +372,7 @@ The meteorological data collected are from the nearest meteorological stations.
 The median distance between weather stations and our tracks is **16.1 kilometers**.
 
 ```{r rain-tag-use-caption, results='hide'}
-caption <- "Rain tag use."
+caption <- "`rain` tag use."
 fig_nums(name = "rain-tag-use", caption = caption)
 ```
 
@@ -384,7 +385,7 @@ knitr::include_graphics("https://github.com/nicolas-roelandt/lasso-data-analysis
 
 
 ```{r wind-tag-use-caption, results='hide'}
-caption <- "Wind tag use."
+caption <- "`wind` tag use."
 fig_nums(name = "wind-tag-use", caption = caption)
 ```
 
@@ -394,7 +395,7 @@ knitr::include_graphics("https://github.com/nicolas-roelandt/lasso-data-analysis
 
 `r paste0('<p class="caption">',fig_nums("wind-tag-use"), '</p>')`
 
-The proportion of "wind" and "rain" tags seem to correlate with their corresponding physical events.
+The proportion of `wind` and `rain` tags seem to correlate with their corresponding physical events.
 In order to create those graphs, we selected scales to group the data 
 (wind force and precipitation) and compute the proportion of tags present in those groups.
 
@@ -413,20 +414,21 @@ project, whether it is a scientific one or not.
 The problem of licenses is greatly facilitated because they are usable by all, 
 without discrimination and without additional cost.
 The question of having to acquire licenses and how to do so is no longer an issue.
-Another advantage, as long as one has the necessary skills, is to be able to adapt 
-the tool to one's needs, an important quality in an often innovative field.
-Free software favors interoperability and this aspect is important when creating 
-complex processing chains, implementing several different tools.
+Another advantage, as long as one has the necessary skills, is the possibility 
+to adapt  the tool to one's needs, an important quality in an often innovative field.
+Free and Open Source Software favors interoperability and this aspect is important
+when creating complex processing chains, implementing several different tools.
 
 As shown in Section \@ref(tools), this study use a rather small toolset of FOSS.
 The reduction of the number of tools needed for the scientific production was 
 possible thanks to the use of a programming language allowing to cover practically 
 all the aspects of the project, whether it is the connection to the database, 
-the statistical analyses, the production of tables and graphs as well as reports.
-A reduced toolbox also promotes reproducibility by limiting the constraints of 
+the statistical analyses, the production of tables and graphs as well as reports
+or scientific papers.
+A reduced toolbox also promotes reproductibility by limiting the constraints of 
 installing software on a machine.
 Nevertheless, the analysis uses a large list of R packages and some of them may 
-have dependencies that can cause problems.
+have dependencies that can cause reproductibility issues.
 
 While free software facilitates the implementation and deployment of tools, 
 literate programming is more oriented to communication between humans.
@@ -455,11 +457,11 @@ The commentary of a figure is as close as possible to the figure and the code
 that produced it.
 By restarting the analysis, it is possible to see if all the conditions are met 
 to resume the work: is the necessary software present? Is the data accessible?
-Does the code still work after the updates?
+Does the code still work after updates?
 
 For the team or the laboratory in which the project takes place, the benefits 
 are also numerous.
-The work done is accessible, especially if collaborative tools have been 
+The work done is accessible and readable, especially if collaborative tools have been 
 put in place.
 Within the framework of the analysis presented here, an initial exploratory 
 analysis revealed certain known dynamics in environmental acoustics.
@@ -493,14 +495,15 @@ methods, code and even the scientific literature produced are open and documente
 makes it much easier to revisit the work in order to answer one's own questions 
 because it provides a complete example and not just final results.
 
-While being a valuable aid for reproducibility, the FOSS and literate programming
+While being a valuable aid for reproductibility, the FOSS and literate programming
 with notebook tools such as Rmarkdown used in this project suffer from some limitations. 
-It is possible to restart the calculations by trying to
+It is possible to redo the calculations by trying to
 to reproduce the software environment (the versions of the software and packages used are provided),
-but there is no guarantee that the result will be exactly the same.
+but there is no guarantee that the result will be exactly the same because the computer
+environment  (is difficult to replicate.
 
 The package R [renv](https://rstudio.github.io/renv/index.html) can help to 
-reproduce an R environment and environment by providing functions for saving and 
+reproduce an R environment by providing functions for saving and 
 restoring dependencies at the project level.
 In some cases, if this is not enough, it will be necessary to turn to lower-level
 solutions such as [Docker](https://www.docker.com/) and [Guix](https://guix.gnu.org/).
@@ -509,8 +512,8 @@ solutions such as [Docker](https://www.docker.com/) and [Guix](https://guix.gnu.
 
 The major objective of this study was to control the quality of the tag data in an
 environmental acoustics crowdsourced dataset.
-The first step was too find if known temporal dynamics of sound sources are present in the dataset
-The first results were encouraging because road sound dynamics related to commuting or 
+The first step was to find if known temporal dynamics of sound sources are present in the dataset
+The first results were encouraging because sound dynamics related to commuting or 
 animal activity can be observed.
 
 In a second time, we checked the correspondence 
@@ -523,12 +526,14 @@ adding the corresponding tag.
 As a result, the correlation between actual rainfall observations and the 
 presence of rain tags in the database is weaker and less significant than for wind.
 
-This study shows that it is possible to observe known dynamics in environmental acoustics in 
-the crowdsourced NoiseCapture dataset (road dynamics related to commuting or animal activity). It also
-increases the level of confidence brought to this dataset by the fact that the
-measurement conditions indicated by the user seem to correspond to real measurement conditions (rain and wind).
-Some questions still need to be explored, notably those concerning the representativeness and 
-representativeness and the unbalanced nature of the samples, which are sometimes weak for certain periods.
+This study shows that it is possible to observe known dynamics in environmental 
+acoustics inthe crowdsourced NoiseCapture dataset (road dynamics related to 
+commuting or animal activity). 
+It also increases the level of confidence brought to this dataset by the fact that 
+the measurement conditions indicated by the user seem to correspond to real 
+measurement conditions (rain and wind).
+Some questions still need to be explored, notably those concerning the representativeness
+and the unbalanced nature of the samples, which are sometimes weak for certain periods.
 
 We also wanted to show that Free and Open Source Software can be used to produce 
 scientific knowledge all along the production chain, from data collection, 
@@ -542,12 +547,14 @@ recovery and continuation of the work presented here.
 And this within our own research team.
 
 We are aware that the acquisition of the necessary skills to mobilize these tools 
-is not easy but we believe that the gain is much higher than the cost.
-Reproducibility is an important constraint for research projects that often have 
+is not easy and need time but we believe that the gain is much higher 
+than the cost.
+Reproductibility is an important constraint for research projects that often have 
 limited means, nevertheless it is an investment in the future, both for the team 
 and for the scientific community interested in the work.
-For the more technical parts, such as the implementation of database servers, 
-the presence of research software engineers is a real plus.
+For the more technical parts, such as the implementation of database servers and 
+help with the reproductibility issues,
+the presence of research software engineers in a team or a lab is a real plus.
 
 # ACKNOWLEDGEMENTS {-}
 
