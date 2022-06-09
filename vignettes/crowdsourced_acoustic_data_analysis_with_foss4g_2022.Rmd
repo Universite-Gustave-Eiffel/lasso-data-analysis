@@ -17,22 +17,21 @@ abstract : |
  The application is open-source, and all its data are available freely.
  This study presents the results of the first exploratory analysis of 3 years of 
  data collection through the lens of sound sources.
- This analysis is based only on the tags given by the users and not on the sound 
+ This analysis is only based on the tags given by the users and not on the sound 
  spectrum of the measurement, which will be studied at a later stage.
- The first results are encouraging, we were able to observe well known temporal 
- dynamics of roads related to commuting or bird songs in the dataset.
- We also found correlations between wind an rain tags and their measurements by 
+ The first results are encouraging, we were able to observe well known temporal sound source
+ dynamics like road sounds temporal dynamic related to commuting or bird songs in the dataset.
+ We also found correlations between wind and rain tags and their measurements by 
  the the national meteorological service.
  The context of the study, the Free and Open Source Software tools and techniques 
- used are presented as well 
- as the benefits of using literate programming in this type of exploratory work.
+ used  and literate programming benefits are presented.
 pkgdown:
   as_is: true
 output:
-  bookdown::html_document2: # vignette output
-    includes:
-      before_body: header.html
-  #isprspaged::article # pdf output
+  #bookdown::html_document2: # vignette output
+  #  includes:
+  #    before_body: header.html
+  isprspaged::article # pdf output
 #knit: pagedown::chrome_print
 ---
 
