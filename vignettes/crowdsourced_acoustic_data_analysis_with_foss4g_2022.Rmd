@@ -159,9 +159,9 @@ analysed using a statistical analysis language.
 ## Tools{#tools}
 
 In order to be as open as possible and to work in the most collaborative way,
-we decided a FOSS toolset: PostgreSQL/Postgis to store the data and the R language 
+we decided on a FOSS toolset: PostgreSQL/Postgis to store the data and the R language 
 to analyse and produce knowledge from it.
-We also used Git as it is a great tool to facilitate remote collaboration.
+We also used Git for source code versioning and to facilitate remote collaboration.
 
 **PostGIS**: the data are provided as a dump from a PostgreSQL/PostGIS database [@paulramseyPostGIS2001].
 In order to access the data, we had to set up a PostgreSQL server and configure 
@@ -180,9 +180,9 @@ Rmarkdown, an R package, allows to mix code in several programming languages and
 text in markdown for the dynamic production of graphs, tables and documents.
 The use of Rmarkdown is one of the recommended means for literate
 programming (along with Jupyter Notebooks and Emacs Org-Mode [@desquilbet2019ReproducibleResearch])
-So it is a great tool to either communicate inside our team and publish our results.
+So it is a useful tool to either communicate progress inside our team and publish our results.
 
-Rmarkdown, as any markdown file, is a plain text file that can be easily versionned
+Rmarkdown, as any markdown file, is a plain text file that can be easily versioned
 with any version control system.
 As our team is scattered in several places in France, we needed a tool to 
 facilitate code sources communication, for this purpose, we used git.
