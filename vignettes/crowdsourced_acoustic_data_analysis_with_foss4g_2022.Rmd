@@ -203,17 +203,18 @@ corresponding to defined criteria.
 A materialized view is a good compromise between a table and a view because it
 has similar response time to a table and also allows us to recompute 
 values easily if threshold values changed.
+It is perfect to store data that does not change too often.
 Those views are the entry point for the R language to get data to analyse.
 
-The analyses were carried out in two stages: a first exploratory analysis aimed 
-at verifying whether certain known environmental dynamics could be visible in the 
-data set, on the territory of metropolitan France.
-
-The first analysis having brought encouraging results, we took it again in order 
+The analyses were carried out in two stages: a first exploratory analysis and more deeper one. 
+The first analysis aimed at verifying whether certain known environmental dynamics
+could be visible in the  data set.
+This first analysis brought encouraging results, we took it again in order 
 to refine it and to extend the field of research.
-In order to have a better qualification of the quality of the dataset, we look if there is a relationship 
-between the weather events in the environment and the tags filled by the user. 
-More precisely the indicator chosen is the ratio of users who have put a particular 
+In order to have a better qualification of the quality of the dataset, we look 
+if there is a relationship between the weather events in the environment and the
+tags filled by the user. 
+More precisely, the indicator chosen is the ratio of users who have put a particular 
 tag among the users who have put at least one tag in a particular condition (i.e. no wind vs. wind).
 
 The code producing the analysis and graphics are separated in 
@@ -230,16 +231,16 @@ While these two analyses share a common basis, the selection criteria were refin
 Short tracks (duration less than 5 seconds) were discarded in both analysis.
 
 Long tracks (duration longer than 15 minutes) have been removed from the exploratory analysis.
-They were kept in the extended analysis.
+They were kept in the second analysis.
 
 In the exploratory analysis, we kept the tracks where the GPS median accuracy of the whole track was less than 20 meters.
-In the extended analysis, we implemented an algorithm to detect and remove outliers track points using a method from the R package CoordinateCleaner[^CCleaner].
+In the extended analysis, we implemented an algorithm to detect and remove outliers track points using a method from the R package `CoordinateCleaner`[^CCleaner].
 This method was used to keep tracks that would have been eliminated because some of their points had aberrant coordinates, which allowed us to work with larger samples and with a better localization accuracy.
 
 [^CCleaner]: https://search.r-project.org/CRAN/refmans/CoordinateCleaner/html/cc_outl.html
 
-In the exploratory analysis, we decided to keep tracks that are comprised in a rather small area,
-the bounding box area would have to be equivalent to a square of 25 by 25 meters. This criterion was not considered in the extended analysis, but a threshold of 8 m/s (equivalent to 30 km/h) was set between 2 GPS measurements to eliminate tracks with aberrant distance between two measurements points.
+In the first analysis, we decided to keep tracks that are comprised in a rather small area,
+the bounding box area of the track would have to be equivalent to a square of 25 by 25 meters. This criterion was not considered in the extended analysis, but a threshold of 8 m/s (equivalent to 30 km/h) was set between 2 GPS measurements to eliminate tracks with aberrant distance between two measurements points.
 
 Although the extended analysis examined some questions on the global dataset, the results presented here are for tracks in metropolitan France.
 To extract data regarding France metropolitan area, we pre-filtered the data
