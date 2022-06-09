@@ -414,20 +414,21 @@ project, whether it is a scientific one or not.
 The problem of licenses is greatly facilitated because they are usable by all, 
 without discrimination and without additional cost.
 The question of having to acquire licenses and how to do so is no longer an issue.
-Another advantage, as long as one has the necessary skills, is to be able to adapt 
-the tool to one's needs, an important quality in an often innovative field.
-Free software favors interoperability and this aspect is important when creating 
-complex processing chains, implementing several different tools.
+Another advantage, as long as one has the necessary skills, is the possibility 
+to adapt  the tool to one's needs, an important quality in an often innovative field.
+Free and Open Source Software favors interoperability and this aspect is important
+when creating complex processing chains, implementing several different tools.
 
 As shown in Section \@ref(tools), this study use a rather small toolset of FOSS.
 The reduction of the number of tools needed for the scientific production was 
 possible thanks to the use of a programming language allowing to cover practically 
 all the aspects of the project, whether it is the connection to the database, 
-the statistical analyses, the production of tables and graphs as well as reports.
+the statistical analyses, the production of tables and graphs as well as reports
+or scientific papers.
 A reduced toolbox also promotes reproducibility by limiting the constraints of 
 installing software on a machine.
 Nevertheless, the analysis uses a large list of R packages and some of them may 
-have dependencies that can cause problems.
+have dependencies that can cause reproductibility issues.
 
 While free software facilitates the implementation and deployment of tools, 
 literate programming is more oriented to communication between humans.
@@ -456,11 +457,11 @@ The commentary of a figure is as close as possible to the figure and the code
 that produced it.
 By restarting the analysis, it is possible to see if all the conditions are met 
 to resume the work: is the necessary software present? Is the data accessible?
-Does the code still work after the updates?
+Does the code still work after updates?
 
 For the team or the laboratory in which the project takes place, the benefits 
 are also numerous.
-The work done is accessible, especially if collaborative tools have been 
+The work done is accessible and readable, especially if collaborative tools have been 
 put in place.
 Within the framework of the analysis presented here, an initial exploratory 
 analysis revealed certain known dynamics in environmental acoustics.
@@ -494,11 +495,12 @@ methods, code and even the scientific literature produced are open and documente
 makes it much easier to revisit the work in order to answer one's own questions 
 because it provides a complete example and not just final results.
 
-While being a valuable aid for reproducibility, the FOSS and literate programming
+While being a valuable aid for reproductibility, the FOSS and literate programming
 with notebook tools such as Rmarkdown used in this project suffer from some limitations. 
-It is possible to restart the calculations by trying to
+It is possible to redo the calculations by trying to
 to reproduce the software environment (the versions of the software and packages used are provided),
-but there is no guarantee that the result will be exactly the same.
+but there is no guarantee that the result will be exactly the same because the computer
+environment is difficult to replicate.
 
 The package R [renv](https://rstudio.github.io/renv/index.html) can help to 
 reproduce an R environment and environment by providing functions for saving and 
