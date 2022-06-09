@@ -3,7 +3,7 @@ title: "Crowdsourced acoustic open data analysis with FOSS4G tools"
 author: "Nicolas Roelandt<sup>1</sup>, Pierre Aumond<sup>2</sup>, Ludovic Moisan<sup>2</sup>"
 affiliation: "<sup>1</sup>AME, Univ. Gustave Eiffel, IFSTTAR, F-69675 Bron, France<br /><sup>2</sup>UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France"
 commission: "Commission IV, WG IV/4"
-keywords : 'Environmental acoustics, crowdsourced open data, FOSS4G, reproducibility, literate programming, Open Science, Open Geospatial Software, Open GIScience, Open Geospatial Data'
+keywords : 'Environmental acoustics, crowdsourced open data, FOSS4G, reproductibility, literate programming, Open Science, Open Geospatial Software, Open GIScience, Open Geospatial Data'
 bibliography: bibliography.bib
 biblio-style: "apalike"
 link-citations: true
@@ -74,7 +74,7 @@ or wind) with the records from the national meteorological service database.
 As these exploratory works will be extended and consolidated thereafter to a 
 more global exploration of the database, and with the will to include this study 
 within the framework of the Open Science, an attention was brought on the 
-reproducibility aspect of the analysis. 
+reproductibility aspect of the analysis. 
 It was entirely realized with Free and Open Source Software (FOSS) and 
 literate programming techniques.
 
@@ -148,7 +148,7 @@ supplementary databases.
 Then we extended some analysis worldwide. The results presented here concern tracks
 recorded in the France metropolitan area.
 
-To facilitate the reproducibility of spatial filtering, it was decided to use 
+To facilitate the reproductibility of spatial filtering, it was decided to use 
 open data sets from recognized sources: the Natural Earth database 
 [@pattersonNaturalEarth2021] and the Admin Express database from the French
 National Institute of Geographic and Forest Information [@institutgeographiquenationalAdminExpress].
@@ -425,7 +425,7 @@ possible thanks to the use of a programming language allowing to cover practical
 all the aspects of the project, whether it is the connection to the database, 
 the statistical analyses, the production of tables and graphs as well as reports
 or scientific papers.
-A reduced toolbox also promotes reproducibility by limiting the constraints of 
+A reduced toolbox also promotes reproductibility by limiting the constraints of 
 installing software on a machine.
 Nevertheless, the analysis uses a large list of R packages and some of them may 
 have dependencies that can cause reproductibility issues.
@@ -500,10 +500,10 @@ with notebook tools such as Rmarkdown used in this project suffer from some limi
 It is possible to redo the calculations by trying to
 to reproduce the software environment (the versions of the software and packages used are provided),
 but there is no guarantee that the result will be exactly the same because the computer
-environment is difficult to replicate.
+environment  (is difficult to replicate.
 
 The package R [renv](https://rstudio.github.io/renv/index.html) can help to 
-reproduce an R environment and environment by providing functions for saving and 
+reproduce an R environment by providing functions for saving and 
 restoring dependencies at the project level.
 In some cases, if this is not enough, it will be necessary to turn to lower-level
 solutions such as [Docker](https://www.docker.com/) and [Guix](https://guix.gnu.org/).
@@ -512,8 +512,8 @@ solutions such as [Docker](https://www.docker.com/) and [Guix](https://guix.gnu.
 
 The major objective of this study was to control the quality of the tag data in an
 environmental acoustics crowdsourced dataset.
-The first step was too find if known temporal dynamics of sound sources are present in the dataset
-The first results were encouraging because road sound dynamics related to commuting or 
+The first step was to find if known temporal dynamics of sound sources are present in the dataset
+The first results were encouraging because sound dynamics related to commuting or 
 animal activity can be observed.
 
 In a second time, we checked the correspondence 
@@ -526,12 +526,14 @@ adding the corresponding tag.
 As a result, the correlation between actual rainfall observations and the 
 presence of rain tags in the database is weaker and less significant than for wind.
 
-This study shows that it is possible to observe known dynamics in environmental acoustics in 
-the crowdsourced NoiseCapture dataset (road dynamics related to commuting or animal activity). It also
-increases the level of confidence brought to this dataset by the fact that the
-measurement conditions indicated by the user seem to correspond to real measurement conditions (rain and wind).
-Some questions still need to be explored, notably those concerning the representativeness and 
-representativeness and the unbalanced nature of the samples, which are sometimes weak for certain periods.
+This study shows that it is possible to observe known dynamics in environmental 
+acoustics inthe crowdsourced NoiseCapture dataset (road dynamics related to 
+commuting or animal activity). 
+It also increases the level of confidence brought to this dataset by the fact that 
+the measurement conditions indicated by the user seem to correspond to real 
+measurement conditions (rain and wind).
+Some questions still need to be explored, notably those concerning the representativeness
+and the unbalanced nature of the samples, which are sometimes weak for certain periods.
 
 We also wanted to show that Free and Open Source Software can be used to produce 
 scientific knowledge all along the production chain, from data collection, 
@@ -545,12 +547,14 @@ recovery and continuation of the work presented here.
 And this within our own research team.
 
 We are aware that the acquisition of the necessary skills to mobilize these tools 
-is not easy but we believe that the gain is much higher than the cost.
-Reproducibility is an important constraint for research projects that often have 
+is not easy and need time but we believe that the gain is much higher 
+than the cost.
+Reproductibility is an important constraint for research projects that often have 
 limited means, nevertheless it is an investment in the future, both for the team 
 and for the scientific community interested in the work.
-For the more technical parts, such as the implementation of database servers, 
-the presence of research software engineers is a real plus.
+For the more technical parts, such as the implementation of database servers and 
+help with the reproductibility issues,
+the presence of research software engineers in a team or a lab is a real plus.
 
 # ACKNOWLEDGEMENTS {-}
 
