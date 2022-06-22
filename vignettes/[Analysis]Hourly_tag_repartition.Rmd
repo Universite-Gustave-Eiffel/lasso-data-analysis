@@ -1,6 +1,6 @@
 ---
-title: "Internship report"
-subtitle: "Hourly tag repartition"
+title: "Time distribution analysis"
+subtitle: "Hourly distribution of tags"
 author: "Ludovic Moisan"
 supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
 date: "`r Sys.Date()`"
