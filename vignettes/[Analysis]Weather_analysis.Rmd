@@ -1,6 +1,6 @@
 ---
-title: "Internship report"
-subtitle: "Weather analysis"
+title: "Weather analaysis"
+subtitle: "Crossing data from Météo_France"
 author: "Ludovic Moisan"
 supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
 date: "`r Sys.Date()`"

@@ -1,6 +1,6 @@
 ---
-title: "Intership report"
-subtitle: "NoiseCapture's database analysis"
+title: "Full report"
+desc: "NoiseCapture's database analysis"
 author: "Ludovic Moisan"
 supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
 date: "`r Sys.Date()`"
