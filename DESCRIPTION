@@ -7,6 +7,15 @@ Authors@R:
              role = c("aut", "cre"),
              email = "nicolas.roelandt@univ-eiffel.fr",
              comment = c(ORCID = "0000-0001-9698-4275")),
+      person(given = "Pierre",
+             family = "Aumond",
+             role = c("aut"),
+             email = "pierre.aumond@univ-eiffel.fr",
+             comment = c(ORCID = "0000-0001-8834-4251")),
+      person(given = "Ludovic",
+             family = "Moisan",
+             role = c("aut"),
+             email = "ludovic.moisan@univ-eiffel.fr"),
       person(given = "Uni. Gustave Eiffel",
              role = "cph"))
 Description: Analyse the data collected between 2017 and 2020 by the
