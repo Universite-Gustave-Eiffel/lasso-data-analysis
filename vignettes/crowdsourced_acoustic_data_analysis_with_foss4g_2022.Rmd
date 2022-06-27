@@ -163,14 +163,14 @@ we decided on a FOSS toolset: PostgreSQL/Postgis to store the data and the R lan
 to analyse and produce knowledge from it.
 We also used Git for source code versioning and to facilitate remote collaboration.
 
-**PostGIS**: the data are provided as a dump from a PostgreSQL/PostGIS database [@paulramseyPostGIS2001].
+- PostGIS: the data are provided as a dump from a PostgreSQL/PostGIS database [@paulramseyPostGIS2001].
 In order to access the data, we had to set up a PostgreSQL server and configure 
 it according to the indications provided with the dataset.
 Several views have been set up to pre-filter the data and provide stable access 
 points for the R language.
 
 
-**R**: the R language [@rcoreteamRLanguageStatistical2021]
+- R: the R language [@rcoreteamRLanguageStatistical2021]
 is a programming language for data processing and statistics with many libraries 
 dedicated to geospatial data.
 R allowed us to query the database to get data, refine it to our needs, then produce
@@ -187,7 +187,7 @@ with any version control system.
 As our team is scattered in several places in France, we needed a tool to 
 facilitate code sources communication, for this purpose, we used git.
 
-**Git**: Git is a Distributed Version Control System (DVCS) [@chacon2014pro]. 
+- Git: Git is a Distributed Version Control System (DVCS) [@chacon2014pro]. 
 It enables collaborative and decentralized work.
 Using the Github online plateforme, we could communicate source code changes to 
 each other in a desynchronized way between different collaborators present on several
