@@ -28,10 +28,10 @@ abstract : |
 pkgdown:
   as_is: true
 output:
-  bookdown::html_document2: # vignette output
-    includes:
-      before_body: header.html
-  #isprspaged::article # pdf output
+  #bookdown::html_document2: # vignette output
+  #  includes:
+  #    before_body: header.html
+  isprspaged::article # pdf output
 #knit: pagedown::chrome_print
 ---
 
