@@ -50,7 +50,7 @@ table_nums <- captioner::captioner(prefix = "Table", style_prefix = TRUE, style=
 #' Announcement of accepted abstracts 		01/04/2022
 #' Submission of full academic papers 		01/06/2022
 ```
-# Introduction {-}
+# Introduction
 
 NoiseCapture[^1] is an Android application developed by the Gustave Eiffel University[^2] 
 and the CNRS[^3] as part of a participatory approach to environmental noise mapping. 
