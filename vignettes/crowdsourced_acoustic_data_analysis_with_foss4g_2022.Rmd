@@ -507,7 +507,7 @@ restoring dependencies at the project level.
 In some cases, if this is not enough, it will be necessary to turn to lower-level
 solutions such as [Docker](https://www.docker.com/) and [Guix](https://guix.gnu.org/).
 
-# Conclusion {-}
+# Conclusion
 
 The major objective of this study was to control the quality of the tag data in an
 environmental acoustics crowdsourced dataset.
