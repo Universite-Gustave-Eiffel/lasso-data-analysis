@@ -40,8 +40,8 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 library(captioner) # handle figures and tables numbering
 
 # Declare variables for figures and table counting
-fig_nums <- captioner::captioner(style_prefix = TRUE, style= "b")
-table_nums <- captioner::captioner(prefix = "Table", style_prefix = TRUE, style= "b")
+fig_nums <- captioner::captioner(style_prefix = TRUE, style= "b", suffix = ".")
+table_nums <- captioner::captioner(prefix = "Table", style_prefix = TRUE, style= "b", suffix = ".")
 ```
 
 ```{r comments, include=FALSE}
@@ -163,14 +163,14 @@ we decided on a FOSS toolset: PostgreSQL/Postgis to store the data and the R lan
 to analyse and produce knowledge from it.
 We also used Git for source code versioning and to facilitate remote collaboration.
 
-- PostGIS: the data are provided as a dump from a PostgreSQL/PostGIS database [@paulramseyPostGIS2001].
+The data are provided as a dump from a PostgreSQL/PostGIS database [@paulramseyPostGIS2001].
 In order to access the data, we had to set up a PostgreSQL server and configure 
 it according to the indications provided with the dataset.
 Several views have been set up to pre-filter the data and provide stable access 
 points for the R language.
 
 
-- R: the R language [@rcoreteamRLanguageStatistical2021]
+the R language [@rcoreteamRLanguageStatistical2021]
 is a programming language for data processing and statistics with many libraries 
 dedicated to geospatial data.
 R allowed us to query the database to get data, refine it to our needs, then produce
@@ -187,7 +187,7 @@ with any version control system.
 As our team is scattered in several places in France, we needed a tool to 
 facilitate code sources communication, for this purpose, we used git.
 
-- Git: Git is a Distributed Version Control System (DVCS) [@chacon2014pro]. 
+Git is a Distributed Version Control System (DVCS) [@chacon2014pro]. 
 It enables collaborative and decentralized work.
 Using the Github online plateforme, we could communicate source code changes to 
 each other in a desynchronized way between different collaborators present on several
@@ -301,13 +301,13 @@ Subsequently, we seek to determine for physical phenomena such as rain and wind
 if the presence of tags related to them in the dataset corresponded to real 
 measurements of rain and wind of the national weather service.
 
-### Known environmental acoustics temporal dynamics 
+### Known environmental acoustics temporal dynamics&nbsp;
 
 A first axis of analysis concerns the time distribution of certains tags.
 The first tag we studied was the `animals` tag. 
 We wanted to see if we were able to see a rise of this tag presence in the dataset
 close to the sunrise.
-Indeed as shown by [@robbins1981effect], bird song activity is highest in the 
+Indeed as shown by @robbins1981effect, bird song activity is highest in the 
 morning, especially in the hour after sunrise.
 
 `r fig_nums("animals-sunrise", display = "cite")` shows that the tag `animals`
@@ -353,8 +353,7 @@ However, we wanted more precise quality indicators so we looked if we were able
 to correlate the mention of physical events in the dataset and records of thoses
 events in an authoritative database.
 
-### Correlation between tags and physical events in the user environment
-
+### Correlation between tags and physical events in the user environment&nbsp;
 In order to determine the accuracy of the manually selected tags by the users of 
 the NoiseCapture app, we wanted to proceed simple investigations concerning some 
 tags related to physical events, such as the weather related ones (rain,wind),
