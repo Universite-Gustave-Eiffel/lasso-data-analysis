@@ -28,10 +28,10 @@ abstract : |
 pkgdown:
   as_is: true
 output:
-  #bookdown::html_document2: # vignette output
-  #  includes:
-  #    before_body: header.html
-  isprspaged::article # pdf output
+  bookdown::html_document2: # vignette output
+    includes:
+      before_body: header.html
+  #isprspaged::article # pdf output
 #knit: pagedown::chrome_print
 ---
 
@@ -301,7 +301,7 @@ Subsequently, we seek to determine for physical phenomena such as rain and wind
 if the presence of tags related to them in the dataset corresponded to real 
 measurements of rain and wind of the national weather service.
 
-### Known environmental acoustics temporal dynamics&nbsp;
+### Known environmental acoustics temporal dynamics&nbsp;:
 
 A first axis of analysis concerns the time distribution of certains tags.
 The first tag we studied was the `animals` tag. 
@@ -353,7 +353,7 @@ However, we wanted more precise quality indicators so we looked if we were able
 to correlate the mention of physical events in the dataset and records of thoses
 events in an authoritative database.
 
-### Correlation between tags and physical events in the user environment&nbsp;
+### Correlation between tags and physical events in the user environment&nbsp;:
 In order to determine the accuracy of the manually selected tags by the users of 
 the NoiseCapture app, we wanted to proceed simple investigations concerning some 
 tags related to physical events, such as the weather related ones (rain,wind),
