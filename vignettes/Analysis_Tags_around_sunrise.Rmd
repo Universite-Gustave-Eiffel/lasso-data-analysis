@@ -1,5 +1,5 @@
 ---
-title: "Sunrise analysis"
+title: "[Analysis] Sunrise analysis"
 subtitle: "Tags' distribution around sunrise"
 author: "Ludovic Moisan"
 supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
@@ -39,7 +39,7 @@ fig_nums("sunrise-fr-animals", "Animals tags hourly proportions around sunrise",
 
 ```{r setup-sunrise, include = FALSE}
 
-here::i_am("vignettes/[Analysis]Tags_around_sunrise.Rmd")
+here::i_am("vignettes/Analysis_Tags_around_sunrise.Rmd")
 
 if(!dir.exists(here("data"))){
   dir.create(here("data"))

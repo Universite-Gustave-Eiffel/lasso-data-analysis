@@ -1,5 +1,5 @@
 ---
-title: "Sunset analysis"
+title: "[Analysis] Sunset analysis"
 subtitle: "Tags' distribution around sunset"
 author: "Ludovic Moisan"
 supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
@@ -38,7 +38,7 @@ fig_nums("sunset-fr-chatting", "Chatting tags hourly proportions around sunset",
 
 ```{r setup-sunset, include = FALSE}
 
-here::i_am("vignettes/[Analysis]Tags_around_sunset.Rmd")
+here::i_am("vignettes/Analysis_Tags_around_sunset.Rmd")
 
 if(!dir.exists(here("data"))){
   dir.create(here("data"))

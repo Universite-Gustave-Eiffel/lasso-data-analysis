@@ -1,5 +1,5 @@
 ---
-title: "Time distribution analysis"
+title: "[Analysis] Time distribution analysis"
 subtitle: "Hourly distribution of tags"
 author: "Ludovic Moisan"
 supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
@@ -40,7 +40,7 @@ fig_nums("hour-fr-road", "Road tags hourly proportions", display = FALSE)
 
 ```{r setup-hourly, include = FALSE}
 
-here::i_am("vignettes/[Analysis]Hourly_tag_repartition.Rmd")
+here::i_am("vignettes/Analysis_Hourly_tag_repartition.Rmd")
 
 if(!dir.exists(here("data"))){
   dir.create(here("data"))
