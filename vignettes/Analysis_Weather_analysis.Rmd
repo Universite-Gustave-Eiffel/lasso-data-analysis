@@ -1,5 +1,5 @@
 ---
-title: "Weather analaysis"
+title: "[Analysis] Weather analysis"
 subtitle: "Crossing data from Météo_France"
 author: "Ludovic Moisan"
 supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
@@ -37,7 +37,7 @@ fig_nums("wind", "Wind tag use by actual wind measures", display = FALSE)
 
 ```{r setup-weather-analysis, include=FALSE}
 
-here::i_am("vignettes/[Analysis]Weather_analysis.Rmd")
+here::i_am("vignettes/Analysis_Weather_analysis.Rmd")
 
 if(!dir.exists(here("data"))){
   dir.create(here("data"))

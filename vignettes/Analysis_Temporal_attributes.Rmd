@@ -1,5 +1,5 @@
 ---
-title: "Temporal attributes analysis"
+title: "[Analysis] Temporal attributes analysis"
 subtitle: "Types of days and special events"
 author: "Ludovic Moisan"
 supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
@@ -28,7 +28,7 @@ library(captioner)
 
 ```{r setup-tempo-analysis, include=FALSE}
 
-here::i_am("vignettes/[Analysis]Temporal_attributes.Rmd")
+here::i_am("vignettes/Analysis_Temporal_attributes.Rmd")
 
 if(!dir.exists(here("data"))){
   dir.create(here("data"))

@@ -1,5 +1,5 @@
 ---
-title: "Database overview"
+title: "[Analysis] Database overview"
 subtitle: "Call to the database - SQL"
 author: "Ludovic Moisan"
 supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
