@@ -93,7 +93,7 @@
                         <h4 data-toc-skip class="author">Nicolas Roelandt<sup>1*</sup>, Pierre Aumond<sup>2</sup>, Ludovic Moisan<sup>3</sup>
 </h4>
             
-            <h4 data-toc-skip class="date">2022-06-29</h4>
+            <h4 data-toc-skip class="date">2022-06-30</h4>
       
       
       <div class="hidden name"><code>crowdsourced_acoustic_data_analysis_with_foss4g_2022.Rmd</code></div>
@@ -225,7 +225,7 @@ analysed using a statistical analysis language.</p>
 <h3 id="tools">
 <span class="header-section-number">3.2</span> Tools<a class="anchor" aria-label="anchor" href="#tools"></a>
 </h3>
-<p>In order to be as open as possible and to work in the most collaborative way,
+<p>To be as open as possible and to work in the most collaborative way,
 we decided on a FOSS toolset: PostgreSQL/Postgis to store the data and the R language
 to analyse and produce knowledge from it.
 We also used Git for source code versioning and to facilitate remote collaboration.</p>
@@ -234,7 +234,7 @@ In order to access the data, we had to set up a PostgreSQL server and configure
 it according to the indications provided with the dataset.
 Several views have been set up to pre-filter the data and provide stable access
 points for the R language.</p>
-<p>the R language <span class="citation">(<a href="#ref-rcoreteamRLanguageStatistical2021" role="doc-biblioref">R Core Team 2021</a>)</span>
+<p>The R language <span class="citation">(<a href="#ref-rcoreteamRLanguageStatistical2021" role="doc-biblioref">R Core Team 2021</a>)</span>
 is a programming language for data processing and statistics with many libraries
 dedicated to geospatial data.
 R allowed us to query the database to get data, refine it to our needs, then produce
@@ -303,7 +303,7 @@ distinguish France metropolitan area from overseas areas.
 This could have introduce complications with timezone handling.
 We refined the spatial filtering to France’s metropolitan area
 using an authoritative dataset <span class="citation">(<a href="#ref-institutgeographiquenationalAdminExpress" role="doc-biblioref">Institut Géographique National 2021</a>)</span>.</p>
-<p>In order to facilitate the replication of the study on areas without this kind
+<p>To facilitate the replication of the study on areas without this kind
 of issues, this as not been done within the database but at the beginning of the
 Rmarkdown document where the exploratory analysis is conducted.
 The Rmarkdown document establishes the connection with the materialized view
@@ -339,15 +339,16 @@ tag as shown in Figure 1.
 <p>Noise annoyance from road traffic and its effects on health are a major concern
 in France and are the subject of several studies (
 <span class="citation">Méline et al. (<a href="#ref-meline2013TransportationNoiseAnnoyance" role="doc-biblioref">2013</a>)</span>, <span class="citation">Grange, Chatignoux, and Grémy (<a href="#ref-grange2009PerceptionsBruitIledeFrance" role="doc-biblioref">2009</a>)</span>).</p>
-<p>In order to have a first idea of the quality of the tags in the dataset, we tried to see if known temporal dynamics in environmental acoustics appeared in the data.</p>
+<p>To have a first idea of the quality of the tags in the dataset, we tried
+to see if known temporal dynamics in environmental acoustics appeared in the data.</p>
 <p>Subsequently, we seek to determine for physical phenomena such as rain and wind
 if the presence of tags related to them in the dataset corresponded to real
 measurements of rain and wind of the national weather service.</p>
 <div class="section level4" number="4.1.1">
 <h4 id="known-environmental-acoustics-temporal-dynamics">
-<span class="header-section-number">4.1.1</span> Known environmental acoustics temporal dynamics :<a class="anchor" aria-label="anchor" href="#known-environmental-acoustics-temporal-dynamics"></a>
+<span class="header-section-number">4.1.1</span> Known environmental acoustics temporal dynamics : <a class="anchor" aria-label="anchor" href="#known-environmental-acoustics-temporal-dynamics"></a>
 </h4>
-<p>A first axis of analysis concerns the time distribution of certains tags.
+<p>a first axis of analysis concerns the time distribution of certains tags.
 The first tag we studied was the <code>animals</code> tag.
 We wanted to see if we were able to see a rise of this tag presence in the dataset
 close to the sunrise.
@@ -381,9 +382,9 @@ events in an authoritative database.</p>
 </div>
 <div class="section level4" number="4.1.2">
 <h4 id="correlation-between-tags-and-physical-events-in-the-user-environment">
-<span class="header-section-number">4.1.2</span> Correlation between tags and physical events in the user environment :<a class="anchor" aria-label="anchor" href="#correlation-between-tags-and-physical-events-in-the-user-environment"></a>
+<span class="header-section-number">4.1.2</span> Correlation between tags and physical events in the user environment : <a class="anchor" aria-label="anchor" href="#correlation-between-tags-and-physical-events-in-the-user-environment"></a>
 </h4>
-<p>In order to determine the accuracy of the manually selected tags by the users of
+<p>to determine the accuracy of the manually selected tags by the users of
 the NoiseCapture app, we wanted to proceed simple investigations concerning some
 tags related to physical events, such as the weather related ones (rain,wind),
 which can be verified later on.</p>
