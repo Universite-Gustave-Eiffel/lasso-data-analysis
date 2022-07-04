@@ -1,7 +1,7 @@
 ---
 title: "Crowdsourced acoustic open data analysis with FOSS4G tools"
-author: "Nicolas Roelandt<sup>1*</sup>, Pierre Aumond<sup>2</sup>, Ludovic Moisan<sup>3</sup>"
-affiliation: "<sup>1</sup>AME, Univ. Gustave Eiffel, IFSTTAR, F-69675 Bron, France - nicolas.roelandt@univ-eiffel.fr<br /><sup>2</sup>UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France - pierre.aumond@univ-eiffel.fr<br /><sup>3</sup>UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France - ludovic.moisan@univ-eiffel.fr"
+author: "N. Roelandt<sup>1*</sup>, P. Aumond<sup>2</sup>, L. Moisan<sup>2</sup>"
+affiliation: "<sup>1</sup>AME, Univ. Gustave Eiffel, IFSTTAR, F-69675 Bron, France - nicolas.roelandt@univ-eiffel.fr<br /><sup>2</sup>UMRAE, Univ Gustave Eiffel, IFSTTAR, CEREMA, F-44344 Bouguenais, France - (pierre.aumond, ludovic.moisan)&#64;univ-eiffel.fr <br />"
 commission: "Commission IV, WG IV/4"
 keywords : 'Environmental acoustics, crowdsourced open data, FOSS4G, reproductibility, literate programming, Open Science, Open Geospatial Software, Open GIScience, Open Geospatial Data'
 bibliography: bibliography.bib
