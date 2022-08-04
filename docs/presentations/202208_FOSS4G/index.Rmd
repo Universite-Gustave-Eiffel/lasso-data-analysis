@@ -1,0 +1,309 @@
+---
+title: "Crowdsourced acoustic open data analysis with FOSS4G tools"
+subtitle: "FOSS4G 2022"  
+author: 
+  - "Nicolas Roelandt"
+date: '`r Sys.Date()`'
+output:
+  xaringan::moon_reader:
+    self_contained: true
+    seal: false
+    css: ["default","xaringan-themer.css", "custom.css"]
+    nature:
+      slideNumberFormat: "%current%"
+      highlightStyle: github
+      highlightLines: true
+      ratio: 16:9
+      countIncrementalSlides: true
+---
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(
+  fig.width=9, fig.height=3.5, fig.retina=3,
+  out.width = "100%",
+  cache = FALSE,
+  echo = TRUE,
+  message = FALSE, 
+  warning = FALSE,
+  hiline = TRUE
+)
+```
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+library(xaringanthemer)
+style_duo_accent(
+  primary_color = "#2f2a85",
+  secondary_color = "#2f2a85",
+  inverse_header_color = "#ef7d00",
+  inverse_link_color  = "#ef7d00",
+  text_font_size = "1.2rem"
+)
+```
+
+class: inverse center middle title-slide
+
+.top[
+```{r logos-institution, echo=FALSE, out.width="100%", eval=TRUE}
+knitr::include_graphics("media/logos2.svg")
+```
+]
+
+### Crowdsourced acoustic open data analysis with FOSS4G tools
+
+##### <span style='color:#ef7d00;'>Nicolas Roelandt</span>, P. Aumond, L. Moisan
+
+.bottom[
+##### <span style='color:#ef7d00;'>_FOSS4G 2022_</span>]
+
+<!--
+###### [gflowiz.github.io/presentations/FOSS4G2021.html](https://gflowiz.github.io/presentations/FOSS4G2021.html)
+-->
+
+###### Press <span style='color:#ef7d00;'>P</span> to access notes
+
+---
+
+## Introduction
+
+Traffic noise is a major health concern :
+
+--
+
+- 1 million healthy life years (DALYs) lost each year (Western Europe)
+
+--
+
+- 147 billion euros per year (social cost in France)
+
+--
+
+How to find problematic areas ?
+
+???
+
+- 1 million healthy life years (DALYs) lost each year in Western Europe due to traffic noise [WHO 2011](https://intranet.euro.who.int/__data/assets/pdf_file/0008/136466/e94888.pdf)
+- social cost of noise in France estimated at 147 billion euros per year [ADEME 2021](https://librairie.ademe.fr/air-et-bruit/4815-cout-social-du-bruit-en-france.html)
+
+---
+
+
+## How to find problematic areas ?
+
+--
+
+- Direct measure on the whole area is not possible
+
+--
+- Traditionnal way is simulation from traffic counts and infrastructure
+
+<img src="media/carte-bruit-bouguenais.png" style="width: 50%" />
+
+---
+### Proposal : Capture sound environment with a smartphone app.
+
+.pull-left[<img src="https://noise-planet.org/assets/img/noisecapture/1.2.7/NoiseCapture_Measurement_spectrogram.jpg" style="width: 50%" />]
+
+.pull-right[<img src="https://noise-planet.org/assets/img/noisecapture/1.2.7/NoiseCapture_Results.jpg" style="width: 50%" />]
+
+.center[[NoiseCapture is available on Google play store](https://play.google.com/store/apps/details?id=org.noise_planet.noisecapture)]
+
+???
+simulation: not real data
+crowdsourced data: lots of real data, large area coverage, disparate and poor quality material
+
+---
+## NoiseCapture dataset
+
+--
+
+- 3 years data collection (2017-2020, still collecting)
+
+--
+- 260 000 tracks worldwide
+
+--
+- sound spectrum, tags and gps localization
+
+???
+sound spectrum: third of octave, each 1s
+
+---
+
+
+## Characterization of the user environment with the collected data ?
+
+--
+
+2 possibilities :
+
+--
+
+- from the sound spectrum
+
+--
+
+- from the *tags* defined by the user
+
+???
+notes
+
+- from the sound spectrum: probably the hardest. Needs pattern recognition and maybe machine learning.
+- From the tags: not all tracks have tags. Information can be easily analyse with statistical software.
+
+
+We choose the second approach in a first time because it is easiest to do but the sound spectrum will be analysed in a second stage.
+If the tags can help to qualify the sound spectrum, it will be a real plus.
+
+---
+
+## Tags
+
+.pull-left[
+- 260 422 tracks
+- 124 363 with tags
+- 50280 not indoor or tests
+- 47 412 duration > 5 s
+- 11 492 in France
+]
+
+--
+.pull-right[<img src="https://universite-gustave-eiffel.github.io/lasso-data-analysis/articles/plots/tags_repartition.png" style="width: 100%" />]
+---
+
+## Toolkit
+
+A quite simple one:
+
+--
+- PostgreSQL/PostGIS
+
+--
+- R
+
+--
+- and lots of R packages : Tidyverse, sf, geojsonsf, stats, suncalc...
+---
+layout: true
+## Preliminary results
+
+---
+
+### Well known temporal sound source dynamics
+
+--
+.pull-left[
+<img src="https://user-images.githubusercontent.com/86657953/168254217-d18e7476-fa3c-48e8-9412-1886183ea98e.png" style="width: 100%" />
+]
+
+--
+
+.pull-right[
+<img src="https://user-images.githubusercontent.com/86657953/168244734-cda47fea-a43d-48e3-9b74-816f438ac276.png" style="width: 100%" />
+]
+
+???
+
+The graph on the left shows the proportion of the "animals" tags around sunrise time (the center is the sunrise time of the day it was recorded). We can see a peak during the 3 hours after the sunrise. It is a well known temporal dynamic for bird songs.
+
+On the right, it is the proportion of "roads" tags (often associated with traffic noise) in local time. We can see two peaks around 9 to 10 am and 8 PM. It is very similar to what is observed with commute times.
+
+---
+###  Physical events
+
+--
+.pull-left[
+
+<img src="https://github.com/nicolas-roelandt/lasso-data-analysis/raw/8f9d0d04e3ccd3dc98f26aa216c79b8a972b56e8/vignettes/plots/Repartition%20wind%20tags.png" style="width: 100%" />
+ r(7) = .93 (p < 0.01) between `wind` tag proportion and the measured wind force
+]
+
+--
+
+.pull-right[
+<img src="https://github.com/nicolas-roelandt/lasso-data-analysis/raw/8f9d0d04e3ccd3dc98f26aa216c79b8a972b56e8/vignettes/plots/Repartition%20rain%20tags.png" style="width: 100%" />
+r(6) = 0.68 (p < 0.1) between the `rain` tag proportion and the measured rain fall
+]
+
+???
+In a second time, we looked if the presence of certain tags related to physical events like the rain or the wind where coherent with the measure recorded by the national weather service.
+
+On the left, we can see the proportion of the tag "wind" regarding the wind force (Beaufort scale).
+The correlation is very good : O.93.
+
+On the right, this the proportion of rain tag regarding the measured rainfall.
+The correlation is not as good : 0.68.
+
+---
+layout: true
+## Reproductible Science is an issue
+---
+
+### Good
+
+- Data available
+- Source code available (SQL scripts and R notebooks)
+- Setup available
+
+--
+### Bad
+- Some notebooks needs work on reproductibility (and code factoring)
+- Environment info are too scarce
+
+---
+
+## Some avenues of investigation
+
+- R package [Renv](https://rstudio.github.io/renv/articles/renv.html)
+- [Docker](https://www.docker.com/)
+- [Guix](https://guix.gnu.org/)
+
+???
+
+- Renv: R package that can store and recreate an R environment (R and packages versions), limited to R
+- Docker : small virtual machinesthat can be re-build and/or re-run. There is R and Postgis images ready to use
+- Guix: so far the best way to reproduce and entire environment
+
+
+---
+
+layout: false
+class: inverse center middle
+# Conclusion
+
+---
+layout: true
+# Conclusion
+---
+
+- Crowdsourced data can be useful for science
+- Known phenomena can be found in the dataset
+- There is still a lot to study 
+- FOSS are a not only useful for Science but <span style='color:#ef7d00;'>key for Reproductible Science</span>
+- Reproductible Science is hard and has to take in account as soon as possible
+
+---
+layout: false
+class: center inverse
+
+.center[
+
+```{r logos-institution-conclusion, echo=FALSE, out.width="100%", eval=TRUE}
+knitr::include_graphics("media/logos2.svg")
+```
+]
+
+# Thanks!
+
+Nicolas Roelandt - Univ. Gustave Eiffel
+
+[nicolas.roelandt@univ-eiffel.fr](mailto:nicolas.roelandt@univ-eiffel.fr) [@RoelandtN42](https://twitter.com/RoelandtN42)
+
+Access to code source : [github.com/Universite-Gustave-Eiffel/lasso-data-analysis](https://github.com/Universite-Gustave-Eiffel/lasso-data-analysis)
+
+Detailed articles and notebooks : [universite-gustave-eiffel.github.io/lasso-data-analysis/articles/](https://universite-gustave-eiffel.github.io/lasso-data-analysis/articles/)
+
+
+
+.bottom-left[
+###### Slides created via the R packages [xaringan](https://github.com/yihui/xaringan) and  [gadenbuie/xaringanthemer](https://github.com/gadenbuie/xaringanthemer)
+]
