@@ -75,18 +75,12 @@ Traffic noise is a major health concern :
 
 - 147 billion euros per year (social cost in France)
 
---
-
-How to find problematic areas ?
-
 ???
 
 - 1 million healthy life years (DALYs) lost each year in Western Europe due to traffic noise [WHO 2011](https://intranet.euro.who.int/__data/assets/pdf_file/0008/136466/e94888.pdf)
 - social cost of noise in France estimated at 147 billion euros per year [ADEME 2021](https://librairie.ademe.fr/air-et-bruit/4815-cout-social-du-bruit-en-france.html)
 
 ---
-
-
 ## How to find problematic areas ?
 
 --
@@ -137,9 +131,7 @@ the trails we are exploring, the results we got so far and some difficulties we 
 --
 - ODC Open Database License v1.0
 
---
-
-https://data.univ-gustave-eiffel.fr/dataset.xhtml?persistentId=doi:10.25578/J5DG3W
+[data.univ-gustave-eiffel.fr/dataset.xhtml?persistentId=doi:10.25578/J5DG3W](https://data.univ-gustave-eiffel.fr/dataset.xhtml?persistentId=doi:10.25578/J5DG3W)
 
 ???
 sound spectrum: third of octave, each 1s
@@ -184,7 +176,7 @@ If the tags can help to describe the sound spectrum, it will be a real plus.
 ]
 
 --
-.pull-right[<img src="https://universite-gustave-eiffel.github.io/lasso-data-analysis/articles/plots/tags_repartition.png" style="width: 110%" />]
+.pull-right[<img src="https://universite-gustave-eiffel.github.io/lasso-data-analysis/articles/plots/tags_repartition.png" style="width: 150%" />]
 
 ---
 
