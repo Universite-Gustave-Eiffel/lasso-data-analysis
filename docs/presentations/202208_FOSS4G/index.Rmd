@@ -99,7 +99,7 @@ How to find problematic areas ?
 <img src="media/carte-bruit-bouguenais.png" style="width: 50%" />
 
 ---
-### Proposal : Capture sound environment with a smartphone app.
+### UMRAE proposal : Capture sound environment with a smartphone app.
 
 .pull-left[<img src="https://noise-planet.org/assets/img/noisecapture/1.2.7/NoiseCapture_Measurement_spectrogram.jpg" style="width: 50%" />]
 
@@ -110,6 +110,16 @@ How to find problematic areas ?
 ???
 simulation: not real data
 crowdsourced data: lots of real data, large area coverage, disparate and poor quality material
+
+---
+layout: false
+class: inverse center middle
+
+## What can we do with the data collected by the app ?
+
+???
+The question is straight forward. In this presentation, I'll speak about the dataset,
+the trails we are exploring, the results we got so far and some difficulties we had and how to mitigate those.
 
 ---
 ## NoiseCapture dataset
@@ -124,13 +134,20 @@ crowdsourced data: lots of real data, large area coverage, disparate and poor qu
 --
 - sound spectrum, tags and gps localization
 
+--
+- ODC Open Database License v1.0
+
+--
+
+https://data.univ-gustave-eiffel.fr/dataset.xhtml?persistentId=doi:10.25578/J5DG3W
+
 ???
 sound spectrum: third of octave, each 1s
 
 ---
 
 
-## Characterization of the user environment with the collected data ?
+## How to characterize of the user environment with the collected data ?
 
 --
 
@@ -152,11 +169,11 @@ notes
 
 
 We choose the second approach in a first time because it is easiest to do but the sound spectrum will be analysed in a second stage.
-If the tags can help to qualify the sound spectrum, it will be a real plus.
+If the tags can help to describe the sound spectrum, it will be a real plus.
 
 ---
 
-## Tags
+## Database and subset
 
 .pull-left[
 - 260 422 tracks
@@ -167,7 +184,8 @@ If the tags can help to qualify the sound spectrum, it will be a real plus.
 ]
 
 --
-.pull-right[<img src="https://universite-gustave-eiffel.github.io/lasso-data-analysis/articles/plots/tags_repartition.png" style="width: 100%" />]
+.pull-right[<img src="https://universite-gustave-eiffel.github.io/lasso-data-analysis/articles/plots/tags_repartition.png" style="width: 110%" />]
+
 ---
 
 ## Toolkit
@@ -182,6 +200,14 @@ A quite simple one:
 
 --
 - and lots of R packages : Tidyverse, sf, geojsonsf, stats, suncalc...
+
+???
+
+The toolkit is relatively simple, PostgreSQL/Postgis because the data source is a PostgreSQL dump.
+So in order to access it, you have to set up a database to store the data.
+R is my work horse for many years, it is use, among other tools, by the UMRAE team.
+The complexity is underneath. The large amont of R package make reproductibilty complex.
+
 ---
 layout: true
 ## Preliminary results
@@ -240,14 +266,14 @@ layout: true
 
 ### Good
 
-- Data available
-- Source code available (SQL scripts and R notebooks)
+- [Data available](https://data.univ-gustave-eiffel.fr/dataset.xhtml?persistentId=doi:10.25578/J5DG3W)
+- [Source code available](https://github.com/Universite-Gustave-Eiffel/lasso-data-analysis) (SQL scripts and R notebooks)
 - Setup available
 
 --
 ### Bad
 - Some notebooks needs work on reproductibility (and code factoring)
-- Environment info are too scarce
+- Environment info is too scarce (and hard to reuse)
 
 ---
 
@@ -261,7 +287,7 @@ layout: true
 
 - Renv: R package that can store and recreate an R environment (R and packages versions), limited to R
 - Docker : small virtual machinesthat can be re-build and/or re-run. There is R and Postgis images ready to use
-- Guix: so far the best way to reproduce and entire environment
+- Guix: to my knowledge the best way to reproduce a software environment
 
 
 ---
@@ -278,8 +304,8 @@ layout: true
 - Crowdsourced data can be useful for science
 - Known phenomena can be found in the dataset
 - There is still a lot to study 
-- FOSS are a not only useful for Science but <span style='color:#ef7d00;'>key for Reproductible Science</span>
-- Reproductible Science is hard and has to take in account as soon as possible
+- FOSS are a not only useful for the industry and science but <span style='color:#ef7d00;'>key for Reproductible Science</span>
+- Reproductible Science is hard to achieve and has to take in account as soon as possible
 
 ---
 layout: false
