@@ -69,15 +69,10 @@ Traffic noise is a major health concern :
 
 --
 
-- 1 million healthy life years (DALYs) lost each year (Western Europe)
+- 1 million healthy life years (DALYs) lost each year in Western Europe due to traffic noise [WHO 2011](https://intranet.euro.who.int/__data/assets/pdf_file/0008/136466/e94888.pdf)
 
 --
 
-- 147 billion euros per year (social cost in France)
-
-???
-
-- 1 million healthy life years (DALYs) lost each year in Western Europe due to traffic noise [WHO 2011](https://intranet.euro.who.int/__data/assets/pdf_file/0008/136466/e94888.pdf)
 - social cost of noise in France estimated at 147 billion euros per year [ADEME 2021](https://librairie.ademe.fr/air-et-bruit/4815-cout-social-du-bruit-en-france.html)
 
 ---
@@ -88,7 +83,7 @@ Traffic noise is a major health concern :
 - Direct measure on the whole area is not possible
 
 --
-- Traditionnal way is simulation from traffic counts and infrastructure
+- Traditional way is simulation from traffic counts (air, rail, road) and infrastructure
 
 <img src="media/carte-bruit-bouguenais.png" style="width: 50%" />
 
@@ -221,9 +216,9 @@ layout: true
 
 ???
 
-The graph on the left shows the proportion of the "animals" tags around sunrise time (the center is the sunrise time of the day it was recorded). We can see a peak during the 3 hours after the sunrise. It is a well known temporal dynamic for bird songs.
+The graph on the left shows the proportion of the "animals" tags around sunrise time (the center is the sunrise time of the day it was recorded). We can see a peak during the 1 hour before the sunrise. It is a well known temporal dynamic for bird songs.
 
-On the right, it is the proportion of "roads" tags (often associated with traffic noise) in local time. We can see two peaks around 9 to 10 am and 8 PM. It is very similar to what is observed with commute times.
+On the right, it is the proportion of "roads" tags (often associated with traffic noise) in local time. We can see two peaks around 8 to 9 AM and 18 to 19 PM. It is very similar to what is observed with commute times.
 
 ---
 ###  Physical events
@@ -231,14 +226,14 @@ On the right, it is the proportion of "roads" tags (often associated with traffi
 --
 .pull-left[
 
-<img src="https://github.com/nicolas-roelandt/lasso-data-analysis/raw/8f9d0d04e3ccd3dc98f26aa216c79b8a972b56e8/vignettes/plots/Repartition%20wind%20tags.png" style="width: 100%" />
+<img src="https://github.com/nicolas-roelandt/lasso-data-analysis/raw/8f9d0d04e3ccd3dc98f26aa216c79b8a972b56e8/vignettes/plots/Repartition%20wind%20tags.png" style="width: 90%" />
  r(7) = .93 (p < 0.01) between `wind` tag proportion and the measured wind force
 ]
 
 --
 
 .pull-right[
-<img src="https://github.com/nicolas-roelandt/lasso-data-analysis/raw/8f9d0d04e3ccd3dc98f26aa216c79b8a972b56e8/vignettes/plots/Repartition%20rain%20tags.png" style="width: 100%" />
+<img src="https://github.com/nicolas-roelandt/lasso-data-analysis/raw/8f9d0d04e3ccd3dc98f26aa216c79b8a972b56e8/vignettes/plots/Repartition%20rain%20tags.png" style="width: 90%" />
 r(6) = 0.68 (p < 0.1) between the `rain` tag proportion and the measured rain fall
 ]
 
@@ -317,6 +312,8 @@ Nicolas Roelandt - Univ. Gustave Eiffel
 [nicolas.roelandt@univ-eiffel.fr](mailto:nicolas.roelandt@univ-eiffel.fr) [@RoelandtN42](https://twitter.com/RoelandtN42)
 
 Access to code source : [github.com/Universite-Gustave-Eiffel/lasso-data-analysis](https://github.com/Universite-Gustave-Eiffel/lasso-data-analysis)
+
+Access to dataset : [noise-planet.org](http://data.noise-planet.org/index.html)
 
 Detailed articles and notebooks : [universite-gustave-eiffel.github.io/lasso-data-analysis/articles/](https://universite-gustave-eiffel.github.io/lasso-data-analysis/articles/)
 
