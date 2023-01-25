@@ -1,6 +1,6 @@
 ---
-title: "Internship report"
-subtitle: "Data cleaning"
+title: "Data cleaning"
+subtitle: "Tracks' points cleanup for temporal analysis"
 author: "Ludovic Moisan"
 supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
 date: "`r Sys.Date()`"
@@ -20,6 +20,19 @@ library(dplyr)
 library(sf)
 library(geosphere)
 library(CoordinateCleaner)
+
+```
+
+```{r con-parameters, include = FALSE}
+drv <- DBI::dbDriver("PostgreSQL")
+con <- DBI::dbConnect(
+drv,
+dbname ="noisecapture",
+host = "lassopg.ifsttar.fr", #server IP or hostname
+port = 5432, #Port on which we ran the proxy
+user="noisecapture",
+password= Sys.getenv('noisecapture_password') # password stored in .Renviron. Use this to edit it : usethis::edit_r_environ()
+)
 
 ```
 

@@ -50,43 +50,28 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="../articles/Analysis_Database_overview.html">[Analysis] Database overview</a>
+    </li>
+    <li>
+      <a href="../articles/Analysis_Hourly_tag_repartition.html">[Analysis] Time distribution analysis</a>
+    </li>
+    <li>
+      <a href="../articles/Analysis_Tags_around_sunrise.html">[Analysis] Sunrise analysis</a>
+    </li>
+    <li>
+      <a href="../articles/Analysis_Tags_around_sunset.html">[Analysis] Sunset analysis</a>
+    </li>
+    <li>
+      <a href="../articles/Analysis_Temporal_attributes.html">[Analysis] Temporal attributes analysis</a>
+    </li>
+    <li>
+      <a href="../articles/Analysis_Weather_analysis.html">[Analysis] Weather analysis</a>
+    </li>
+    <li>
       <a href="../articles/crowdsourced_acoustic_data_analysis_with_foss4g_2022.html">Crowdsourced acoustic open data analysis with FOSS4G tools</a>
     </li>
     <li>
-      <a href="../articles/Main_doc.html">Intership report</a>
-    </li>
-    <li>
       <a href="../articles/temporal_exploratory_analysis.html">Temporal exploratory analysis</a>
-    </li>
-    <li>
-      <a href="../articles/%5BAnalysis%5DDatabase_overview.html">Internship report</a>
-    </li>
-    <li>
-      <a href="../articles/%5BAnalysis%5DHourly_tag_repartition.html">Internship report</a>
-    </li>
-    <li>
-      <a href="../articles/%5BAnalysis%5DTags_around_sunrise.html">Internship report</a>
-    </li>
-    <li>
-      <a href="../articles/%5BAnalysis%5DTags_around_sunset.html">Internship report</a>
-    </li>
-    <li>
-      <a href="../articles/%5BAnalysis%5DTemporal_attributes.html">Internship report</a>
-    </li>
-    <li>
-      <a href="../articles/%5BAnalysis%5DWeather_analysis.html">Internship report</a>
-    </li>
-    <li>
-      <a href="../articles/%5BComputing%5DAdding_temporal_data.html">Internship report</a>
-    </li>
-    <li>
-      <a href="../articles/%5BComputing%5DAdding_weather.html">Internship report</a>
-    </li>
-    <li>
-      <a href="../articles/%5BComputing%5DCalculate_components.html">Internship report</a>
-    </li>
-    <li>
-      <a href="../articles/%5BComputing%5DData_cleaning.html">Internship report</a>
     </li>
   </ul>
 </li>
@@ -105,10 +90,10 @@
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Crowdsourced acoustic open data analysis with FOSS4G tools</h1>
-                        <h4 data-toc-skip class="author">Nicolas Roelandt<sup>1</sup>, Pierre Aumond<sup>2</sup>, Ludovic Moisan<sup>2</sup>
+                        <h4 data-toc-skip class="author">Nicolas Roelandt<sup>1*</sup>, Pierre Aumond<sup>2</sup>, Ludovic Moisan<sup>3</sup>
 </h4>
             
-            <h4 data-toc-skip class="date">2022-06-01</h4>
+            <h4 data-toc-skip class="date">2022-06-30</h4>
       
       
       <div class="hidden name"><code>crowdsourced_acoustic_data_analysis_with_foss4g_2022.Rmd</code></div>
@@ -131,19 +116,19 @@
       The application is open-source, and all its data are available freely.
       This study presents the results of the first exploratory analysis of 3 years of
       data collection through the lens of sound sources.
-      This analysis is based only on the tags given by the users and not on the sound
+      This analysis is only based on the tags given by the users and not on the sound
       spectrum of the measurement, which will be studied at a later stage.
-      The first results are encouraging, we were able to observe well known temporal
-      dynamics of roads related to commuting or bird songs in the dataset.
-      We also found correlations between wind an rain tags and their measurements by
+      The first results are encouraging, we were able to observe well known temporal sound source
+      dynamics like road sounds temporal dynamic related to commuting or bird songs in the dataset.
+      We also found correlations between wind and rain tags and their measurements by
       the the national meteorological service.
       The context of the study, the Free and Open Source Software tools and techniques
-      used are presented as well
-      as the benefits of using literate programming in this type of exploratory work.</p>
+      used and literate programming benefits are presented.</p>
     </div>
     
-<div class="section level2">
-<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+<div class="section level2" number="1">
+<h2 id="introduction">
+<span class="header-section-number">1</span> Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
 <p>NoiseCapture<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> is an Android application developed by the Gustave Eiffel University<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>
 and the CNRS<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> as part of a participatory approach to environmental noise mapping.
@@ -160,16 +145,16 @@ or wind) with the records from the national meteorological service database.</p>
 <p>As these exploratory works will be extended and consolidated thereafter to a
 more global exploration of the database, and with the will to include this study
 within the framework of the Open Science, an attention was brought on the
-reproducibility aspect of the analysis.
+reproductibility aspect of the analysis.
 It was entirely realized with Free and Open Source Software (FOSS) and
 literate programming techniques.</p>
 <p>The context of the study, the implemented methodology and the first results
 will be presented as well as the benefits of using literate programming
 in this type of exploratory work.</p>
 </div>
-<div class="section level2" number="1">
+<div class="section level2" number="2">
 <h2 id="context">
-<span class="header-section-number">1</span> Context<a class="anchor" aria-label="anchor" href="#context"></a>
+<span class="header-section-number">2</span> Context<a class="anchor" aria-label="anchor" href="#context"></a>
 </h2>
 <p>Noise has a major impact on the health and quality of life of humans and wildlife.
 A study, coordinated by the WHO and published in 2011, indicates that at least one million healthy life years (DALYs)
@@ -178,15 +163,15 @@ effects are numerous: hearing damage, sleep disturbances, cardiovascular patholo
 studies show that the perceived noise environment is significantly correlated with an individual’s satisfaction with
 his or her living environment, with his or her health-related quality of life or with the restorative effect of a place <span class="citation">(<a href="#ref-botteldooren2011InfluenceTrafficNoise" role="doc-biblioref">Botteldooren, Dekoninck, and Gillis 2011</a>)</span>.
 The economic and social impact of noise has also been demonstrated with a social cost of noise in France estimated at
-147 billion euros per year <span class="citation">(<a href="#ref-ademe2021EstimationCoutSocial" role="doc-biblioref">ADEME et al. 2021</a>)</span>. A complete and precise evaluation of the presence of noise in the environment is
+147 billion euros per year <span class="citation">(<a href="#ref-ademe2021EstimationCoutSocial" role="doc-biblioref">ADEME et al. 2021</a>)</span>. A complete and precise environmental noise assessment is
 therefore of great necessity.</p>
 <p>The NoiseCapture app is part of a global Open Science approach (called Noise-Planet) led by Université
 Gustave Eiffel and CNRS, for the development of tools for the assessment of the sound environment.
 This project is particularly interested in the implementation of a participative approach for the
-production of data with smartphones in order to eventually propose an alternative method of environmental sound mapping.
+production of data with smartphones to eventually propose an alternative method of environmental sound mapping.
 For this purpose, an Android application and a spatial data infrastructure
-have been specifically developed. The whole system allows to collect physical data (acoustic measurements, GPS positions…)</p>
-<p>and perceptual data (pleasantness, presence of sound sources), without any territory limit, while
+have been specifically developed. The whole system allows to collect physical data (acoustic measurements, GPS positions…)
+and perceptual data (pleasantness, presence of sound sources), without any territory limit, while
 respecting the privacy of the contributors. The collected data are freely accessible,
 in particular by the scientific community which would like to develop new tools
 for the evaluation and representation of sound environments.</p>
@@ -195,18 +180,19 @@ acoustic samples. A first article presenting this dataset has been published in 
 It details the structure of the database and the data, the profile of the
 contributors and the contributions but does not analyze the content of the data.
 This is what this article proposes to begin.</p>
-<div class="section level3" number="1.1">
-<h3 id="methodology">
-<span class="header-section-number">1.1</span> Methodology<a class="anchor" aria-label="anchor" href="#methodology"></a>
-</h3>
+</div>
+<div class="section level2" number="3">
+<h2 id="methodology">
+<span class="header-section-number">3</span> Methodology<a class="anchor" aria-label="anchor" href="#methodology"></a>
+</h2>
 <p>As the NoiseCapture application is Open Source and the data collection infrastructure
 use Free and Open Source Softwares (FOSS), we decided to pursue this by using
 open source software and data for the analysis part.</p>
 <p>First, we will introduce the dataset then we will present the tools we used and why we choose them.</p>
-<div class="section level4" number="1.1.1">
-<h4 id="data">
-<span class="header-section-number">1.1.1</span> Data<a class="anchor" aria-label="anchor" href="#data"></a>
-</h4>
+<div class="section level3" number="3.1">
+<h3 id="data">
+<span class="header-section-number">3.1</span> Data<a class="anchor" aria-label="anchor" href="#data"></a>
+</h3>
 <p>The data used in this study are contributions made by the user of the application
 between August 29, 2017 and August 28, 2020.
 During this period, nearly 70,000 unique contributors allowed
@@ -228,27 +214,27 @@ number of recordings and having a single administrative area facilitates the col
 supplementary databases.
 Then we extended some analysis worldwide. The results presented here concern tracks
 recorded in the France metropolitan area.</p>
-<p>To facilitate the reproducibility of spatial filtering, it was decided to use
+<p>To facilitate the reproductibility of spatial filtering, it was decided to use
 open data sets from recognized sources: the Natural Earth database
 <span class="citation">(<a href="#ref-pattersonNaturalEarth2021" role="doc-biblioref">Patterson and Kelso 2021</a>)</span> and the Admin Express database from the French
 National Institute of Geographic and Forest Information <span class="citation">(<a href="#ref-institutgeographiquenationalAdminExpress" role="doc-biblioref">Institut Géographique National 2021</a>)</span>.</p>
 <p>The raw data has been stored and pre-filtered in a geospatial database and has been
 analysed using a statistical analysis language.</p>
 </div>
-<div class="section level4" number="1.1.2">
-<h4 id="tools">
-<span class="header-section-number">1.1.2</span> Tools<a class="anchor" aria-label="anchor" href="#tools"></a>
-</h4>
-<p>In order to be as open as possible and to work in the most collaborative way,
-we decided a FOSS toolset: PostgreSQL/Postgis to store the data and the R language
+<div class="section level3" number="3.2">
+<h3 id="tools">
+<span class="header-section-number">3.2</span> Tools<a class="anchor" aria-label="anchor" href="#tools"></a>
+</h3>
+<p>To be as open as possible and to work in the most collaborative way,
+we decided on a FOSS toolset: PostgreSQL/Postgis to store the data and the R language
 to analyse and produce knowledge from it.
-We also used Git as it is a great tool to facilitate remote collaboration.</p>
-<p><strong>PostGIS</strong>: the data are provided as a dump from a PostgreSQL/PostGIS database <span class="citation">(<a href="#ref-paulramseyPostGIS2001" role="doc-biblioref">Ramsey and Blasby 2001</a>)</span>.
+We also used Git for source code versioning and to facilitate remote collaboration.</p>
+<p>The data are provided as a dump from a PostgreSQL/PostGIS database <span class="citation">(<a href="#ref-paulramseyPostGIS2001" role="doc-biblioref">Ramsey and Blasby 2001</a>)</span>.
 In order to access the data, we had to set up a PostgreSQL server and configure
 it according to the indications provided with the dataset.
 Several views have been set up to pre-filter the data and provide stable access
 points for the R language.</p>
-<p><strong>R</strong>: the R language <span class="citation">(<a href="#ref-rcoreteamRLanguageStatistical2021" role="doc-biblioref">R Core Team 2021</a>)</span>
+<p>The R language <span class="citation">(<a href="#ref-rcoreteamRLanguageStatistical2021" role="doc-biblioref">R Core Team 2021</a>)</span>
 is a programming language for data processing and statistics with many libraries
 dedicated to geospatial data.
 R allowed us to query the database to get data, refine it to our needs, then produce
@@ -257,22 +243,21 @@ data analysis, graphs and reports using Rmarkdown files.</p>
 text in markdown for the dynamic production of graphs, tables and documents.
 The use of Rmarkdown is one of the recommended means for literate
 programming (along with Jupyter Notebooks and Emacs Org-Mode <span class="citation">(<a href="#ref-desquilbet2019ReproducibleResearch" role="doc-biblioref">Desquilbet et al. 2019</a>)</span>)
-So it is a great tool to either communicate inside our team and publish our results.</p>
-<p>Rmarkdown, as any markdown file, is a plain text file that can be easily versionned
+So it is a useful tool to either communicate progress inside our team and publish our results.</p>
+<p>Rmarkdown, as any markdown file, is a plain text file that can be easily versioned
 with any version control system.
 As our team is scattered in several places in France, we needed a tool to
 facilitate code sources communication, for this purpose, we used git.</p>
-<p><strong>Git</strong>: Git is a Distributed Version Control System (DVCS) <span class="citation">(<a href="#ref-chacon2014pro" role="doc-biblioref">Chacon and Straub 2014</a>)</span>.
+<p>Git is a Distributed Version Control System (DVCS) <span class="citation">(<a href="#ref-chacon2014pro" role="doc-biblioref">Chacon and Straub 2014</a>)</span>.
 It enables collaborative and decentralized work.
 Using the Github online plateforme, we could communicate source code changes to
 each other in a desynchronized way between different collaborators present on several
-sites (Nantes, Lyon, Paris).
-Git is already used within the UMRAE laboratory.</p>
+sites (Nantes, Lyon, Paris).</p>
 </div>
-<div class="section level4" number="1.1.3">
-<h4 id="implementation">
-<span class="header-section-number">1.1.3</span> Implementation<a class="anchor" aria-label="anchor" href="#implementation"></a>
-</h4>
+<div class="section level3" number="3.3">
+<h3 id="pre-processing">
+<span class="header-section-number">3.3</span> Pre-processing<a class="anchor" aria-label="anchor" href="#pre-processing"></a>
+</h3>
 <p>The raw data are provided in the form of a PostgreSQL/PostGIS dump.
 A server has been set up to store the data.
 Several SQL scripts create materialized views that perform much of the attribute
@@ -281,17 +266,18 @@ corresponding to defined criteria.
 A materialized view is a good compromise between a table and a view because it
 has similar response time to a table and also allows us to recompute
 values easily if threshold values changed.
+It is perfect to store data that does not change too often.
 Those views are the entry point for the R language to get data to analyse.</p>
-<p>The analyses were carried out in two stages: a first exploratory analysis aimed
-at verifying whether certain known environmental dynamics could be visible in the
-data set, on the territory of metropolitan France.</p>
-<p>The first analysis having brought encouraging results, we took it again in order
+<p>The analyses were carried out in two stages: a first exploratory analysis and more deeper one.
+The first analysis aimed at verifying whether certain known environmental dynamics
+could be visible in the data set.
+This first analysis brought encouraging results, we took it again in order
 to refine it and to extend the field of research.
-In order to have a better qualification of the quality of the dataset, we look if there is a relationship
-between the weather events in the environment and the tags filled by the user.
-More precisely the indicator chosen is the ratio of users who have put a particular
+In order to have a better qualification of the quality of the dataset, we look
+if there is a relationship between the weather events in the environment and the
+tags filled by the user.
+More precisely, the indicator chosen is the ratio of users who have put a particular
 tag among the users who have put at least one tag in a particular condition (i.e. no wind vs. wind).</p>
-<p>We will present some of this results here.</p>
 <p>The code producing the analysis and graphics are separated in
 several complementary documents<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a>.</p>
 <p>The selection criteria for the data we were going to use for our analyses were
@@ -301,12 +287,12 @@ only outdoor measurements.
 While these two analyses share a common basis, the selection criteria were refined between both.</p>
 <p>Short tracks (duration less than 5 seconds) were discarded in both analysis.</p>
 <p>Long tracks (duration longer than 15 minutes) have been removed from the exploratory analysis.
-They were kept in the extended analysis.</p>
+They were kept in the second analysis.</p>
 <p>In the exploratory analysis, we kept the tracks where the GPS median accuracy of the whole track was less than 20 meters.
-In the extended analysis, we implemented an algorithm to detect and remove outliers track points using a method from the R package CoordinateCleaner<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a>.
+In the extended analysis, we implemented an algorithm to detect and remove outliers track points using a method from the R package <code>CoordinateCleaner</code><a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a>.
 This method was used to keep tracks that would have been eliminated because some of their points had aberrant coordinates, which allowed us to work with larger samples and with a better localization accuracy.</p>
-<p>In the exploratory analysis, we decided to keep tracks that are comprised in a rather small area,
-the bounding box area would have to be equivalent to a square of 25 by 25 meters. This criterion was not considered in the extended analysis, but a threshold of 8 m/s (equivalent to 30 km/h) was set between 2 GPS measurements to eliminate tracks with aberrant distance between two measurements points.</p>
+<p>In the first analysis, we decided to keep tracks that are comprised in a rather small area,
+the bounding box area of the track would have to be equivalent to a square of 25 by 25 meters. This criterion was not considered in the extended analysis, but a threshold of 8 m/s (equivalent to 30 km/h) was set between 2 GPS measurements to eliminate tracks with aberrant distance between two measurements points.</p>
 <p>Although the extended analysis examined some questions on the global dataset, the results presented here are for tracks in metropolitan France.
 To extract data regarding France metropolitan area, we pre-filtered the data
 using the NaturalEarth dataset to keep tracks that are within the France country.
@@ -317,7 +303,7 @@ distinguish France metropolitan area from overseas areas.
 This could have introduce complications with timezone handling.
 We refined the spatial filtering to France’s metropolitan area
 using an authoritative dataset <span class="citation">(<a href="#ref-institutgeographiquenationalAdminExpress" role="doc-biblioref">Institut Géographique National 2021</a>)</span>.</p>
-<p>In order to facilitate the replication of the study on areas without this kind
+<p>To facilitate the replication of the study on areas without this kind
 of issues, this as not been done within the database but at the beginning of the
 Rmarkdown document where the exploratory analysis is conducted.
 The Rmarkdown document establishes the connection with the materialized view
@@ -328,18 +314,19 @@ Some files prepare additional data or calculate indicators.
 Others analyze the results.</p>
 </div>
 </div>
-</div>
-<div class="section level2" number="2">
+<div class="section level2" number="4">
 <h2 id="results">
-<span class="header-section-number">2</span> Results<a class="anchor" aria-label="anchor" href="#results"></a>
+<span class="header-section-number">4</span> Results<a class="anchor" aria-label="anchor" href="#results"></a>
 </h2>
-<div class="section level3" number="2.1">
+<div class="section level3" number="4.1">
 <h3 id="environmental-acoustics-results">
-<span class="header-section-number">2.1</span> Environmental acoustics results<a class="anchor" aria-label="anchor" href="#environmental-acoustics-results"></a>
+<span class="header-section-number">4.1</span> Environmental acoustics results<a class="anchor" aria-label="anchor" href="#environmental-acoustics-results"></a>
 </h3>
-<p>The main goal of this preliminary study was to verify the scientific value of
-crowdsourced acoustic data and if tags are sufficient to describe user environment.</p>
-<p>The study concerns tracks bearing a tag, recorded in metropolitan France.
+<p>The main goal of this preliminary study was to control the quality of the tags defined
+by the users in a crowdsourced acoustic data and if thoses tags are sufficient to
+describe the user environment.</p>
+<p>The results presented here concerns tracks bearing a tag, recorded in metropolitan
+France between 2017 and 2020.
 It focuses on the proportion of a certain tag in relation to all the tags for a
 given period (time of day, season, etc.).
 In the sample studied, it is possible to note a large prevalence of the <em>road</em>
@@ -347,45 +334,45 @@ tag as shown in Figure 1.
 <em>chatting</em>, <em>animals</em> and <em>wind</em> tags are also well represented.</p>
 <p><img src="plots/tags_repartition.png" width="1050"></p>
 <p class="caption">
-<strong>Figure 1: </strong>Tag representation in mainland France.
+<strong>Figure 1. </strong>Tag representation in mainland France.
 </p>
 <p>Noise annoyance from road traffic and its effects on health are a major concern
 in France and are the subject of several studies (
-<span class="citation"><a href="#ref-meline2013TransportationNoiseAnnoyance" role="doc-biblioref">Méline et al.</a> (<a href="#ref-meline2013TransportationNoiseAnnoyance" role="doc-biblioref">2013</a>)</span>, <span class="citation"><a href="#ref-grange2009PerceptionsBruitIledeFrance" role="doc-biblioref">Grange, Chatignoux, and Grémy</a> (<a href="#ref-grange2009PerceptionsBruitIledeFrance" role="doc-biblioref">2009</a>)</span>).</p>
-<p>In order to have a first idea of the quality of our dataset, we tried to see if
-known phenomena in environmental acoustics appeared in the data.</p>
+<span class="citation">Méline et al. (<a href="#ref-meline2013TransportationNoiseAnnoyance" role="doc-biblioref">2013</a>)</span>, <span class="citation">Grange, Chatignoux, and Grémy (<a href="#ref-grange2009PerceptionsBruitIledeFrance" role="doc-biblioref">2009</a>)</span>).</p>
+<p>To have a first idea of the quality of the tags in the dataset, we tried
+to see if known temporal dynamics in environmental acoustics appeared in the data.</p>
 <p>Subsequently, we seek to determine for physical phenomena such as rain and wind
-if the presence of tags related to them in our dataset corresponded to real
+if the presence of tags related to them in the dataset corresponded to real
 measurements of rain and wind of the national weather service.</p>
-<div class="section level4" number="2.1.1">
-<h4 id="known-environmental-acoustics-phenomena">
-<span class="header-section-number">2.1.1</span> Known environmental acoustics phenomena<a class="anchor" aria-label="anchor" href="#known-environmental-acoustics-phenomena"></a>
+<div class="section level4" number="4.1.1">
+<h4 id="known-environmental-acoustics-temporal-dynamics">
+<span class="header-section-number">4.1.1</span> Known environmental acoustics temporal dynamics : <a class="anchor" aria-label="anchor" href="#known-environmental-acoustics-temporal-dynamics"></a>
 </h4>
-<p>A first axis of analysis concerns the time distribution of certains tags.
+<p>a first axis of analysis concerns the time distribution of certains tags.
 The first tag we studied was the <code>animals</code> tag.
-We wanted to see if we wera able to see a rise of this tag close to the sunrise.
-Indeed as shown by <span class="citation">(<a href="#ref-robbins1981effect" role="doc-biblioref">Robbins 1981</a>)</span>, bird song activity is highest in the
+We wanted to see if we were able to see a rise of this tag presence in the dataset
+close to the sunrise.
+Indeed as shown by <span class="citation">Robbins (<a href="#ref-robbins1981effect" role="doc-biblioref">1981</a>)</span>, bird song activity is highest in the
 morning, especially in the hour after sunrise.</p>
-<p>Figure 2 shows that animal noises
-(tag <em>animals</em>) are more frequent in the morning and especially
-at sunrise time.</p>
+<p>Figure 2 shows that the tag <code>animals</code>
+(associated to bird songs) is more frequent in the morning and especially at sunrise time.</p>
 <p><img src="https://user-images.githubusercontent.com/86657953/168254217-d18e7476-fa3c-48e8-9412-1886183ea98e.png"><!-- --></p>
 <p class="caption">
-<strong>Figure 2: </strong>Animals acoustic dynamics.
+<strong>Figure 2. </strong>Animals acoustic dynamics.
 </p>
 <p>The second tag we studied was the <code>road</code> one.
 We also observed peaks in human activity, especially the commuting morning and evening peak times.
 Figure 3 shows peak times ate 9:00 AM–10:00 AM
 and 8:00 PM–9:00 PM.
 On a previous study on commuting patterns from smart card data in Beijing (China),
-<span class="citation"><a href="#ref-MA2017135" role="doc-biblioref">Ma et al.</a> (<a href="#ref-MA2017135" role="doc-biblioref">2017</a>)</span> found peak times at 7:00 AM–9:00 AM and 5:00 PM–7:00 PM.
+<span class="citation">Ma et al. (<a href="#ref-MA2017135" role="doc-biblioref">2017</a>)</span> found peak times at 7:00 AM–9:00 AM and 5:00 PM–7:00 PM.
 This time lag might be due to several reasons that we did not explore: cultural
 difference between China and France, different mobility practices (smart card
 for public transportation data versus road noise data), different types of study area
 (Beijing metropolis and metropolitan France).</p>
 <p><img src="https://user-images.githubusercontent.com/86657953/168244734-cda47fea-a43d-48e3-9b74-816f438ac276.png"><!-- --></p>
 <p class="caption">
-<strong>Figure 3: </strong>Road dynamics.
+<strong>Figure 3. </strong>Road acoustics dynamics.
 </p>
 <p>Seeing those dynamics was a good sign regarding the validity of crowdsourced
 environmental acoustic data.
@@ -393,17 +380,17 @@ However, we wanted more precise quality indicators so we looked if we were able
 to correlate the mention of physical events in the dataset and records of thoses
 events in an authoritative database.</p>
 </div>
-<div class="section level4" number="2.1.2">
+<div class="section level4" number="4.1.2">
 <h4 id="correlation-between-tags-and-physical-events-in-the-user-environment">
-<span class="header-section-number">2.1.2</span> Correlation between tags and physical events in the user environment<a class="anchor" aria-label="anchor" href="#correlation-between-tags-and-physical-events-in-the-user-environment"></a>
+<span class="header-section-number">4.1.2</span> Correlation between tags and physical events in the user environment : <a class="anchor" aria-label="anchor" href="#correlation-between-tags-and-physical-events-in-the-user-environment"></a>
 </h4>
+<p>to determine the accuracy of the manually selected tags by the users of
+the NoiseCapture app, we wanted to proceed simple investigations concerning some
+tags related to physical events, such as the weather related ones (rain,wind),
+which can be verified later on.</p>
 <p>As we know the user position and we have the timestamp of the recording, we are
 able to determine the weather conditions at that time and place using the services
 of Météo-France, the French national meteorological service.</p>
-<p>In order to determine the accuracy of the manually selected tags by the users of
-the NoiseCapture app, we want to proceed simple investigations concerning some
-tags that concern physical events, such as the weather related ones (rain,wind),
-which can be verified later on.</p>
 <p>The weather data used is from France’s national weather organisation Météo-France,
 available along with its full documentation from their website :
 <a href="https://donneespubliques.meteofrance.fr/?fond=produit&amp;id_produit=90&amp;id_rubrique=32" class="external-link">French weather data</a></p>
@@ -411,13 +398,13 @@ available along with its full documentation from their website :
 The median distance between weather stations and our tracks is <strong>16.1 kilometers</strong>.</p>
 <p><img src="https://github.com/nicolas-roelandt/lasso-data-analysis/raw/8f9d0d04e3ccd3dc98f26aa216c79b8a972b56e8/vignettes/plots/Repartition%20rain%20tags.png"><!-- --></p>
 <p class="caption">
-<strong>Figure 4: </strong>Rain tag use.
+<strong>Figure 4. </strong><code>rain</code> tag use.
 </p>
 <p><img src="https://github.com/nicolas-roelandt/lasso-data-analysis/raw/8f9d0d04e3ccd3dc98f26aa216c79b8a972b56e8/vignettes/plots/Repartition%20wind%20tags.png"><!-- --></p>
 <p class="caption">
-<strong>Figure 5: </strong>Wind tag use.
+<strong>Figure 5. </strong><code>wind</code> tag use.
 </p>
-<p>The proportion of “wind” and “rain” tags seem to correlate with their corresponding physical events.
+<p>The proportion of <code>wind</code> and <code>rain</code> tags seem to correlate with their corresponding physical events.
 In order to create those graphs, we selected scales to group the data
 (wind force and precipitation) and compute the proportion of tags present in those groups.</p>
 <p>There is a strong correlation between the proportion of wind tags and the strength of wind, r(7) = .93, <em>p &lt; 0.01</em>.
@@ -429,28 +416,29 @@ The dataset we have studied is not sufficient to characterize the
 amount of rainfall but sufficient to qualify the presence or absence of it.</p>
 </div>
 </div>
-<div class="section level3" number="2.2">
+<div class="section level3" number="4.2">
 <h3 id="benefits-of-openscience-and-literate-programming">
-<span class="header-section-number">2.2</span> Benefits of OpenScience and literate programming<a class="anchor" aria-label="anchor" href="#benefits-of-openscience-and-literate-programming"></a>
+<span class="header-section-number">4.2</span> Benefits of OpenScience and literate programming<a class="anchor" aria-label="anchor" href="#benefits-of-openscience-and-literate-programming"></a>
 </h3>
 <p>Intrinsically, Free and Open Source Software (FOSS) brings many benefits to any
 project, whether it is a scientific one or not.
 The problem of licenses is greatly facilitated because they are usable by all,
 without discrimination and without additional cost.
 The question of having to acquire licenses and how to do so is no longer an issue.
-Another advantage, as long as one has the necessary skills, is to be able to adapt
-the tool to one’s needs, an important quality in an often innovative field.
-Free software favors interoperability and this aspect is important when creating
-complex processing chains, implementing several different tools.</p>
-<p>As shown in Section <a href="#tools">1.1.2</a>, this study use a rather small toolset of FOSS.
+Another advantage, as long as one has the necessary skills, is the possibility
+to adapt the tool to one’s needs, an important quality in an often innovative field.
+Free and Open Source Software favors interoperability and this aspect is important
+when creating complex processing chains, implementing several different tools.</p>
+<p>As shown in Section <a href="#tools">3.2</a>, this study use a rather small toolset of FOSS.
 The reduction of the number of tools needed for the scientific production was
 possible thanks to the use of a programming language allowing to cover practically
 all the aspects of the project, whether it is the connection to the database,
-the statistical analyses, the production of tables and graphs as well as reports.
-A reduced toolbox also promotes reproducibility by limiting the constraints of
+the statistical analyses, the production of tables and graphs as well as reports
+or scientific papers.
+A reduced toolbox also promotes reproductibility by limiting the constraints of
 installing software on a machine.
 Nevertheless, the analysis uses a large list of R packages and some of them may
-have dependencies that can cause problems.</p>
+have dependencies that can cause reproductibility issues.</p>
 <p>While free software facilitates the implementation and deployment of tools,
 literate programming is more oriented to communication between humans.
 Thus, as early as 1984, Donald Knuth, who invented the concept, questions the
@@ -458,7 +446,7 @@ relationship between the developer of a program and the source code he produces.
 He proposes that, beyond the simple transmission of instructions to a computer,
 the source code should be a means of communicating the intentions of the developer
 to another human being <span class="citation">(<a href="#ref-knuth1984LiterateProgramming" role="doc-biblioref">Knuth 1984</a>)</span>.</p>
-<p>As <span class="citation"><a href="#ref-schulte2012MultiLanguageComputingEnvironment" role="doc-biblioref">Schulte et al.</a> (<a href="#ref-schulte2012MultiLanguageComputingEnvironment" role="doc-biblioref">2012</a>)</span> explains, literate programming
+<p>As <span class="citation">Schulte et al. (<a href="#ref-schulte2012MultiLanguageComputingEnvironment" role="doc-biblioref">2012</a>)</span> explains, literate programming
 mixes source code and natural language, divided into blocks of instructions for
 the computer and blocks of text for human understanding. The code blocks are
 useful for scientific production because they participate in data processing and
@@ -475,10 +463,10 @@ The commentary of a figure is as close as possible to the figure and the code
 that produced it.
 By restarting the analysis, it is possible to see if all the conditions are met
 to resume the work: is the necessary software present? Is the data accessible?
-Does the code still work after the updates?</p>
+Does the code still work after updates?</p>
 <p>For the team or the laboratory in which the project takes place, the benefits
 are also numerous.
-The work done is accessible, especially if collaborative tools have been
+The work done is accessible and readable, especially if collaborative tools have been
 put in place.
 Within the framework of the analysis presented here, an initial exploratory
 analysis revealed certain known dynamics in environmental acoustics.
@@ -508,25 +496,27 @@ of the work and the results presented, but also the general public to appropriat
 methods, code and even the scientific literature produced are open and documented,
 makes it much easier to revisit the work in order to answer one’s own questions
 because it provides a complete example and not just final results.</p>
-<p>While being a valuable aid for reproducibility, the FOSS and literate programming
+<p>While being a valuable aid for reproductibility, the FOSS and literate programming
 with notebook tools such as Rmarkdown used in this project suffer from some limitations.
-It is possible to restart the calculations by trying to
+It is possible to redo the calculations by trying to
 to reproduce the software environment (the versions of the software and packages used are provided),
-but there is no guarantee that the result will be exactly the same.</p>
+but there is no guarantee that the result will be exactly the same because the computer
+environment (is difficult to replicate.</p>
 <p>The package R <a href="https://rstudio.github.io/renv/index.html" class="external-link">renv</a> can help to
-reproduce an R environment and environment by providing functions for saving and
+reproduce an R environment by providing functions for saving and
 restoring dependencies at the project level.
-In some cases, if this is not enough, it will be necessary to turn to higher-level
+In some cases, if this is not enough, it will be necessary to turn to lower-level
 solutions such as <a href="https://www.docker.com/" class="external-link">Docker</a> and <a href="https://guix.gnu.org/" class="external-link">Guix</a>.</p>
 </div>
 </div>
-<div class="section level2">
-<h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
+<div class="section level2" number="5">
+<h2 id="conclusion">
+<span class="header-section-number">5</span> Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
 </h2>
 <p>The major objective of this study was to control the quality of the tag data in an
 environmental acoustics crowdsourced dataset.
-The first step was too find if known temporal dynamics of sound sources are present in the dataset
-The first results were encouraging because road sound dynamics related to commuting or
+The first step was to find if known temporal dynamics of sound sources are present in the dataset
+The first results were encouraging because sound dynamics related to commuting or
 animal activity can be observed.</p>
 <p>In a second time, we checked the correspondence
 between tags related to the acoustic measurement conditions (presence of rain or wind)
@@ -537,12 +527,14 @@ or the perception of light rain is not sufficient for the user to think about
 adding the corresponding tag.
 As a result, the correlation between actual rainfall observations and the
 presence of rain tags in the database is weaker and less significant than for wind.</p>
-<p>This study shows that it is possible to observe known dynamics in environmental acoustics in
-the crowdsourced NoiseCapture dataset (road dynamics related to commuting or animal activity). It also
-increases the level of confidence brought to this dataset by the fact that the
-measurement conditions indicated by the user seem to correspond to real measurement conditions (rain and wind).
-Some questions still need to be explored, notably those concerning the representativeness and
-representativeness and the unbalanced nature of the samples, which are sometimes weak for certain periods.</p>
+<p>This study shows that it is possible to observe known dynamics in environmental
+acoustics inthe crowdsourced NoiseCapture dataset (road dynamics related to
+commuting or animal activity).
+It also increases the level of confidence brought to this dataset by the fact that
+the measurement conditions indicated by the user seem to correspond to real
+measurement conditions (rain and wind).
+Some questions still need to be explored, notably those concerning the representativeness
+and the unbalanced nature of the samples, which are sometimes weak for certain periods.</p>
 <p>We also wanted to show that Free and Open Source Software can be used to produce
 scientific knowledge all along the production chain, from data collection,
 storage, analysis and even presentation.
@@ -553,12 +545,14 @@ and a document mixing narrative, figures and code has greatly facilitated the
 recovery and continuation of the work presented here.
 And this within our own research team.</p>
 <p>We are aware that the acquisition of the necessary skills to mobilize these tools
-is not easy but we believe that the gain is much higher than the cost.
-Reproducibility is an important constraint for research projects that often have
+is not easy and need time but we believe that the gain is much higher
+than the cost.
+Reproductibility is an important constraint for research projects that often have
 limited means, nevertheless it is an investment in the future, both for the team
 and for the scientific community interested in the work.
-For the more technical parts, such as the implementation of database servers,
-the presence of research software engineers is a real plus.</p>
+For the more technical parts, such as the implementation of database servers and
+help with the reproductibility issues,
+the presence of research software engineers in a team or a lab is a real plus.</p>
 </div>
 <div class="section level2">
 <h2 id="acknowledgements">ACKNOWLEDGEMENTS<a class="anchor" aria-label="anchor" href="#acknowledgements"></a>
@@ -572,7 +566,7 @@ We would like to thank the FOSS community for providing us all those tools to wo
 </h2>
 <div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-ademe2021EstimationCoutSocial" class="csl-entry">
-ADEME, I CARE &amp; CONSULT, ÉNERGIES DEMAIN, DOUILLET Maia, SIPOS Gala, DELUGIN Léna, BULLIOT Benoît, REMONTET Lucas, and BIDAULT Elsa. 2021. <span>“Estimation du coût social du bruit en France et analyse de mesures d’évitement simultané du bruit et de la pollution de l’air.”</span> <a href="https://librairie.ademe.fr/air-et-bruit/4815-cout-social-du-bruit-en-france.html" class="external-link">https://librairie.ademe.fr/air-et-bruit/4815-cout-social-du-bruit-en-france.html</a>.
+ADEME, I CARE &amp; CONSULT, ÉNERGIES DEMAIN, Maia Douillet, Gala Sipos, Léna Delugin, Benoît Bulliot, Lucas Remontet, and Elsa Bidault. 2021. <span>“Estimation du coût social du bruit en France et analyse de mesures d’évitement simultané du bruit et de la pollution de l’air.”</span> <a href="https://librairie.ademe.fr/air-et-bruit/4815-cout-social-du-bruit-en-france.html" class="external-link">https://librairie.ademe.fr/air-et-bruit/4815-cout-social-du-bruit-en-france.html</a>.
 </div>
 <div id="ref-botteldooren2011InfluenceTrafficNoise" class="csl-entry">
 Botteldooren, Dick, Luc Dekoninck, and Dominique Gillis. 2011. <span>“The Influence of Traffic Noise on Appreciation of the Living Quality of a Neighborhood.”</span> <em>International Journal of Environmental Research and Public Health</em> 8 (3): 777–98. <a href="https://doi.org/10.3390/ijerph8030777" class="external-link">https://doi.org/10.3390/ijerph8030777</a>.
@@ -587,7 +581,7 @@ Desquilbet, Loic, Sabrina Granger, Boris Hejblum, Arnaud Legrand, Pascal Pernot,
 Fritschi, Lin, A. Lex Brown, Rokho Kim, Dietrich Schwela, and Stelios Kephalopoulos, eds. 2011. <em>Burden of Disease from Environmental Noise: Quantification of Healthy Life Years Lost in <span>Europe</span></em>. <span>Copenhagen</span>: <span>World Health Organization, Regional Office for Europe</span>.
 </div>
 <div id="ref-grange2009PerceptionsBruitIledeFrance" class="csl-entry">
-Grange, Dorothée, Edouard Chatignoux, and Isabelle Grémy. 2009. <em>Les Perceptions Du Bruit En <span class="nocase">Ile-de-France</span></em>. Rapport <span class="nocase">ORS Ile-de-France</span>. <a href="https://www.ors-idf.org/fileadmin/DataStorageKit/ORS/Etudes/2009/Etude2009_9/RapportPercepBruit_1_.pdf" class="external-link">https://www.ors-idf.org/fileadmin/DataStorageKit/ORS/Etudes/2009/Etude2009_9/RapportPercepBruit_1_.pdf</a>.
+Grange, Dorothée, Edouard Chatignoux, and Isabelle Grémy. 2009. <span>“Les Perceptions Du Bruit En <span class="nocase">Ile-de-France</span>.”</span> Rapport <span class="nocase">ORS Ile-de-France</span>. <a href="https://www.ors-idf.org/fileadmin/DataStorageKit/ORS/Etudes/2009/Etude2009_9/RapportPercepBruit_1_.pdf" class="external-link">https://www.ors-idf.org/fileadmin/DataStorageKit/ORS/Etudes/2009/Etude2009_9/RapportPercepBruit_1_.pdf</a>.
 </div>
 <div id="ref-institutgeographiquenationalAdminExpress" class="csl-entry">
 Institut Géographique National. 2021. <span>“Admin Express.”</span> <a href="https://geoservices.ign.fr/adminexpress" class="external-link">https://geoservices.ign.fr/adminexpress</a>.
@@ -596,7 +590,7 @@ Institut Géographique National. 2021. <span>“Admin Express.”</span> <a href
 Knuth, Donald E. 1984. <span>“Literate Programming.”</span> <em>The Computer Journal</em> 27 (2): 97–111. <a href="https://doi.org/10.1093/comjnl/27.2.97" class="external-link">https://doi.org/10.1093/comjnl/27.2.97</a>.
 </div>
 <div id="ref-MA2017135" class="csl-entry">
-Ma, Xiaolei, Congcong Liu, Huimin Wen, Yunpeng Wang, and Yao-Jan Wu. 2017. <span>“Understanding Commuting Patterns Using Transit Smart Card Data.”</span> <em>Journal of Transport Geography</em> 58: 135–45. https://doi.org/<a href="https://doi.org/10.1016/j.jtrangeo.2016.12.001" class="external-link">https://doi.org/10.1016/j.jtrangeo.2016.12.001</a>.
+Ma, Xiaolei, Congcong Liu, Huimin Wen, Yunpeng Wang, and Yao-Jan Wu. 2017. <span>“Understanding Commuting Patterns Using Transit Smart Card Data.”</span> <em>Journal of Transport Geography</em> 58: 135–45. <a href="https://doi.org/10.1016/j.jtrangeo.2016.12.001" class="external-link">https://doi.org/10.1016/j.jtrangeo.2016.12.001</a>.
 </div>
 <div id="ref-meline2013TransportationNoiseAnnoyance" class="csl-entry">
 Méline, Julie, Andraea Van Hulst, Frédérique Thomas, Noëlla Karusisi, and Basile Chaix. 2013. <span>“Transportation Noise and Annoyance Related to Road Traffic in the <span>French RECORD</span> Study.”</span> <em>International Journal of Health Geographics</em> 12 (October): 44. <a href="https://doi.org/10.1186/1476-072X-12-44" class="external-link">https://doi.org/10.1186/1476-072X-12-44</a>.
@@ -626,7 +620,7 @@ Schulte, Eric, Dan Davison, Thomas Dye, and Carsten Dominik. 2012. <span>“A <s
 //document.querySelector('#TOC h1').insertAdjacentHTML('afterend', '<wbr>');
 </script>
 </div>
-<div class="footnotes">
+<div class="footnotes footnotes-end-of-document">
 <hr>
 <ol>
 <li id="fn1"><p><a href="https://noise-planet.org/noisecapture.html" class="external-link uri">https://noise-planet.org/noisecapture.html</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
@@ -649,7 +643,7 @@ Schulte, Eric, Dan Davison, Thomas Dye, and Carsten Dominik. 2012. <span>“A <s
 
       <footer><div class="copyright">
   <p></p>
-<p>Developed by Nicolas Roelandt.</p>
+<p>Developed by Nicolas Roelandt, Pierre Aumond, Ludovic Moisan.</p>
 </div>
 
 <div class="pkgdown">

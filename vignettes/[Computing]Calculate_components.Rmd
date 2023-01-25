@@ -1,6 +1,6 @@
 ---
-title: "Internship report"
-subtitle: "Calculating new data components"
+title: "Adding temporal data"
+subtitle: "Calculating timezones and sun's movement related data"
 author: "Ludovic Moisan"
 supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
 date: "`r Sys.Date()`"
@@ -75,7 +75,6 @@ clean_track_info <- clean_track_info %>%
   ))
 
 ```
-
 
 ```{r intersect-geo-timezones, include = FALSE, cache = TRUE}
 #Adding timezones
@@ -245,7 +244,7 @@ sun_info <- inner_join(sunrises,sunsets)
 ```{r time-after-sunrise, include = FALSE}
 # join sun_info to study data
 
-all_info_sun <- left_join(all_info,sun_info)
+all_info_sun <- left_join(all_info, sun_info)
 
 # Mutating hours to fit in a 12h window around the sunrise or sunset
 all_info_sun <- 
@@ -257,8 +256,7 @@ all_info_sun <-
   all_info_sun %>% mutate(after_sunset = case_when(
   local_time - local_sunset >= 12 ~ -(24 - local_time - local_sunset),
   local_time - local_sunset <= -12 ~ 24 - abs(local_time - local_sunset),
-  TRUE ~ local_time - local_sunset
-))
+  TRUE ~ local_time - local_sunset))
 
 
 #saveRDS(all_info_sun, file = "vignettes/all_info_sun.rds")

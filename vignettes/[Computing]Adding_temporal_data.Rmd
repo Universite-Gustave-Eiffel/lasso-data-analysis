@@ -1,6 +1,6 @@
 ---
-title: "Internship report"
-subtitle: "Adding temporal data"
+title: "Adding temporal attributes"
+subtitle: "Types of days and special events"
 author: "Ludovic Moisan"
 supervisors: "Pierre Aumond, Paul Chapron, Nicolas Roelandt"
 date: "`r Sys.Date()`"
@@ -11,7 +11,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-<!-- This file is for the calculation and implementation of our temporal attributes -->
+<!-- This file is for the calculation and implementation of our temporal attributes (types of days and special events) -->
 
 ```{r library-tempo-add, include = FALSE}
 
