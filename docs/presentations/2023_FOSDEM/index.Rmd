@@ -44,7 +44,7 @@ class: inverse center middle title-slide
 
 .top[
 ```{r logos-institution, echo=FALSE, out.width="100%", eval=TRUE}
-knitr::include_graphics("media/logos.svg")
+knitr::include_graphics("media/logos.png")
 ```
 ]
 
@@ -81,8 +81,10 @@ Traffic noise is a major health concern :
 --
 - Traditional way is simulation from traffic counts (air, rail, road) and infrastructure
 
-.center[<img src="https://raw.githubusercontent.com/Universite-Gustave-Eiffel/lasso-data-analysis/main/docs/presentations/202208_FOSS4G/media/carte-bruit-bouguenais.png" style="width: 50%" />
+.center[<img src="https://raw.githubusercontent.com/Universite-Gustave-Eiffel/lasso-data-analysis/main/docs/presentations/202208_FOSS4G/media/carte-bruit-bouguenais.png" style="width: 45%" />
 ]
+
+.center[Map generated with [NoiseModelling](https://noise-planet.org/noisemodelling.html)]
 
 ???
 simulation: not real data
@@ -98,6 +100,20 @@ simulation: not real data
 
 ???
 crowdsourced data: lots of real data, large area coverage, disparate and poor quality material
+
+---
+### NoisePlanet Project
+
+- NoiseModelling: generat noise maps from Open Source geodata
+- NoiseCapture : measure and share sound environment
+- OnoMap : Spatial Data Infrastructure
+- Communauty maps
+
+
+.center[<img src="./media/noise_planet.png" style="width: 55%" />
+]
+
+.center[[noise-planet.org](https://noise-planet.org/)]
 
 ---
 layout: false
@@ -141,7 +157,7 @@ sound spectrum: third of octave, each 1s
 
 --
 
-- from the sound spectrum
+- from the sound spectrum (ongoing)
 
 --
 
@@ -150,7 +166,7 @@ sound spectrum: third of octave, each 1s
 ???
 notes
 
-- from the sound spectrum: probably the hardest. Needs pattern recognition and maybe machine learning.
+- from the sound spectrum: probably the hardest. Needs pattern recognition and maybe machine learning. Ongoing work
 - From the tags: not all tracks have tags. Information can be easily analyse with statistical software.
 
 
@@ -187,6 +203,9 @@ A quite simple one:
 --
 - and lots of R packages : Tidyverse, sf, geojsonsf, stats, suncalc...
 
+--
+- Dependencies : Pandoc, Markdown, Reveal.js, Proj, GEOS, GDAL, etc...
+
 ???
 
 The toolkit is relatively simple, PostgreSQL/Postgis because the data source is a PostgreSQL dump.
@@ -196,21 +215,24 @@ The complexity is underneath. The large amont of R package make reproductibilty 
 
 ---
 layout: true
-## Preliminary results
-
+### What do we found in the dataset ?
 ---
 
-### Well known temporal sound source dynamics
+#### Well known temporal sound source dynamics
 
 --
 .pull-left[
 <img src="https://github.com/Universite-Gustave-Eiffel/lasso-data-analysis/blob/main/docs/presentations/202208_FOSS4G/media/animals-tags.png?raw=true" style="width: 100%" />
+
+.center[Bird songs at dawn]
 ]
 
 --
 
 .pull-right[
 <img src="https://github.com/Universite-Gustave-Eiffel/lasso-data-analysis/blob/main/docs/presentations/202208_FOSS4G/media/roads-tags.png?raw=true" style="width: 100%" />
+
+.center[Commuters traffic noise]
 ]
 
 ???
@@ -220,7 +242,8 @@ The graph on the left shows the proportion of the "animals" tags around sunrise 
 On the right, it is the proportion of "roads" tags (often associated with traffic noise) in local time. We can see two peaks around 8 to 9 AM and 18 to 19 PM. It is very similar to what is observed with commute times.
 
 ---
-###  Physical events
+
+#### Physical events
 
 --
 .pull-left[
@@ -247,6 +270,9 @@ The correlation is very good : O.93.
 On the right, this the proportion of rain tag regarding the measured rainfall.
 The correlation is not as good : 0.68.
 
+---
+
+.center[The dataset is ]
 ---
 layout: true
 ## Reproductible Science is an issue
@@ -290,10 +316,26 @@ layout: true
 ---
 
 - Crowdsourced data can be useful for science
-- Known phenomena can be found in the dataset
-- There is still a lot to study 
-- FOSS are a not only useful for the industry and science but <span style='color:#ef7d00;'>key for Reproductible Science</span>
-- Reproductible Science is hard to achieve and has to take in account as soon as possible
+- This dataset is usable
+- FOSS are <span style='color:#D580E6;'>key for Reproductible Science</span>
+- Reproductible Science is <span style='color:#D580E6;'>hard to achieve</span> 
+- Notebooks **are not enough**
+
+--
+.center[
+[data.univ-gustave-eiffel.fr/dataset.xhtml?persistentId=doi:10.25578/J5DG3W](https://data.univ-gustave-eiffel.fr/dataset.xhtml?persistentId=doi:10.25578/J5DG3W)
+
+<img src="https://noise-planet.org/assets/img/logos/noise_planet.png" style="width: 30%" />
+
+[noise-planet.org](https://noise-planet.org/)
+
+]
+
+???
+- This dataset is usable and there is still a lot to study
+- FOSS are a not only useful for the industry and science but <span style='color:#D580E6;'>key for Reproductible Science</span>
+- Reproductible Science is <span style='color:#D580E6;'>hard to achieve</span> and has to take in account as soon as possible within the project
+- Notebooks can be use as laboratory notebooks and can help reproductibility but **are not enough**
 
 ---
 layout: false
@@ -302,7 +344,7 @@ class: center inverse
 .center[
 
 ```{r logos-institution-conclusion, echo=FALSE, out.width="100%", eval=TRUE}
-knitr::include_graphics("media/logos2.svg")
+knitr::include_graphics("media/logos.png")
 ```
 ]
 
@@ -310,7 +352,7 @@ knitr::include_graphics("media/logos2.svg")
 
 Nicolas Roelandt - Univ. Gustave Eiffel
 
-[nicolas.roelandt@univ-eiffel.fr](mailto:nicolas.roelandt@univ-eiffel.fr) [@RoelandtN42](https://twitter.com/RoelandtN42)
+[nicolas.roelandt@univ-eiffel.fr](mailto:nicolas.roelandt@univ-eiffel.fr) [@NRoelandt@sciences.re](https://social.sciences.re/@NRoelandt)
 
 Access to code source : [github.com/Universite-Gustave-Eiffel/lasso-data-analysis](https://github.com/Universite-Gustave-Eiffel/lasso-data-analysis)
 
