@@ -8,7 +8,7 @@
    inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
    sodipodi:docname="logos.svg"
    xml:space="preserve"
-   inkscape:export-filename="logos2.png"
+   inkscape:export-filename="logos.png"
    inkscape:export-xdpi="96"
    inkscape:export-ydpi="96"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -44,7 +44,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.7"
-     inkscape:cx="553.57143"
+     inkscape:cx="1042.8571"
      inkscape:cy="164.28571"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
@@ -426,9 +426,9 @@
          inkscape:label="FOSDEM"><tspan
            x="-170"
            y="261.4897"
-           id="tspan2212"><tspan
+           id="tspan469"><tspan
              style="font-size:85.3333px"
-             id="tspan2210">FOSDEM</tspan></tspan></text><text
+             id="tspan467">FOSDEM</tspan></tspan></text><text
          xml:space="preserve"
          transform="matrix(0.26458333,0,0,0.26458333,167.44017,125.6126)"
          id="text440-7"
@@ -438,9 +438,9 @@
          inkscape:label="23"><tspan
            x="-170"
            y="228.33822"
-           id="tspan2216"><tspan
+           id="tspan473"><tspan
              style="font-size:48px;fill:#af2c93"
-             id="tspan2214">'23</tspan></tspan></text></g><g
+             id="tspan471">'23</tspan></tspan></text></g><g
        id="g5393"
        transform="matrix(0.11637037,0,0,0.11637037,-77.940031,24.992877)"><path
          sodipodi:nodetypes="ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
