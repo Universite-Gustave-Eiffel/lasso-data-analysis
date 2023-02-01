@@ -104,10 +104,10 @@ crowdsourced data: lots of real data, large area coverage, disparate and poor qu
 ---
 ### NoisePlanet Project
 
-- NoiseModelling: generat noise maps from Open Source geodata
+- NoiseModelling: generate noise maps from Open Source geodata
 - NoiseCapture : measure and share sound environment
 - OnoMap : Spatial Data Infrastructure
-- Communauty maps
+- Community maps
 
 
 .center[<img src="./media/noise_planet.png" style="width: 55%" />
@@ -130,7 +130,7 @@ the trails we are exploring, the results we got so far and some difficulties we 
 
 --
 
-- 3 years data collection (2017-2020, still collecting)
+- 3 years data extraction (2017-2020, still collecting)
 
 --
 - 260 000 tracks worldwide
@@ -157,11 +157,11 @@ sound spectrum: third of octave, each 1s
 
 --
 
-- from the sound spectrum (ongoing)
+- from the sound spectrum (ongoing analysis)
 
 --
 
-- from the *tags* defined by the user
+- from the *tags* defined by the contributor
 
 ???
 notes
@@ -201,7 +201,7 @@ A quite simple one:
 - R
 
 --
-- and lots of R packages : Tidyverse, sf, geojsonsf, stats, suncalc...
+- Lots of R packages : Tidyverse, sf, geojsonsf, stats, suncalc...
 
 --
 - Dependencies : Pandoc, Markdown, Reveal.js, Proj, GEOS, GDAL, etc...
@@ -287,11 +287,11 @@ layout: true
 --
 ### Bad
 - Some notebooks needs work on reproductibility (and code factoring)
-- Environment info is too scarce (and hard to reuse)
+- Informations on software environment are too scarce (and hard to reuse)
 
 ---
 
-## Some avenues of investigation
+### Some avenues of investigation
 
 - R package [Renv](https://rstudio.github.io/renv/articles/renv.html)
 - [Docker](https://www.docker.com/)
@@ -300,7 +300,7 @@ layout: true
 ???
 
 - Renv: R package that can store and recreate an R environment (R and packages versions), limited to R
-- Docker : small virtual machinesthat can be re-build and/or re-run. There is R and Postgis images ready to use
+- Docker : small virtual machines that can be re-build and/or re-run. There is R and Postgis images ready to use
 - Guix: to my knowledge the best way to reproduce a software environment
 
 
@@ -355,6 +355,7 @@ Nicolas Roelandt - Univ. Gustave Eiffel
 [nicolas.roelandt@univ-eiffel.fr](mailto:nicolas.roelandt@univ-eiffel.fr) [@NRoelandt@sciences.re](https://social.sciences.re/@NRoelandt)
 
 Access to code source : [github.com/Universite-Gustave-Eiffel/lasso-data-analysis](https://github.com/Universite-Gustave-Eiffel/lasso-data-analysis)
+
 
 Access to dataset : [noise-planet.org](http://data.noise-planet.org/index.html)
 
