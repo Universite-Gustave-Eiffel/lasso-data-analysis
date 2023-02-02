@@ -354,10 +354,11 @@ Nicolas Roelandt - Univ. Gustave Eiffel
 
 [nicolas.roelandt@univ-eiffel.fr](mailto:nicolas.roelandt@univ-eiffel.fr) [@NRoelandt@sciences.re](https://social.sciences.re/@NRoelandt)
 
+This presentation : https://s.42l.fr/FOSDEM2023-LASSO
+
+  
+
 Access to code source : [github.com/Universite-Gustave-Eiffel/lasso-data-analysis](https://github.com/Universite-Gustave-Eiffel/lasso-data-analysis)
-
-
-Access to dataset : [noise-planet.org](http://data.noise-planet.org/index.html)
 
 Detailed articles and notebooks : [universite-gustave-eiffel.github.io/lasso-data-analysis/articles/](https://universite-gustave-eiffel.github.io/lasso-data-analysis/articles/)
 
