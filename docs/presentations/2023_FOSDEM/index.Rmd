@@ -211,7 +211,7 @@ A quite simple one:
 The toolkit is relatively simple, PostgreSQL/Postgis because the data source is a PostgreSQL dump.
 So in order to access it, you have to set up a database to store the data.
 R is my work horse for many years, it is use, among other tools, by the UMRAE team.
-The complexity is underneath. The large amont of R package make reproductibilty complex.
+The complexity is underneath. The large amount of R package make reproducibilty complex.
 
 ---
 layout: true
@@ -271,11 +271,8 @@ On the right, this the proportion of rain tag regarding the measured rainfall.
 The correlation is not as good : 0.68.
 
 ---
-
-.center[The dataset is ]
----
 layout: true
-## Reproductible Science is an issue
+## Reproducible Science is an issue
 ---
 
 ### Good
@@ -286,8 +283,8 @@ layout: true
 
 --
 ### Bad
-- Some notebooks needs work on reproductibility (and code factoring)
-- Informations on software environment are too scarce (and hard to reuse)
+- Some notebooks needs work on reproducibility (and code factoring)
+- Information on software environment is too scarce (and hard to reuse)
 
 ---
 
@@ -317,8 +314,8 @@ layout: true
 
 - Crowdsourced data can be useful for science
 - This dataset is usable
-- FOSS are <span style='color:#D580E6;'>key for Reproductible Science</span>
-- Reproductible Science is <span style='color:#D580E6;'>hard to achieve</span> 
+- FOSS are <span style='color:#D580E6;'>key for Reproducible Science</span>
+- Reproducible Science is <span style='color:#D580E6;'>hard to achieve</span> 
 - Notebooks **are not enough**
 
 --
@@ -333,8 +330,8 @@ layout: true
 
 ???
 - This dataset is usable and there is still a lot to study
-- FOSS are a not only useful for the industry and science but <span style='color:#D580E6;'>key for Reproductible Science</span>
-- Reproductible Science is <span style='color:#D580E6;'>hard to achieve</span> and has to take in account as soon as possible within the project
+- FOSS are a not only useful for the industry and science but <span style='color:#D580E6;'>key for Reproducible Science</span>
+- Reproducible Science is <span style='color:#D580E6;'>hard to achieve</span> and has to take in account as soon as possible within the project
 - Notebooks can be use as laboratory notebooks and can help reproductibility but **are not enough**
 
 ---
