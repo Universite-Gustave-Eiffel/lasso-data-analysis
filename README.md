@@ -11,6 +11,9 @@ These preliminary works are part of the research carried out
 within the framework of the LASSO project 
 led by the [UMRAE laboratory](https://www.umrae.fr/en/) ([Univ. Gustave Eiffel](https://www.univ-gustave-eiffel.fr/)/[CEREMA](http://www.cerema.fr/))
 
+A presentation of the analysis at [FOSDEM 2023](https://fosdem.org/2023) is 
+[available here](https://fosdem.org/2023/schedule/event/openresearch_noisecapture/) ([slides](https://universite-gustave-eiffel.github.io/lasso-data-analysis/presentations/2023_FOSDEM/#1)).
+
 ## Data source
 
 The raw data are available here :
